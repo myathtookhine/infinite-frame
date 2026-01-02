@@ -46,12 +46,10 @@ const AdminLayout = ({ children }) => {
         >
           <Bars3Icon className="h-6 w-6 text-black" />
         </button>
-
         <div className="flex items-center gap-2">
           <img src="/vite.svg" alt="Logo" className="h-6 w-6" />
           <span className="font-sans text-lg font-semibold">Infinit Frame</span>
         </div>
-
         <div className="w-10" /> {/* Spacer for centering */}
       </header>
 
@@ -68,15 +66,17 @@ const AdminLayout = ({ children }) => {
         {/* Sidebar */}
         <aside
           className={`fixed inset-y-0 left-0 bg-black text-white w-64 p-4 z-50 flex flex-col transform transition-transform duration-300 ease-in-out ${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } md:translate-x-0 md:static md:z-auto md:rounded-2xl md:h-[calc(100vh-2rem)] md:sticky md:top-4`}
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0 md:z-auto md:rounded-2xl md:h-[calc(100vh-2rem)] md:sticky md:top-4`}
           aria-label="Sidebar"
         >
           {/* Sidebar Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="font-sans text-xl font-semibold">Infinit Frame</h2>
-              <div className="font-sans text-xs text-gray-400">Admin Portal</div>
+              <div className="font-sans text-xs text-gray-400">
+                Admin Portal
+              </div>
             </div>
             <button
               className="md:hidden p-1 rounded hover:bg-white/10 transition-colors"
@@ -88,11 +88,19 @@ const AdminLayout = ({ children }) => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1" role="navigation" aria-label="Main navigation">
+          <nav
+            className="flex-1"
+            role="navigation"
+            aria-label="Main navigation"
+          >
             <SidebarLink to="/dashboard" icon={HomeIcon} onClick={closeSidebar}>
               Dashboard
             </SidebarLink>
-            <SidebarLink to="/profile" icon={UserCircleIcon} onClick={closeSidebar}>
+            <SidebarLink
+              to="/profile"
+              icon={UserCircleIcon}
+              onClick={closeSidebar}
+            >
               Profile
             </SidebarLink>
           </nav>
@@ -103,8 +111,18 @@ const AdminLayout = ({ children }) => {
               onClick={handleLogout}
               className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-md text-white hover:bg-white/10 font-sans transition-colors duration-150"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+                />
               </svg>
               Logout
             </button>
