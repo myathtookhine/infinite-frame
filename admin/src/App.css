@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+/* Infinite Frame Admin - Minimalist Zen Theme */
+@layer base {
+  :root {
+    --color-primary: #000000;
+    --color-secondary: #ffffff;
+  }
+
+  * {
+    border-color: #000000;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #000000;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Heading scale tuned for a minimalist, Zen aesthetic */
+  h1 {
+    font-size: 3rem; /* approx. Tailwind text-5xl */
+    font-weight: 600; /* semibold */
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    font-size: 2.25rem; /* approx. Tailwind text-4xl */
+    font-weight: 600; /* semibold */
+    line-height: 1.125;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    font-size: 1.5rem; /* approx. text-2xl */
+    font-weight: 500; /* medium */
+  }
+
+  h4 {
+    font-size: 1.25rem; /* approx. text-xl */
+    font-weight: 500;
+  }
+
+  h5 {
+    font-size: 1.125rem; /* approx. text-lg */
+    font-weight: 500;
+  }
+
+  h6 {
+    font-size: 1rem; /* text-base */
+    font-weight: 500;
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .font-sans {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+/* Glitch text effect (improved to match reference) */
+.glitch {
+  position: relative;
+  display: inline-block;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* light channel */
+.glitch::before {
+  color: #D69200;
+  mix-blend-mode: screen;
+  /* text-shadow: -2px 0 #fafafa; */
+  transform: translate3d(0,0,0);
+  animation: glitch-top 2s infinite linear;
+}
+
+/* dark/blue channel */
+.glitch::after {
+  color: #D69200;
+  mix-blend-mode: multiply;
+  text-shadow: 2px 0 #ffffff;
+  transform: translate3d(0,0,0);
+  animation: glitch-bottom 1.8s infinite linear;
+}
+
+.glitch--delay::before { animation-delay: 120ms; }
+.glitch--delay::after { animation-delay: 260ms; }
+
+@keyframes glitch-top {
+  0% { clip-path: inset(0 0 0 0); transform: translateX(0); }
+  6% { clip-path: inset(0 0 60% 0); transform: translateX(-4px); }
+  9% { clip-path: inset(20% 0 40% 0); transform: translateX(6px); }
+  13% { clip-path: inset(40% 0 20% 0); transform: translateX(-2px); }
+  17% { clip-path: inset(10% 0 50% 0); transform: translateX(3px); }
+  22% { clip-path: inset(0 0 0 0); transform: translateX(0); }
+  100% { clip-path: inset(0 0 0 0); transform: translateX(0); }
+}
+
+@keyframes glitch-bottom {
+  0% { clip-path: inset(0 0 0 0); transform: translateX(0); }
+  5% { clip-path: inset(60% 0 0 0); transform: translateX(3px); }
+  11% { clip-path: inset(30% 0 30% 0); transform: translateX(-6px); }
+  16% { clip-path: inset(10% 0 50% 0); transform: translateX(2px); }
+  20% { clip-path: inset(0 0 0 0); transform: translateX(0); }
+  100% { clip-path: inset(0 0 0 0); transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch::before,
+  .glitch::after {
+    animation: none !important;
+  }
+}
