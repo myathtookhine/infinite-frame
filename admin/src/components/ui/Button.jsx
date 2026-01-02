@@ -1,43 +1,49 @@
 import { forwardRef } from 'react';
+import { useTheme } from "../../context/ThemeContext";
 
 const Button = forwardRef(
   (
     {
       children,
-      variant = 'primary',
-      size = 'md',
-      type = 'button',
+      variant = "primary",
+      size = "md",
+      type = "button",
       block = false,
       disabled = false,
       onClick,
-      className = '',
+      className = "",
       ...props
     },
     ref
   ) => {
+    const { isDark } = useTheme();
+
     // Base styles
     const baseStyles =
-      'font-sans font-medium transition-all duration-200 border-2 rounded-md shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed';
+      "font-sans font-medium transition-all duration-200 border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
-    // Variant styles
+    // Variant styles for light and dark themes
     const variantStyles = {
-      primary:
-        'bg-black text-white border-black hover:bg-gray-800 cursor-pointer hover:border-gray-800',
-      secondary:
-        'bg-white text-black border-black hover:bg-gray-100 cursor-pointer',
+      primary: isDark
+        ? "bg-white text-black border-white hover:bg-gray-200 hover:border-gray-200 focus:ring-white"
+        : "bg-black text-white border-black hover:bg-gray-800 hover:border-gray-800 focus:ring-black",
+      secondary: isDark
+        ? "bg-transparent text-white border-white hover:bg-white/10 focus:ring-white"
+        : "bg-transparent text-black border-black hover:bg-black/5 focus:ring-black",
     };
 
     // Size styles
     const sizeStyles = {
-      sm: 'px-3 py-1.5 text-sm',
-      md: 'px-5 py-2.5 text-base',
-      lg: 'px-7 py-3.5 text-lg',
+      sm: "px-3 py-1.5 text-sm",
+      md: "px-5 py-2.5 text-base",
+      lg: "px-7 py-3.5 text-lg",
     };
 
     // Block style
-    const blockStyle = block ? 'w-full' : '';
+    const blockStyle = block ? "w-full" : "";
 
-    const combinedClassName = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${blockStyle} ${className}`.trim();
+    const combinedClassName =
+      `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${blockStyle} ${className}`.trim();
 
     return (
       <button

@@ -1,35 +1,48 @@
 import { forwardRef, useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { useTheme } from "../../context/ThemeContext";
 
 const Input = forwardRef(
   (
     {
-      type = 'text',
+      type = "text",
       label,
       error,
-      className = '',
-      containerClassName = '',
+      className = "",
+      containerClassName = "",
       icon: Icon,
       showPasswordToggle,
       ...props
     },
     ref
   ) => {
+    const { isDark } = useTheme();
     const [visible, setVisible] = useState(false);
-    const isPassword = type === 'password';
-    const enableToggle = typeof showPasswordToggle === 'boolean' ? showPasswordToggle : isPassword;
+    const isPassword = type === "password";
+    const enableToggle =
+      typeof showPasswordToggle === "boolean" ? showPasswordToggle : isPassword;
 
-    const paddingLeft = Icon ? 'pl-10' : 'pl-4';
-    const paddingRight = enableToggle ? 'pr-10' : 'pr-4';
+    const paddingLeft = Icon ? "pl-10" : "pl-4";
+    const paddingRight = enableToggle ? "pr-10" : "pr-4";
 
-    const inputType = isPassword && enableToggle ? (visible ? 'text' : 'password') : type;
+    const inputType =
+      isPassword && enableToggle ? (visible ? "text" : "password") : type;
+
+    const labelClass = isDark ? "text-gray-300" : "text-gray-700";
+    const iconClass = isDark ? "text-gray-500" : "text-gray-400";
+    const inputClass = isDark
+      ? "border-gray-700 bg-[#0a0a0a] text-white placeholder:text-gray-600 focus:ring-white focus:border-white"
+      : "border-gray-300 bg-white text-black placeholder:text-gray-400 focus:ring-black focus:border-black";
+    const toggleClass = isDark
+      ? "text-gray-400 hover:text-gray-200"
+      : "text-gray-500 hover:text-gray-700";
 
     return (
       <div className={containerClassName}>
         {label && (
           <label
             htmlFor={props.id}
-            className="block font-sans text-sm font-medium mb-2"
+            className={`block font-sans text-sm font-medium mb-2 ${labelClass}`}
           >
             {label}
           </label>
@@ -38,7 +51,7 @@ const Input = forwardRef(
         <div className="relative">
           {Icon && (
             <Icon
-              className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 pointer-events-none"
+              className={`absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 ${iconClass} pointer-events-none`}
               aria-hidden="true"
             />
           )}
@@ -46,16 +59,16 @@ const Input = forwardRef(
           <input
             ref={ref}
             type={inputType}
-            className={`w-full ${paddingLeft} ${paddingRight} py-3 border-2 border-black rounded-md font-sans focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-shadow hover:shadow-sm focus:shadow-md ${className}`}
+            className={`w-full ${paddingLeft} ${paddingRight} py-3 border-2 rounded-md font-sans focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all ${inputClass} ${className}`}
             {...props}
           />
 
           {enableToggle && isPassword && (
             <button
               type="button"
-              aria-label={visible ? 'Hide password' : 'Show password'}
+              aria-label={visible ? "Hide password" : "Show password"}
               onClick={() => setVisible((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 text-gray-500"
+              className={`absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 ${toggleClass}`}
             >
               {visible ? (
                 <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
