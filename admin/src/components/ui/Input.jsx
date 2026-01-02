@@ -31,7 +31,7 @@ const Input = forwardRef(
     const labelClass = isDark ? "text-gray-300" : "text-gray-700";
     const iconClass = isDark ? "text-gray-500" : "text-gray-400";
     const inputClass = isDark
-      ? "border-gray-700 bg-[#0a0a0a] text-white placeholder:text-gray-600 focus:ring-white focus:border-white"
+      ? "border-[#262626] bg-[#0a0a0a] text-white placeholder:text-gray-600 focus:ring-white focus:border-white"
       : "border-gray-300 bg-white text-black placeholder:text-gray-400 focus:ring-black focus:border-black";
     const toggleClass = isDark
       ? "text-gray-400 hover:text-gray-200"

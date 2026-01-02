@@ -51,7 +51,7 @@ const AdminLayout = ({ children }) => {
 
   const bgColor = isDark ? "bg-[#0a0a0a]" : "bg-gray-100";
   const headerBg = isDark ? "bg-[#141414]" : "bg-white";
-  const headerBorder = isDark ? "border-gray-800" : "border-gray-300";
+  const headerBorder = isDark ? "border-[#262626]" : "border-gray-300";
   const sidebarBg = isDark ? "bg-[#141414]" : "bg-white";
   const textColor = isDark ? "text-white" : "text-black";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
@@ -108,7 +108,7 @@ const AdminLayout = ({ children }) => {
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } md:translate-x-0 md:z-auto md:rounded-2xl md:h-[calc(100vh-2rem)] md:sticky md:top-4 ${
             isDark
-              ? "md:border md:border-gray-800"
+              ? "md:border md:border-[#262626]"
               : "md:border md:border-gray-300"
           }`}
           aria-label="Sidebar"
@@ -209,7 +209,7 @@ const AdminLayout = ({ children }) => {
         <div
           className={`flex-1 ${contentBg} md:rounded-2xl md:min-h-[calc(100vh-2rem)] md:my-0 ${
             isDark
-              ? "md:border md:border-gray-800"
+              ? "md:border md:border-[#262626]"
               : "md:border md:border-gray-300"
           }`}
         >

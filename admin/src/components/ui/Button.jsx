@@ -25,11 +25,11 @@ const Button = forwardRef(
     // Variant styles for light and dark themes
     const variantStyles = {
       primary: isDark
-        ? "bg-white text-black border-white hover:bg-gray-200 hover:border-gray-200 focus:ring-white"
-        : "bg-black text-white border-black hover:bg-gray-800 hover:border-gray-800 focus:ring-black",
+        ? "bg-white text-black border-white hover:bg-gray-200 hover:border-gray-200 focus:ring-white cursor-pointer"
+        : "bg-black text-white border-black hover:bg-gray-800 hover:border-gray-800 focus:ring-black cursor-pointer",
       secondary: isDark
-        ? "bg-transparent text-white border-white hover:bg-white/10 focus:ring-white"
-        : "bg-transparent text-black border-black hover:bg-black/5 focus:ring-black",
+        ? "bg-transparent text-white border-white hover:bg-white/10 focus:ring-white cursor-pointer"
+        : "bg-transparent text-black border-black hover:bg-black/5 focus:ring-black cursor-pointer",
     };
 
     // Size styles

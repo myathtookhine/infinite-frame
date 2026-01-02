@@ -26,9 +26,9 @@ const Profile = () => {
   const textColor = isDark ? "text-white" : "text-black";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
   const cardBg = isDark ? "bg-[#1a1a1a]" : "bg-white";
-  const cardBorder = isDark ? "border-gray-800" : "border-gray-300";
+  const cardBorder = isDark ? "border-[#262626]" : "border-gray-300";
   const hoverBorder = isDark
-    ? "hover:border-gray-700"
+    ? "hover:border-[#404040]"
     : "hover:border-gray-400";
 
   const handleUsernameUpdate = (e) => {
