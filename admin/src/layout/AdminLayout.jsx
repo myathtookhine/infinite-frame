@@ -76,7 +76,7 @@ const AdminLayout = ({ children }) => {
         <div className="flex items-center gap-2">
           <img src="/vite.svg" alt="Logo" className="h-6 w-6" />
           <span className={`font-sans text-lg font-semibold ${textColor}`}>
-            Infinit Frame
+            Infinite Frame
           </span>
         </div>
         <button
@@ -117,7 +117,7 @@ const AdminLayout = ({ children }) => {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className={`font-sans text-xl font-semibold ${textColor}`}>
-                Infinit Frame
+                Infinite Frame
               </h2>
               <div className={`font-sans text-xs ${subtextColor}`}>
                 Admin Portal

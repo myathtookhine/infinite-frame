@@ -174,7 +174,7 @@ const Login = () => {
             {/* Footer */}
             <div className="text-center mt-8">
               <p className={`font-sans text-sm ${footerColor}`}>
-                @2026 Infinit Frame. All rights reserved.
+                @2026 Infinite Frame. All rights reserved.
               </p>
             </div>
           </div>
