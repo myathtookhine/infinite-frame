@@ -1,6 +1,10 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 const AuthContext = createContext(null);
+
+// Base URL for API
+const API_BASE_URL = 'http://localhost:5000/api';
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -15,19 +19,60 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = (username, password) => {
-    // Simple validation - default credentials: admin / 123123
-    if (username === 'admin' && password === '123123') {
-      const token = 'dummy-token-' + Date.now();
+  const login = async (username, password) => {
+    try {
+      // Make API call to the backend login endpoint using axios
+      const response = await axios.post(`${API_BASE_URL}/login`, {
+        username,
+        password,
+      });
+
+      // axios automatically parses JSON response
+      const { user } = response.data;
+
+      // Login successful
+      const token = 'admin-token-' + Date.now();
       localStorage.setItem('adminToken', token);
+      localStorage.setItem('adminUser', JSON.stringify(user));
       setIsAuthenticated(true);
-      return { success: true };
+
+      return { success: true, user };
+    } catch (error) {
+      console.error('Login error:', error);
+      if (error.response) {
+        return { success: false, error: error.response.data.message || 'Invalid credentials' };
+      }
+      return { success: false, error: 'Unable to connect to server.' };
     }
-    return { success: false, error: 'Invalid credentials' };
+  };
+
+  const sendOtp = async (email) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/send-otp`, { email });
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to send OTP. Please try again.'
+      };
+    }
+  };
+
+  const register = async (userData) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/register`, userData);
+      return { success: true, user: response.data.user };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Registration failed.'
+      };
+    }
   };
 
   const logout = () => {
     localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
     setIsAuthenticated(false);
   };
 
@@ -55,8 +100,10 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     login,
     logout,
-    changePassword,
-    updateUsername,
+    sendOtp,
+    register,
+    changePassword: () => { }, // Placeholders
+    updateUsername: () => { },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

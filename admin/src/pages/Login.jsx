@@ -10,23 +10,31 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (!username || !password) {
-      setError('Please enter both username and password');
+      setError('Please enter both username and password!');
       return;
     }
 
-    const result = login(username, password);
+    setLoading(true);
+    const result = await login(username, password);
+
     if (result.success) {
-      navigate('/dashboard');
+      // Login အောင်မြင်ရင် 2 seconds စောင့်ခိုင်းမယ်
+      setTimeout(() => {
+        setLoading(false);
+        navigate('/dashboard');
+      }, 800);
     } else {
+      setLoading(false);
       setError(result.error);
     }
   };
@@ -39,8 +47,24 @@ const Login = () => {
 
   return (
     <div
-      className={`min-h-screen ${bgColor} flex items-center justify-center p-5`}
+      className={`min-h-screen ${bgColor} flex items-center justify-center p-5 relative overflow-hidden`}
     >
+      {/* Full Page Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md transition-all duration-300">
+          <div className="flex flex-col items-center">
+            {/* Spinning Loader */}
+            <div className="w-16 h-16 border-4 border-t-white border-white/20 rounded-full animate-spin mb-4"></div>
+            <h2 className="text-white text-2xl font-sans tracking-widest animate-pulse">
+              Signing In...
+            </h2>
+            <p className="text-gray-400 text-sm mt-2 font-sans">
+              Authenticating with Infinite Frame Server
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
         {/* Left Info Panel */}
         <div className="border-2 border-black p-8 h-full relative overflow-hidden bg-black text-white rounded-md transition-shadow hover:shadow-md">
@@ -122,22 +146,35 @@ const Login = () => {
               )}
 
               {/* Submit Button */}
-              <Button type="submit" variant="primary" size="lg" block>
-                Sign In
+              <Button type="submit" variant="primary" size="lg" block disabled={loading}>
+                {loading ? 'Signing In...' : 'Sign In'}
               </Button>
 
+              <div className="text-center mt-4">
+                <p className={`font-sans text-sm ${footerColor}`}>
+                  Don't have an account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/register')}
+                    className="font-bold hover:underline cursor-pointer"
+                  >
+                    Register
+                  </button>
+                </p>
+              </div>
+
               {/* Default Credentials Hint */}
-              <div
+              {/* <div
                 className={`text-center text-xs ${footerColor} font-sans mt-4`}
               >
-                Default: admin / 123123
-              </div>
+                Default: admin01 / 123456
+              </div> */}
             </form>
 
             {/* Footer */}
             <div className="text-center mt-8">
               <p className={`font-sans text-sm ${footerColor}`}>
-                @2024 Infinit Frame. All rights reserved.
+                @2026 Infinit Frame. All rights reserved.
               </p>
             </div>
           </div>
