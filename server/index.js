@@ -72,7 +72,7 @@ app.post('/api/send-otp', async (req, res) => {
             
             <div style="border-top: 1px solid #e0e0e0; padding-top: 30px;">
               <p style="font-size: 10px; letter-spacing: 3px; color: #aaaaaa; text-transform: uppercase;">
-                © 2026 Admin Portal System
+                © 2026 Infinite Frame Admin Portal System
               </p>
             </div>
           </div>
