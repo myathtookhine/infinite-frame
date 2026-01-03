@@ -32,3 +32,18 @@ SELECT * FROM admins;
 
 -- သီးသန့် Username တစ်ခုတည်းကို ရှာကြည့်ရန် (Backend တွင် သုံးမည့်ပုံစံ)
 SELECT * FROM admins WHERE username = 'admin01';
+
+-- ၁။ Categories
+CREATE TABLE categories (id SERIAL PRIMARY KEY, name VARCHAR(100) UNIQUE NOT NULL);
+
+-- ၂။ Styles
+CREATE TABLE styles (id SERIAL PRIMARY KEY, name VARCHAR(100) UNIQUE NOT NULL);
+
+-- ၃။ Themes
+CREATE TABLE themes (id SERIAL PRIMARY KEY, name VARCHAR(100) UNIQUE NOT NULL);
+
+-- ၄။ Mediums
+CREATE TABLE mediums (id SERIAL PRIMARY KEY, name VARCHAR(100) UNIQUE NOT NULL);
+
+-- ၅။ Size Units
+CREATE TABLE units (id SERIAL PRIMARY KEY, name VARCHAR(10) UNIQUE NOT NULL);

@@ -4,6 +4,7 @@ require('dotenv').config();
 
 // Route Imports
 const authRoutes = require('./routes/auth');
+const configRoutes = require('./routes/config');
 
 const app = express();
 
@@ -13,7 +14,7 @@ app.use(express.json());
 
 // API Routes
 app.use('/api', authRoutes); 
-// Note: This keeps your current endpoints like /api/login, /api/register working.
+app.use('/api/config', configRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import AdminLayout from './layout/AdminLayout';
 import './App.css';
 
@@ -36,6 +37,16 @@ function App() {
                 <ProtectedRoute>
                   <AdminLayout>
                     <Profile />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <Settings />
                   </AdminLayout>
                 </ProtectedRoute>
               }

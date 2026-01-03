@@ -96,7 +96,7 @@ const Profile = () => {
   };
 
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-8 py-6 sm:py-12">
+    <main className="max-w-7xl mx-auto">
       <div className="mb-6">
         <h2 className={`font-sans text-3xl sm:text-5xl mb-2 ${textColor}`}>
           Profile Settings

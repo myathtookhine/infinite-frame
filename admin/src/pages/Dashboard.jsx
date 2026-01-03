@@ -1,65 +1,175 @@
-import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
 import { useTheme } from "../context/ThemeContext";
+import {
+  UsersIcon,
+  PhotoIcon,
+  CalendarDaysIcon
+} from '@heroicons/react/24/outline';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area
+} from 'recharts';
+
+const mockData = {
+  week: [
+    { name: 'Mon', views: 120 },
+    { name: 'Tue', views: 300 },
+    { name: 'Wed', views: 200 },
+    { name: 'Thu', views: 450 },
+    { name: 'Fri', views: 400 },
+    { name: 'Sat', views: 700 },
+    { name: 'Sun', views: 500 },
+  ],
+  month: [
+    { name: 'Week 1', views: 1200 },
+    { name: 'Week 2', views: 1800 },
+    { name: 'Week 3', views: 1400 },
+    { name: 'Week 4', views: 2200 },
+  ],
+  year: [
+    { name: 'Jan', views: 5000 },
+    { name: 'Feb', views: 6500 },
+    { name: 'Mar', views: 5800 },
+    { name: 'Apr', views: 8000 },
+    { name: 'May', views: 7200 },
+    { name: 'Jun', views: 9000 },
+    { name: 'Jul', views: 8500 },
+    { name: 'Aug', views: 10000 },
+    { name: 'Sep', views: 9200 },
+    { name: 'Oct', views: 11000 },
+    { name: 'Nov', views: 10500 },
+    { name: 'Dec', views: 13000 },
+  ],
+};
 
 const Dashboard = () => {
   const { isDark } = useTheme();
+  const [timeFilter, setTimeFilter] = useState('week');
+
   const textColor = isDark ? "text-white" : "text-black";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
-  const cardBg = isDark ? "bg-[#1a1a1a]" : "bg-white";
-  const cardBorder = isDark ? "border-[#262626]" : "border-gray-300";
-  const hoverBorder = isDark
-    ? "hover:border-[#404040]"
-    : "hover:border-gray-400";
+  const cardBg = isDark ? "bg-[#141414]" : "bg-white";
+  const cardBorder = isDark ? "border-[#262626]" : "border-gray-200";
+  const accentColor = isDark ? "#ffffff" : "#000000";
+  const gridColor = isDark ? "#262626" : "#f0f0f0";
+
+  const stats = [
+    { label: 'Visitors', value: '4,281', icon: UsersIcon },
+    { label: 'Artworks', value: '156', icon: PhotoIcon },
+    { label: 'Exhibitions', value: '12', icon: CalendarDaysIcon },
+  ];
+
+  const chartLabelColor = isDark ? "#9CA3AF" : "#4B5563";
 
   return (
-    <main className="max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h2 className={`font-sans text-3xl sm:text-5xl mb-2 ${textColor}`}>
+    <main className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
+      <div>
+        <h2 className={`font-sans text-3xl sm:text-5xl font-black tracking-tight mb-2 ${textColor}`}>
           Dashboard
         </h2>
         <p className={`font-sans ${subtextColor} text-sm sm:text-lg`}>
-          Welcome to the Admin Portal
+          Overview of your gallery's performance.
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-        <div
-          className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-lg transition-all ${hoverBorder}`}
-        >
-          <div className={`font-sans text-sm ${subtextColor} mb-2`}>
-            Total Artworks
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {stats.map((stat, idx) => (
+          <div
+            key={idx}
+            className={`border-2 ${cardBorder} ${cardBg} p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-2.5 rounded-xl ${isDark ? 'bg-white/5' : 'bg-black/5'} group-hover:scale-110 transition-transform duration-300`}>
+                <stat.icon className={`h-6 w-6 ${textColor}`} />
+              </div>
+            </div>
+            <div className={`font-sans text-sm ${subtextColor} font-bold uppercase tracking-widest mb-1`}>
+              {stat.label}
+            </div>
+            <div className={`font-sans text-4xl font-black ${textColor}`}>
+              {stat.value}
+            </div>
           </div>
-          <div className={`font-sans text-4xl sm:text-5xl ${textColor}`}>0</div>
-        </div>
-        <div
-          className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-lg transition-all ${hoverBorder}`}
-        >
-          <div className={`font-sans text-sm ${subtextColor} mb-2`}>
-            Categories
-          </div>
-          <div className={`font-sans text-4xl sm:text-5xl ${textColor}`}>0</div>
-        </div>
-        <div
-          className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-lg transition-all ${hoverBorder}`}
-        >
-          <div className={`font-sans text-sm ${subtextColor} mb-2`}>
-            Mediums
-          </div>
-          <div className={`font-sans text-4xl sm:text-5xl ${textColor}`}>0</div>
-        </div>
+        ))}
       </div>
 
-      {/* Zen Quote */}
-      <div
-        className={`border-2 ${cardBorder} ${cardBg} p-8 sm:p-12 text-center rounded-lg`}
-      >
-        <p className={`font-sans text-xl sm:text-2xl mb-4 ${textColor}`}>
-          "Coming Soon"
-        </p>
-        <p className={`font-sans text-sm ${subtextColor}`}>
-          — Infinite Frame
-        </p>
+      {/* Graph Section */}
+      <div className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-2xl`}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div>
+            <h3 className={`text-xl font-bold ${textColor}`}>Visitor Activity</h3>
+            <p className={`text-sm ${subtextColor}`}>Total views over selected period</p>
+          </div>
+
+          <div className={`flex p-1 rounded-lg ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
+            {['week', 'month', 'year'].map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setTimeFilter(filter)}
+                className={`px-4 py-1.5 rounded-md text-sm font-bold capitalize transition-all duration-200 ${timeFilter === filter
+                  ? (isDark ? 'bg-white text-black' : 'bg-black text-white')
+                  : (isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black')
+                  }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="h-[350px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={mockData[timeFilter]}>
+              <defs>
+                <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={accentColor} stopOpacity={0.1} />
+                  <stop offset="95%" stopColor={accentColor} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
+                dy={10}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: isDark ? '#1a1a1a' : '#fff',
+                  border: `2px solid ${isDark ? '#262626' : '#f0f0f0'}`,
+                  borderRadius: '12px',
+                  padding: '10px'
+                }}
+                labelStyle={{ color: isDark ? '#fff' : '#000', fontWeight: 'bold', marginBottom: '4px' }}
+                itemStyle={{ color: isDark ? '#fff' : '#000' }}
+                cursor={{ stroke: gridColor, strokeWidth: 2 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="views"
+                stroke={accentColor}
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#colorViews)"
+                animationDuration={1500}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </main>
   );
