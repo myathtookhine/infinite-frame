@@ -50,26 +50,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const sendOtp = async (email) => {
+  const register = async (userData) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/send-otp`, { email });
+      const response = await axios.post(`${API_BASE_URL}/register`, userData);
       return { success: true, message: response.data.message };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to send OTP. Please try again.'
+        error: error.response?.data?.message || 'Registration failed.'
       };
     }
   };
 
-  const register = async (userData) => {
+  const verifyOtp = async (email, otp) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/register`, userData);
+      const response = await axios.post(`${API_BASE_URL}/verify-otp`, { email, otp });
       return { success: true, user: response.data.user };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Registration failed.'
+        error: error.response?.data?.message || 'Verification failed.'
       };
     }
   };
@@ -123,8 +123,8 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     login,
     logout,
-    sendOtp,
     register,
+    verifyOtp,
     changePassword,
     updateProfile,
   };

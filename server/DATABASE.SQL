@@ -7,10 +7,15 @@ DROP TABLE IF EXISTS admins;
 
 -- Admin table ကို Username နဲ့ အသစ်ပြန်ဆောက်မယ်
 CREATE TABLE admins (
-    id SERIAL PRIMARY KEY,                    -- အလိုအလျောက်တိုးမည့် ID
-    username VARCHAR(50) UNIQUE NOT NULL,    -- ထပ်နေလို့မရသော Username
-    password_hash TEXT NOT NULL,              -- Password (နောင်တွင် Hash လုပ်သိမ်းမည်)
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP -- ဆောက်သည့်အချိန်
+    id SERIAL PRIMARY KEY,                    
+    username VARCHAR(50) UNIQUE NOT NULL,    
+    email VARCHAR(100) UNIQUE NOT NULL,       
+    password_hash TEXT NOT NULL,              
+    account_type VARCHAR(20) CHECK (account_type IN ('individual', 'gallery')) DEFAULT 'individual',
+    slug VARCHAR(100) UNIQUE,
+    otp_code VARCHAR(6),
+    is_verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP 
 );
 
 
