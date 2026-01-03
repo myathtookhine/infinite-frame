@@ -50,11 +50,38 @@ app.post('/api/send-otp', async (req, res) => {
       to: email,
       subject: 'Infinite Frame Registration - OTP Code',
       html: `
-        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h2 style="color: #000;">Verification Code</h2>
-          <p>Your 6-digit OTP for Infinite Frame registration is:</p>
-          <h1 style="background: #f4f4f4; padding: 10px; display: inline-block; letter-spacing: 5px;">${otp}</h1>
-          <p>This code will expire in 5 minutes.</p>
+        <div style="background-color: #ffffff; padding: 50px 20px; font-family: 'IBM Plex Sans', Helvetica, Arial, sans-serif; color: #000000; text-align: center;">
+          <div style="max-width: 500px; margin: 0 auto; border: 3px solid #000000; padding: 50px 30px; box-shadow: 12px 12px 0px #000000; background-color: #ffffff;">
+            <h1 style="font-size: 22px; text-transform: uppercase; letter-spacing: 6px; margin-bottom: 40px; font-weight: 700;">
+              Infinite Frame
+            </h1>
+            
+            <div style="height: 1px; background-color: #e0e0e0; margin-bottom: 40px;"></div>
+            
+            <p style="font-size: 13px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 25px; color: #555555;">
+              Your Verification Code
+            </p>
+            
+            <div style="background-color: #000000; color: #ffffff; padding: 25px; font-size: 36px; font-weight: 700; letter-spacing: 15px; margin-bottom: 40px; border: 1px solid #000000;">
+              ${otp}
+            </div>
+            
+            <p style="font-size: 11px; letter-spacing: 2px; color: #888888; text-transform: uppercase; margin-bottom: 40px;">
+              This code will expire in 5 minutes
+            </p>
+            
+            <div style="border-top: 1px solid #e0e0e0; padding-top: 30px;">
+              <p style="font-size: 10px; letter-spacing: 3px; color: #aaaaaa; text-transform: uppercase;">
+                © 2026 Admin Portal System
+              </p>
+            </div>
+          </div>
+          
+          <div style="margin-top: 30px;">
+            <p style="font-size: 10px; color: #cccccc; letter-spacing: 1px;">
+              If you didn't request this code, please ignore this email.
+            </p>
+          </div>
         </div>
       `,
     };
