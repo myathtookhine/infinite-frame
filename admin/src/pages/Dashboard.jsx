@@ -28,7 +28,7 @@ const Dashboard = () => {
           className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-lg transition-all ${hoverBorder}`}
         >
           <div className={`font-sans text-sm ${subtextColor} mb-2`}>
-            Total Frames
+            Total Artworks
           </div>
           <div className={`font-sans text-4xl sm:text-5xl ${textColor}`}>0</div>
         </div>
@@ -36,7 +36,7 @@ const Dashboard = () => {
           className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-lg transition-all ${hoverBorder}`}
         >
           <div className={`font-sans text-sm ${subtextColor} mb-2`}>
-            Active Users
+            Categories
           </div>
           <div className={`font-sans text-4xl sm:text-5xl ${textColor}`}>0</div>
         </div>
@@ -44,7 +44,7 @@ const Dashboard = () => {
           className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-lg transition-all ${hoverBorder}`}
         >
           <div className={`font-sans text-sm ${subtextColor} mb-2`}>
-            Sessions
+            Mediums
           </div>
           <div className={`font-sans text-4xl sm:text-5xl ${textColor}`}>0</div>
         </div>
@@ -55,10 +55,10 @@ const Dashboard = () => {
         className={`border-2 ${cardBorder} ${cardBg} p-8 sm:p-12 text-center rounded-lg`}
       >
         <p className={`font-sans text-xl sm:text-2xl mb-4 ${textColor}`}>
-          "Everything is temporary"
+          "Coming Soon"
         </p>
         <p className={`font-sans text-sm ${subtextColor}`}>
-          — Infinite Frame Philosophy
+          — Infinite Frame
         </p>
       </div>
     </main>

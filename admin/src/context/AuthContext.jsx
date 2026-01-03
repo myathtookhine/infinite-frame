@@ -8,13 +8,16 @@ const API_BASE_URL = 'http://localhost:5000/api';
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check if user is already logged in
     const token = localStorage.getItem('adminToken');
-    if (token) {
+    const storedUser = localStorage.getItem('adminUser');
+    if (token && storedUser) {
       setIsAuthenticated(true);
+      setUser(JSON.parse(storedUser));
     }
     setIsLoading(false);
   }, []);
@@ -27,16 +30,17 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      // axios automatically parses JSON response
-      const { user } = response.data;
+      const userData = response.data.user;
 
       // Login successful
       const token = 'admin-token-' + Date.now();
       localStorage.setItem('adminToken', token);
-      localStorage.setItem('adminUser', JSON.stringify(user));
-      setIsAuthenticated(true);
+      localStorage.setItem('adminUser', JSON.stringify(userData));
 
-      return { success: true, user };
+      setIsAuthenticated(true);
+      setUser(userData);
+
+      return { success: true, user: userData };
     } catch (error) {
       console.error('Login error:', error);
       if (error.response) {
@@ -74,36 +78,55 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
     setIsAuthenticated(false);
+    setUser(null);
   };
 
-  const changePassword = (currentPassword, newPassword) => {
-    // For demo purposes, accept if current password is 123123
-    if (currentPassword === '123123') {
-      // In a real app, you'd update the password on the server
-      return { success: true, message: 'Password changed successfully' };
+  const updateProfile = async (newUsername) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/update-profile`, {
+        userId: user.id,
+        newUsername
+      });
+
+      const updatedUserData = response.data.user;
+      localStorage.setItem('adminUser', JSON.stringify(updatedUserData));
+      setUser(updatedUserData);
+
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Update failed.'
+      };
     }
-    return { success: false, error: 'Current password is incorrect' };
   };
 
-  const updateUsername = (newUsername) => {
-    // For demo purposes, accept any non-empty username
-    if (newUsername && newUsername.trim() !== '') {
-      // In a real app, you'd update the username on the server
-      localStorage.setItem('adminUsername', newUsername);
-      return { success: true, message: 'Username updated successfully' };
+  const changePassword = async (currentPassword, newPassword) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/change-password`, {
+        userId: user.id,
+        currentPassword,
+        newPassword
+      });
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Password change failed.'
+      };
     }
-    return { success: false, error: 'Invalid username' };
   };
 
   const value = {
     isAuthenticated,
+    user,
     isLoading,
     login,
     logout,
     sendOtp,
     register,
-    changePassword: () => { }, // Placeholders
-    updateUsername: () => { },
+    changePassword,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

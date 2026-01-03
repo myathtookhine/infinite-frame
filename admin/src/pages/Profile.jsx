@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from "../context/ThemeContext";
@@ -11,7 +11,8 @@ import {
 } from "@heroicons/react/24/outline";
 
 const Profile = () => {
-  const [username, setUsername] = useState("admin");
+  const { user, changePassword, updateProfile, logout } = useAuth();
+  const [username, setUsername] = useState(user?.username || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,9 +20,14 @@ const Profile = () => {
   const [usernameSuccess, setUsernameSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
-  const { changePassword, updateUsername, logout } = useAuth();
   const { isDark } = useTheme();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      setUsername(user.username);
+    }
+  }, [user]);
 
   const textColor = isDark ? "text-white" : "text-black";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
@@ -31,7 +37,7 @@ const Profile = () => {
     ? "hover:border-[#404040]"
     : "hover:border-gray-400";
 
-  const handleUsernameUpdate = (e) => {
+  const handleUsernameUpdate = async (e) => {
     e.preventDefault();
     setUsernameError("");
     setUsernameSuccess("");
@@ -41,7 +47,7 @@ const Profile = () => {
       return;
     }
 
-    const result = updateUsername(username);
+    const result = await updateProfile(username);
     if (result.success) {
       setUsernameSuccess(result.message);
       setTimeout(() => setUsernameSuccess(""), 3000);
@@ -50,7 +56,7 @@ const Profile = () => {
     }
   };
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
     setPasswordError("");
     setPasswordSuccess("");
@@ -72,7 +78,7 @@ const Profile = () => {
     }
 
     // Attempt to change password
-    const result = changePassword(currentPassword, newPassword);
+    const result = await changePassword(currentPassword, newPassword);
     if (result.success) {
       setPasswordSuccess(result.message);
       setCurrentPassword("");

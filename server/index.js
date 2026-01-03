@@ -146,6 +146,71 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// 4. UPDATE USERNAME API
+app.post('/api/update-profile', async (req, res) => {
+  const { userId, newUsername } = req.body;
+
+  try {
+    const updatedUser = await pool.query(
+      'UPDATE admins SET username = $1 WHERE id = $2 RETURNING id, username, email',
+      [newUsername, userId]
+    );
+
+    if (updatedUser.rows.length === 0) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    res.json({ 
+      message: "Username updated successfully!", 
+      user: updatedUser.rows[0] 
+    });
+
+  } catch (err) {
+    console.error(err.message);
+    if (err.code === '23505') {
+      return res.status(400).json({ message: "Username already exists!" });
+    }
+    res.status(500).json({ message: "Server Error!" });
+  }
+});
+
+// 5. CHANGE PASSWORD API
+app.post('/api/change-password', async (req, res) => {
+  const { userId, currentPassword, newPassword } = req.body;
+
+  try {
+    // ၁။ User ကို အရင်ရှာမယ်
+    const userResult = await pool.query('SELECT * FROM admins WHERE id = $1', [userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    const user = userResult.rows[0];
+
+    // ၂။ လက်ရှိ Password မှန်မမှန် အရင်စစ်မယ်
+    const validPassword = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!validPassword) {
+      return res.status(400).json({ message: "Current password is incorrect!" });
+    }
+
+    // ၃။ Password အသစ်ကို Hash လုပ်မယ်
+    const saltRounds = 10;
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // ၄။ Database မှာ Update လုပ်မယ်
+    await pool.query(
+      'UPDATE admins SET password_hash = $1 WHERE id = $2',
+      [hashedNewPassword, userId]
+    );
+
+    res.json({ message: "Password changed successfully!" });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server Error!" });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Backend server is running on port ${PORT}`);
