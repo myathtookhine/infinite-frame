@@ -47,7 +47,7 @@ const Login = () => {
 
   return (
     <div
-      className={`min-h-screen ${bgColor} flex items-center justify-center p-5 relative overflow-hidden`}
+      className={`min-h-screen ${bgColor} flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden`}
     >
       {/* Full Page Loading Overlay */}
       {loading && (
@@ -70,13 +70,13 @@ const Login = () => {
         <div className="border-2 border-black p-8 h-full relative overflow-hidden bg-black text-white rounded-md transition-shadow hover:shadow-md">
           <div className="relative z-10 h-full flex flex-col">
             {/* Top-left branding */}
-            <div className="text-left">
-              <h1 className="font-sans text-7xl mb-0">
+            <div className="text-left py-6 md:py-0">
+              <h1 className="font-sans text-4xl sm:text-5xl md:text-7xl mb-0 leading-tight">
                 <span className="glitch" data-text="Infinite">
                   Infinite
                 </span>
               </h1>
-              <h1 className="font-sans text-7xl mb-4">
+              <h1 className="font-sans text-4xl sm:text-5xl md:text-7xl mb-4 leading-tight">
                 <span className="glitch glitch--delay" data-text="Frame">
                   Frame
                 </span>
@@ -90,7 +90,7 @@ const Login = () => {
 
         {/* Right Login Panel */}
         <div
-          className={`border-2 ${rightPanelBorder} ${rightPanelBg} p-8 h-full flex items-center rounded-md relative`}
+          className={`border-2 ${rightPanelBorder} ${rightPanelBg} p-6 sm:p-8 md:p-10 h-full flex items-center rounded-md relative`}
         >
           {/* Theme Toggle Button */}
           <button

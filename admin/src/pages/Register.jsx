@@ -119,7 +119,7 @@ const Register = () => {
   const footerColor = isDark ? "text-gray-400" : "text-gray-500";
 
   return (
-    <div className={`min-h-screen ${bgColor} flex items-center justify-center p-5 relative overflow-hidden transition-colors duration-300`}>
+    <div className={`min-h-screen ${bgColor} flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden transition-colors duration-300`}>
       {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
@@ -147,10 +147,10 @@ const Register = () => {
           </button>
         </div>
 
-        <div className={`border-2 ${panelBorder} ${panelBg} p-8 rounded-md transition-shadow hover:shadow-xl`}>
+        <div className={`border-2 ${panelBorder} ${panelBg} p-5 sm:p-8 md:p-10 rounded-md transition-shadow hover:shadow-xl`}>
           {step === 1 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <h2 className={`font-sans text-3xl mb-2 text-left ${headingColor}`}>Create Account</h2>
+              <h2 className={`font-sans text-2xl sm:text-3xl mb-2 text-left ${headingColor}`}>Create Account</h2>
               <p className={`${footerColor} text-sm mb-8`}>Step 1: Your essential details</p>
               
               <form onSubmit={handleNextStep} className="space-y-5">
@@ -222,7 +222,7 @@ const Register = () => {
                   <label className={`block font-sans text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>Admin URL (Slug)</label>
                   <div className={`flex items-center border-2 ${panelBorder} rounded-md overflow-hidden focus-within:ring-2 ${isDark ? 'focus-within:ring-white' : 'focus-within:ring-black'} transition-all ${isDark ? 'bg-[#0a0a0a]' : 'bg-white'}`}>
                     <div className={`px-3 py-3 text-sm font-sans border-r ${panelBorder} ${isDark ? 'bg-white/5 text-gray-500' : 'bg-gray-50 text-gray-400'}`}>
-                      infiniteframe.com/
+                      infiniteframe.online/
                     </div>
                     <input
                       id="adminUrl"
@@ -252,20 +252,21 @@ const Register = () => {
                   <KeyIcon className={`h-10 w-10 ${headingColor}`} />
                 </div>
               </div>
-              <h2 className={`font-sans text-3xl mb-2 ${headingColor}`}>Verify Email</h2>
-              <p className={`${footerColor} text-sm mb-8`}>We sent a 6-digit code to {formData.email}</p>
+              <h2 className={`font-sans text-2xl sm:text-3xl mb-2 ${headingColor}`}>Verify Email</h2>
+              <p className={`${footerColor} text-sm mb-8`}>We sent a code to {formData.email}</p>
 
-              <div className="flex justify-between gap-2 mb-8">
+              <div className="flex justify-center gap-1.5 sm:gap-3 mb-8">
                 {otp.map((digit, index) => (
                   <input
                     key={index}
                     id={`otp-${index}`}
                     type="text"
                     maxLength={1}
+                    inputMode="numeric"
                     value={digit}
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className={`w-12 h-14 text-center text-2xl font-bold border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all
+                    className={`w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all
                       ${isDark ? 'bg-transparent border-[#262626] text-white' : 'bg-white border-black text-black'}`}
                   />
                 ))}
@@ -289,7 +290,7 @@ const Register = () => {
               <div className="mb-6 flex justify-center">
                 <CheckCircleIcon className="h-20 w-20 text-green-500 animate-bounce" />
               </div>
-              <h2 className={`font-sans text-3xl mb-2 ${headingColor}`}>Registration Successful!</h2>
+              <h2 className={`font-sans text-2xl sm:text-3xl mb-2 ${headingColor}`}>Registration Successful!</h2>
               <p className={`${footerColor} text-sm mb-8`}>
                 Welcome to Infinite Frame, <strong>{formData.username}</strong>. 
                 Your account is now ready to use.
