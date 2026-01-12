@@ -12,8 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { ENDPOINTS } from '../config';
-
-const API_BASE_URL = ENDPOINTS.ATTRIBUTES;
+import Input from '../components/ui/Input';
 
 const ArtworkAttributes = () => {
   const [types, setTypes] = useState([]);
@@ -46,7 +45,7 @@ const ArtworkAttributes = () => {
     }; 
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/types`, config);
+      const response = await axios.get(`${ENDPOINTS.ATTRIBUTES}/types`, config);
       const fetchedTypes = response.data.filter(t => t.type !== 'Category');
       
       setTypes(fetchedTypes);
@@ -87,13 +86,13 @@ const ArtworkAttributes = () => {
     const config = { headers: { 'x-admin-id': user.id } };
 
     try {
-      await axios.post(`${API_BASE_URL}`, { 
+      await axios.post(ENDPOINTS.ATTRIBUTES, { 
         type: newTypeName, 
         name: newTypeFirstItem 
       }, config);
       
       // Refresh
-      const response = await axios.get(`${API_BASE_URL}/types`, config);
+      const response = await axios.get(`${ENDPOINTS.ATTRIBUTES}/types`, config);
       const fetchedTypes = response.data.filter(t => t.type !== 'Category');
       setTypes(fetchedTypes);
       setActiveTab(newTypeName);
@@ -216,29 +215,23 @@ const ArtworkAttributes = () => {
                </p>
 
                {/* Group Name */}
-               <div>
-                <label className={`block text-xs font-sans font-bold uppercase tracking-widest mb-2 ${subtextColor}`}>Group Name</label>
-                <input
-                  autoFocus
-                  type="text"
-                  value={newTypeName}
-                  onChange={(e) => setNewTypeName(e.target.value)}
-                  placeholder="e.g. Materials"
-                  className={`w-full px-4 py-3 rounded-md border-2 ${borderColor} ${inputBg} ${textColor} focus:outline-none focus:ring-2 ${isDark ? 'focus:ring-white' : 'focus:ring-black'} transition-all font-sans text-sm`}
-                />
-              </div>
+              <Input
+                autoFocus
+                label="Group Name"
+                type="text"
+                value={newTypeName}
+                onChange={(e) => setNewTypeName(e.target.value)}
+                placeholder="e.g. Materials"
+              />
 
                {/* First Item */}
-               <div>
-                <label className={`block text-xs font-sans font-bold uppercase tracking-widest mb-2 ${subtextColor}`}>First Item Name</label>
-                <input
-                  type="text"
-                  value={newTypeFirstItem}
-                  onChange={(e) => setNewTypeFirstItem(e.target.value)}
-                  placeholder="e.g. Wood"
-                  className={`w-full px-4 py-3 rounded-md border-2 ${borderColor} ${inputBg} ${textColor} focus:outline-none focus:ring-2 ${isDark ? 'focus:ring-white' : 'focus:ring-black'} transition-all font-sans text-sm`}
-                />
-              </div>
+              <Input
+                label="First Item Name"
+                type="text"
+                value={newTypeFirstItem}
+                onChange={(e) => setNewTypeFirstItem(e.target.value)}
+                placeholder="e.g. Wood"
+              />
 
               {createError && <p className="text-red-500 text-xs">{createError}</p>}
 

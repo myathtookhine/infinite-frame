@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { API_BASE_URL } from '../config';
+import { ENDPOINTS } from '../config';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { 
@@ -35,7 +35,7 @@ const ManageAdmins = () => {
 
   const fetchAdmins = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/admin-management`, config);
+      const res = await axios.get(ENDPOINTS.ADMIN_MANAGEMENT.BASE, config);
       setAdmins(res.data);
     } catch (err) {
       console.error("Failed to fetch admins", err);
@@ -48,7 +48,7 @@ const ManageAdmins = () => {
     e.preventDefault();
     setError('');
     try {
-      await axios.post(`${API_BASE_URL}/admin-management`, formData, config);
+      await axios.post(ENDPOINTS.ADMIN_MANAGEMENT.BASE, formData, config);
       setShowModal(false);
       setFormData({ username: '', email: '', password: '' });
       fetchAdmins();
@@ -63,7 +63,7 @@ const ManageAdmins = () => {
     if(!window.confirm(`Are you sure you want to ${newStatus === 'suspended' ? 'SUSPEND' : 'ACTIVATE'} this user?`)) return;
 
     try {
-      await axios.put(`${API_BASE_URL}/admin-management/${id}/status`, { status: newStatus }, config);
+      await axios.put(ENDPOINTS.ADMIN_MANAGEMENT.STATUS(id), { status: newStatus }, config);
       fetchAdmins();
     } catch (err) {
       alert("Failed to update status");
@@ -73,7 +73,7 @@ const ManageAdmins = () => {
   const handleDelete = async (id) => {
     if(!window.confirm("Are you sure? This cannot be undone!")) return;
     try {
-      await axios.delete(`${API_BASE_URL}/admin-management/${id}`, config);
+      await axios.delete(ENDPOINTS.ADMIN_MANAGEMENT.DELETE(id), config);
       fetchAdmins();
     } catch (err) {
       alert("Failed to delete user");

@@ -12,8 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { ENDPOINTS } from '../config';
-
-const API_BASE_URL = ENDPOINTS.ATTRIBUTES;
+import Input from './ui/Input';
 
 const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserId }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,7 +33,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
     }; 
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/${type}`, config);
+      const response = await axios.get(`${ENDPOINTS.ATTRIBUTES}/${type}`, config);
       setItems(response.data);
     } catch (err) {
       console.error(`Error fetching ${type}:`, err);
@@ -58,14 +57,14 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
     try {
       if (editingItem) {
         // UPDATE (PUT)
-        const response = await axios.put(`${API_BASE_URL}/${editingItem.id}`, { name: newItemName }, config);
+        const response = await axios.put(`${ENDPOINTS.ATTRIBUTES}/${editingItem.id}`, { name: newItemName }, config);
         setItems(items.map(item => item.id === editingItem.id ? response.data : item));
         setIsModalOpen(false);
         setEditingItem(null);
         setNewItemName('');
       } else {
         // CREATE (POST)
-        const response = await axios.post(`${API_BASE_URL}`, { type, name: newItemName }, config);
+        const response = await axios.post(ENDPOINTS.ATTRIBUTES, { type, name: newItemName }, config);
         setItems([...items, response.data]);
         setNewItemName('');
         setIsModalOpen(false);
@@ -100,7 +99,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
     const config = { headers: { 'x-admin-id': user.id } };
     
     try {
-      await axios.delete(`${API_BASE_URL}/${id}`, config);
+      await axios.delete(`${ENDPOINTS.ATTRIBUTES}/${id}`, config);
       setItems(items.filter(item => item.id !== id));
       onRefresh && onRefresh();
     } catch (err) {
@@ -120,7 +119,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
     const newStatus = !item.is_active;
 
     try {
-        const response = await axios.put(`${API_BASE_URL}/${item.id}`, { 
+      const response = await axios.put(`${ENDPOINTS.ATTRIBUTES}/${item.id}`, { 
             is_active: newStatus 
         }, config);
         
@@ -178,14 +177,14 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
       <div className="w-full">
         {/* List Entries */}
         <div className="w-full">
-          <div className="mb-6 relative">
-            <MagnifyingGlassIcon className={`absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 ${subtextColor}`} />
-            <input
+          <div className="mb-6">
+            <Input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={`Search ${title.toLowerCase()}...`}
-              className={`w-full pl-12 pr-4 py-3 rounded-md border-2 ${borderColor} ${inputBg} ${textColor} focus:outline-none focus:ring-2 ${isDark ? 'focus:ring-white' : 'focus:ring-black'} transition-all font-sans text-sm`}
+              icon={MagnifyingGlassIcon}
+              containerClassName=""
             />
           </div>
 
@@ -282,17 +281,14 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className={`block text-xs font-sans font-bold uppercase tracking-widest mb-2 ${subtextColor}`}>Name</label>
-                <input
-                  autoFocus
-                  type="text"
-                  value={newItemName}
-                  onChange={(e) => setNewItemName(e.target.value)}
-                  placeholder={`Enter name`}
-                  className={`w-full px-4 py-3 rounded-md border-2 ${borderColor} ${inputBg} ${textColor} focus:outline-none focus:ring-2 ${isDark ? 'focus:ring-white' : 'focus:ring-black'} transition-all font-sans text-sm`}
-                />
-              </div>
+              <Input
+                autoFocus
+                label="Name"
+                type="text"
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+                placeholder="Enter name"
+              />
               {error && <p className="text-red-500 text-xs">{error}</p>}
               <div className="flex gap-3 pt-2">
                 <button

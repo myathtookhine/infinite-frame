@@ -118,8 +118,8 @@ const AdminLayout = ({ children }) => {
           }`}
           aria-label="Sidebar"
         >
-          {/* Sidebar Header */}
-          <div className="flex items-center justify-between mb-8">
+          {/* Sidebar Header - Fixed */}
+          <div className="flex-shrink-0 flex items-center justify-between mb-4 pb-4 border-b border-current/10">
             <div>
               <h2 className={`font-sans text-xl font-semibold ${textColor}`}>
                 Infinite Frame
@@ -144,9 +144,9 @@ const AdminLayout = ({ children }) => {
             </button>
           </div>
 
-          {/* Navigation */}
+          {/* Navigation - Scrollable */}
           <nav
-            className="flex-1"
+            className="flex-1 overflow-y-auto no-scrollbar"
             role="navigation"
             aria-label="Main navigation"
           >
@@ -200,19 +200,19 @@ const AdminLayout = ({ children }) => {
             )}
           </nav>
 
-          {/* Theme Toggle & Logout */}
+          {/* Theme Toggle & Profile - Fixed */}
           <div
-            className={`mt-auto pt-4 space-y-2 ${
+            className={`flex-shrink-0 mt-auto pt-4 space-y-2 ${
               isDark ? "border-t border-white/10" : "border-t border-black/10"
             }`}
           >
             <button
               onClick={toggleTheme}
-              className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-md ${
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer font-sans text-sm transition-colors duration-150 ${
                 isDark
-                  ? "text-white hover:bg-white/10"
-                  : "text-black hover:bg-black/5"
-              } font-sans transition-colors duration-150`}
+                  ? "text-gray-400 hover:bg-gray-800 hover:text-white"
+                  : "text-gray-600 hover:bg-gray-200 hover:text-black"
+                }`}
             >
               {isDark ? (
                 <SunIcon className="h-5 w-5" />
