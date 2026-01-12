@@ -87,7 +87,7 @@ const ManageAdmins = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
           <h1 className={`text-2xl font-sans font-bold ${isDark ? "text-white" : "text-black"}`}>
             Manage Admins
@@ -96,7 +96,7 @@ const ManageAdmins = () => {
             Create and manage individual artist accounts
           </p>
         </div>
-        <Button onClick={() => setShowModal(true)} variant="primary" className="flex items-center gap-2">
+        <Button onClick={() => setShowModal(true)} variant="primary" className="w-full md:w-auto flex items-center justify-center gap-2">
           <PlusIcon className="w-4 h-4" /> Add New Admin
         </Button>
       </div>
@@ -104,67 +104,68 @@ const ManageAdmins = () => {
       {loading ? (
         <div className="text-center py-10 text-gray-500">Loading...</div>
       ) : (
-        <div className={`overflow-x-auto rounded-lg border ${isDark ? "border-gray-700" : "border-gray-200"}`}>
-          <table className="w-full text-left text-sm">
-            <thead className={`${tableHeaderClass} uppercase font-sans text-xs`}>
-              <tr>
-                <th className="px-6 py-3">Username</th>
-                <th className="px-6 py-3">Email</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Created At</th>
-                <th className="px-6 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {admins.length === 0 ? (
-                 <tr>
-                   <td colSpan="5" className="px-6 py-8 text-center text-gray-500">No admins found. Create one!</td>
-                 </tr>
-              ) : (
-                admins.map((admin) => (
-                  <tr key={admin.id} className={tableRowClass}>
-                    <td className={`px-6 py-4 font-medium ${textClass}`}>{admin.username}</td>
-                    <td className={`px-6 py-4 ${textClass}`}>{admin.email}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
-                        admin.status === 'active' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {admin.status}
-                      </span>
-                    </td>
-                    <td className={`px-6 py-4 ${textClass}`}>
-                      {new Date(admin.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-2">
-                       {/* Toggle Status */}
-                       <button 
-                        onClick={() => toggleStatus(admin.id, admin.status)}
-                        title={admin.status === 'active' ? "Suspend User" : "Activate User"}
-                        className={`p-1 rounded transition-colors ${
-                          admin.status === 'active' 
-                            ? "text-orange-500 hover:bg-orange-100" 
-                            : "text-green-500 hover:bg-green-100"
-                        }`}
-                      >
-                        {admin.status === 'active' ? <NoSymbolIcon className="w-5 h-5"/> : <CheckCircleIcon className="w-5 h-5"/>}
-                      </button>
-
-                      {/* Delete */}
-                      <button 
-                        onClick={() => handleDelete(admin.id)}
-                        title="Delete User"
-                        className="p-1 text-red-500 hover:bg-red-100 rounded transition-colors"
-                      >
-                         <TrashIcon className="w-5 h-5" />
-                      </button>
-                    </td>
+          /* Responsive Table Wrapper */
+          <div className="w-full overflow-hidden">
+            <div className={`overflow-x-auto rounded-lg border ${isDark ? "border-gray-700" : "border-gray-200"}`}>
+              <table className="w-full text-left text-sm min-w-[700px]">
+                <thead className={`${tableHeaderClass} uppercase font-sans text-xs`}>
+                  <tr>
+                    <th className="px-6 py-3 whitespace-nowrap">Username</th>
+                    <th className="px-6 py-3 whitespace-nowrap">Email</th>
+                    <th className="px-6 py-3 whitespace-nowrap">Status</th>
+                    <th className="px-6 py-3 whitespace-nowrap">Created At</th>
+                    <th className="px-6 py-3 text-right whitespace-nowrap">Actions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {admins.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-8 text-center text-gray-500">No admins found. Create one!</td>
+                    </tr>
+                  ) : (
+                    admins.map((admin) => (
+                      <tr key={admin.id} className={tableRowClass}>
+                        <td className={`px-6 py-4 font-medium whitespace-nowrap ${textClass}`}>{admin.username}</td>
+                        <td className={`px-6 py-4 whitespace-nowrap ${textClass}`}>{admin.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${admin.status === 'active'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                            }`}>
+                            {admin.status}
+                          </span>
+                        </td>
+                        <td className={`px-6 py-4 whitespace-nowrap ${textClass}`}>
+                          {new Date(admin.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-right whitespace-nowrap space-x-2">
+                          {/* Toggle Status */}
+                          <button
+                            onClick={() => toggleStatus(admin.id, admin.status)}
+                            title={admin.status === 'active' ? "Suspend User" : "Activate User"}
+                            className={`p-1 rounded transition-colors ${admin.status === 'active'
+                              ? "text-orange-500 hover:bg-orange-100"
+                              : "text-green-500 hover:bg-green-100"
+                              }`}
+                          >
+                            {admin.status === 'active' ? <NoSymbolIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
+                          </button>
+
+                          {/* Delete */}
+                          <button
+                            onClick={() => handleDelete(admin.id)}
+                            title="Delete User"
+                            className="p-1 text-red-500 hover:bg-red-100 rounded transition-colors"
+                          >
+                            <TrashIcon className="w-5 h-5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
         </div>
       )}
 

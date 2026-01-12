@@ -14,7 +14,7 @@ import {
 import { ENDPOINTS } from '../config';
 import Input from './ui/Input';
 
-const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserId }) => {
+const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserId, hideHeader = false, renderAddButton }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null); // { id, name }
   const [items, setItems] = useState([]);
@@ -144,40 +144,49 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
   const textColor = isDark ? 'text-white' : 'text-black';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
 
+  // Expose openAddModal for external button
+  const addButton = !isReadOnly && (
+    <button
+      onClick={openAddModal}
+      className={`w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-md font-sans font-bold text-sm cursor-pointer transition-all duration-300 ${isDark
+        ? 'bg-white text-black hover:bg-gray-200'
+        : 'bg-black text-white hover:bg-gray-800'
+        }`}
+    >
+      <PlusIcon className="h-4 w-4" />
+      <span className="whitespace-nowrap">Add Item</span>
+    </button>
+  );
+
+  // Call renderAddButton callback if provided
+  if (renderAddButton && !isReadOnly) {
+    renderAddButton(openAddModal);
+  }
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
-        <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg flex-shrink-0 ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
-            <TagIcon className={`h-6 w-6 ${textColor}`} />
+      {!hideHeader && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg flex-shrink-0 ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
+              <TagIcon className={`h-6 w-6 ${textColor}`} />
+            </div>
+            <div className="min-w-0">
+              <h2 className={`text-xl sm:text-2xl font-sans font-bold ${textColor} truncate`}>{title}</h2>
+              <p className={`text-sm ${subtextColor} truncate`}>
+                {isReadOnly ? `View available ${title} options` : `Manage ${title} options`}
+              </p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <h2 className={`text-xl sm:text-2xl font-sans font-bold ${textColor} truncate`}>{title}</h2>
-            <p className={`text-sm ${subtextColor} truncate`}>
-               {isReadOnly ? `View available ${title} options` : `Manage ${title} options`}
-            </p>
-          </div>
-        </div>
 
-        {!isReadOnly && (
-          <button
-            onClick={openAddModal}
-            className={`w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-md font-sans font-bold text-sm cursor-pointer transition-all duration-300 ${
-              isDark 
-                ? 'bg-white text-black hover:bg-gray-200' 
-                : 'bg-black text-white hover:bg-gray-800'
-            }`}
-          >
-            <PlusIcon className="h-4 w-4" />
-            <span className="whitespace-nowrap">Add Item</span>
-          </button>
-        )}
-      </div>
+          {addButton}
+        </div>
+      )}
 
       <div className="w-full">
         {/* List Entries */}
         <div className="w-full">
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <Input
               type="text"
               value={searchQuery}
@@ -186,7 +195,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
               icon={MagnifyingGlassIcon}
               containerClassName=""
             />
-          </div>
+          </div> */}
 
           <div className="space-y-3">
             {loading && items.length === 0 ? (

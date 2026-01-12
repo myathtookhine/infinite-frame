@@ -234,13 +234,13 @@ const AdminLayout = ({ children }) => {
 
         {/* Main Content */}
         <div
-          className={`flex-1 ${contentBg} md:rounded-2xl md:min-h-[calc(100vh-2rem)] md:my-0 ${
+          className={`flex-1 min-w-0 overflow-hidden ${contentBg} md:rounded-2xl md:min-h-[calc(100vh-2rem)] md:my-0 ${
             isDark
               ? "md:border md:border-[#262626]"
               : "md:border md:border-gray-300"
           }`}
         >
-          <main className="p-4 sm:p-6 md:p-8">{children}</main>
+          <main className="p-4 sm:p-6 md:p-8 w-full max-w-full overflow-x-auto">{children}</main>
         </div>
       </div>
     </div>
