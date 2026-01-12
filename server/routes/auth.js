@@ -61,12 +61,14 @@ const sendOTP = async (email, otp) => {
     // Send Mail
     const info = await transporter.sendMail(mailOptions);
     console.log("✅ Email sent successfully ID:", info.messageId);
-    return true;
+    return { success: true };
   } catch (error) {
     console.error("❌ Email Sending Failed:", error);
-    // Log specifics if available
-    if(error.code === 'EAUTH') console.error("⚠️ CHECK EMAIL PASSWORD: Use App Password, not Login Password.");
-    return false;
+    let errorMessage = error.message;
+    if(error.code === 'EAUTH') errorMessage = "SMTP Auth Error: Check Email/Password Settings";
+    if(error.code === 'ETIMEDOUT') errorMessage = "SMTP Connection Timeout";
+    
+    return { success: false, error: errorMessage };
   }
 };
 
@@ -100,12 +102,12 @@ router.post('/register', async (req, res) => {
       [username, email, hashedPassword, otpCode]
     );
 
-    const emailSent = await sendOTP(email, otpCode);
+    const emailResult = await sendOTP(email, otpCode);
     
-    if (!emailSent) {
+    if (!emailResult.success) {
       // Optional: Delete the unverified user if email failed so they can try again cleanly
       await pool.query("DELETE FROM admins WHERE email = $1", [email]);
-      return res.status(500).json({ message: "Failed to send verification email. Please try again or contact support." });
+      return res.status(500).json({ message: `Email Failed: ${emailResult.error}` });
     }
 
     res.status(201).json({ message: "OTP sent successfully!" });
