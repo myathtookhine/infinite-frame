@@ -1,9 +1,5 @@
 @import "tailwindcss";
-
-/* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-/* Note: Google Sans might not be served via public API. Falling back to Inter if not system installed. */
-/* Using a local font face technique is usually required for Google Sans. We will list it in the stack. */
 
 /* Infinite Frame Admin - Minimalist Zen Theme */
 @layer base {
