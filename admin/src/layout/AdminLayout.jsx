@@ -12,7 +12,8 @@ import {
   Cog6ToothIcon,
   SwatchIcon,
   UserGroupIcon,
-  ClockIcon
+  ClockIcon,
+  TagIcon
 } from "@heroicons/react/24/outline";
 
 const SidebarLink = ({ to, children, icon: Icon, onClick, isDark }) => {
