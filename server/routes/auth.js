@@ -136,13 +136,20 @@ router.post('/login', async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password_hash);
 
     if (validPassword) {
+      // ✅ LOG ACTIVITY: LOGIN
+      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      await pool.query(
+        "INSERT INTO activity_logs (admin_id, action, ip_address, details) VALUES ($1, 'LOGIN', $2, 'User logged in successfully')",
+        [user.id, clientIp]
+      );
+
       res.json({ 
         message: "Login Success", 
         user: { 
           id: user.id, 
           username: user.username, 
           email: user.email,
-          role: user.role // Return Role
+          role: user.role
         } 
       });
     } else {
@@ -151,6 +158,25 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error!");
+  }
+});
+
+// 3.1 LOGOUT API (For logging purposes)
+router.post('/logout', async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) return res.status(200).json({ message: "Logged out" });
+
+  try {
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    await pool.query(
+      "INSERT INTO activity_logs (admin_id, action, ip_address, details) VALUES ($1, 'LOGOUT', $2, 'User logged out')",
+      [userId, clientIp]
+    );
+    res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    console.error(err.message);
+    // Don't block logout on error
+    res.status(200).json({ message: "Logged out" });
   }
 });
 

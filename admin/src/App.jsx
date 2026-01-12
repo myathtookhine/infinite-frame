@@ -9,6 +9,7 @@ import Profile from './pages/Profile';
 import Categories from './pages/Categories';
 import ArtworkAttributes from './pages/ArtworkAttributes';
 import ManageAdmins from './pages/ManageAdmins';
+import ActivityLogs from './pages/ActivityLogs';
 import AdminLayout from './layout/AdminLayout';
 import './App.css';
 
@@ -71,6 +72,17 @@ function App() {
                 <ProtectedRoute>
                   <AdminLayout>
                     <ManageAdmins />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/activity-logs"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <ActivityLogs />
                   </AdminLayout>
                 </ProtectedRoute>
               }

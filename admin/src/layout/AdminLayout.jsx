@@ -10,9 +10,9 @@ import {
   SunIcon,
   MoonIcon,
   Cog6ToothIcon,
-  TagIcon,
   SwatchIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  ClockIcon
 } from "@heroicons/react/24/outline";
 
 const SidebarLink = ({ to, children, icon: Icon, onClick, isDark }) => {
@@ -177,14 +177,25 @@ const AdminLayout = ({ children }) => {
             </SidebarLink>
 
             {user?.role === 'super_admin' && (
-              <SidebarLink
-                to="/manage-admins"
-                icon={UserGroupIcon}
-                onClick={closeSidebar}
-                isDark={isDark}
-              >
-                Manage Admins
-              </SidebarLink>
+              <>
+                <SidebarLink
+                  to="/manage-admins"
+                  icon={UserGroupIcon}
+                  onClick={closeSidebar}
+                  isDark={isDark}
+                >
+                  Manage Admins
+                </SidebarLink>
+
+                <SidebarLink
+                  to="/activity-logs"
+                  icon={ClockIcon}
+                  onClick={closeSidebar}
+                  isDark={isDark}
+                >
+                  Activity Logs
+                </SidebarLink>
+              </>
             )}
           </nav>
 

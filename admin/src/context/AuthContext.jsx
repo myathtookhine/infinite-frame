@@ -75,11 +75,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    setIsAuthenticated(false);
-    setUser(null);
+  const logout = async () => {
+    try {
+      if (user?.id) {
+        await axios.post(`${API_BASE_URL}/logout`, { userId: user.id });
+      }
+    } catch (err) {
+      console.error("Logout log failed:", err);
+    } finally {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      setIsAuthenticated(false);
+      setUser(null);
+    }
   };
 
   const updateProfile = async (newUsername) => {

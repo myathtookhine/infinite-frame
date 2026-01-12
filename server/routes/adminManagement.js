@@ -23,6 +23,23 @@ const requireSuperAdmin = async (req, res, next) => {
 // Apply middleware to all routes
 router.use(requireSuperAdmin);
 
+// 0. GET ACTIVITY LOGS
+router.get('/logs', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT l.id, l.action, l.ip_address, l.created_at, a.username, a.email
+      FROM activity_logs l
+      JOIN admins a ON l.admin_id = a.id
+      ORDER BY l.created_at DESC
+      LIMIT 100
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
 // 1. GET ALL ADMINS (Except self/Super Admin logic can be refined)
 router.get('/', async (req, res) => {
   try {
