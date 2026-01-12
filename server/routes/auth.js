@@ -5,21 +5,16 @@ const nodemailer = require('nodemailer');
 const pool = require('../db');
 
 // Nodemailer Transporter Setup
-// Nodemailer Transporter Setup (Updated for Render: Port 587 is often safer)
+// Nodemailer Transporter Setup (Official Gmail Service + IPv4 Fix)
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // true for 465, false for other ports
+  service: 'gmail', // Automatically handles host & port (465)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  tls: {
-    rejectUnauthorized: false // Helps avoid some strict SSL errors during dev/cloud
-  },
-  connectionTimeout: 10000, // 10 seconds timeout
-  greetingTimeout: 5000,
-  socketTimeout: 10000
+  family: 4, // Force IPv4 (Fixes Timeout on Render/Cloud)
+  logger: true, // Log information to console
+  debug: true   // Include SMTP traffic in logs
 });
 
 // Helper to send OTP email
