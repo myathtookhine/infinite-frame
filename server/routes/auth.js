@@ -4,28 +4,18 @@ const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const pool = require('../db');
 
-// Nodemailer Transporter Setup
-// Nodemailer Transporter Setup (Brevo / Sendinblue)
-const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',
-  port: 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  // Optional debugging
-  logger: true,
-  debug: true
-});
+// Brevo API Config (Using HTTP API to bypass Render Free Tier SMTP block)
+const BREVO_API_KEY = process.env.BREVO_API_KEY; // Requires 'api-key' from Brevo Dashboard
+
+
 
 // Helper to send OTP email
 const sendOTP = async (email, otp) => {
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: 'Infinite Frame Registration - OTP Code',
-    html: `
+  const emailData = {
+    sender: { name: "Infinite Frame", email: "myathtookhine6@gmail.com" },
+    to: [{ email: email }],
+    subject: "Infinite Frame Registration - OTP Code",
+    htmlContent: `
       <div style="background-color: #ffffff; padding: 50px 20px; font-family: 'IBM Plex Sans', Helvetica, Arial, sans-serif; color: #000000; text-align: center;">
         <div style="max-width: 500px; margin: 0 auto; border: 3px solid #000000; padding: 50px 30px; box-shadow: 12px 12px 0px #000000; background-color: #ffffff;">
           <h1 style="font-size: 22px; text-transform: uppercase; letter-spacing: 6px; margin-bottom: 40px; font-weight: 700;">
@@ -48,24 +38,31 @@ const sendOTP = async (email, otp) => {
           </div>
         </div>
       </div>
-    `,
+    `
   };
 
   try {
-    // Attempt verification (Fail fast if connection is bad)
-    await transporter.verify();
-    
-    // Send Mail
-    const info = await transporter.sendMail(mailOptions);
-    console.log("✅ Email sent successfully ID:", info.messageId);
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "api-key": BREVO_API_KEY,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(emailData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("❌ Brevo API Error:", errorData);
+      return { success: false, error: errorData.message || "Email API Error" };
+    }
+
+    console.log("✅ Email sent successfully via Brevo API");
     return { success: true };
   } catch (error) {
-    console.error("❌ Email Sending Failed:", error);
-    let errorMessage = error.message;
-    if(error.code === 'EAUTH') errorMessage = "SMTP Auth Error: Check Email/Password Settings";
-    if(error.code === 'ETIMEDOUT') errorMessage = "SMTP Connection Timeout";
-    
-    return { success: false, error: errorMessage };
+    console.error("❌ Network Error:", error);
+    return { success: false, error: error.message };
   }
 };
 
