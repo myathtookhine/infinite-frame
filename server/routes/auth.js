@@ -5,8 +5,11 @@ const nodemailer = require('nodemailer');
 const pool = require('../db');
 
 // Nodemailer Transporter Setup
+// Nodemailer Transporter Setup (Updated for Render/Cloud Reliability)
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -44,7 +47,21 @@ const sendOTP = async (email, otp) => {
       </div>
     `,
   };
-  await transporter.sendMail(mailOptions);
+
+  try {
+    // Attempt verification (Fail fast if connection is bad)
+    await transporter.verify();
+    
+    // Send Mail
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent successfully ID:", info.messageId);
+    return true;
+  } catch (error) {
+    console.error("❌ Email Sending Failed:", error);
+    // Log specifics if available
+    if(error.code === 'EAUTH') console.error("⚠️ CHECK EMAIL PASSWORD: Use App Password, not Login Password.");
+    return false;
+  }
 };
 
 // 1. INITIATE REGISTER (Renamed from /send-otp or /register)
@@ -77,7 +94,14 @@ router.post('/register', async (req, res) => {
       [username, email, hashedPassword, otpCode]
     );
 
-    await sendOTP(email, otpCode);
+    const emailSent = await sendOTP(email, otpCode);
+    
+    if (!emailSent) {
+      // Optional: Delete the unverified user if email failed so they can try again cleanly
+      await pool.query("DELETE FROM admins WHERE email = $1", [email]);
+      return res.status(500).json({ message: "Failed to send verification email. Please try again or contact support." });
+    }
+
     res.status(201).json({ message: "OTP sent successfully!" });
   } catch (err) {
     console.error(err.message);
