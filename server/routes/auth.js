@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   port: 2465,
   secure: true, // true for port 465/2465
   auth: {
-    user: 'Infinite Frame Admin Portal',
+    user: 'resend',
     pass: process.env.RESEND_API_KEY,
   },
 });
