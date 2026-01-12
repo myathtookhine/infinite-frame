@@ -4,18 +4,24 @@ const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const pool = require('../db');
 
-// Brevo API Config (Using HTTP API to bypass Render Free Tier SMTP block)
-const BREVO_API_KEY = process.env.BREVO_API_KEY; // Requires 'api-key' from Brevo Dashboard
-
-
+// Resend SMTP Config (Port 2465 bypasses Render Free Tier block)
+const transporter = nodemailer.createTransport({
+  host: 'smtp.resend.com',
+  port: 2465,
+  secure: true, // true for port 465/2465
+  auth: {
+    user: 'Infinite Frame Admin Portal',
+    pass: process.env.RESEND_API_KEY,
+  },
+});
 
 // Helper to send OTP email
 const sendOTP = async (email, otp) => {
-  const emailData = {
-    sender: { name: "Infinite Frame", email: "myathtookhine6@gmail.com" },
-    to: [{ email: email }],
-    subject: "Infinite Frame Registration - OTP Code",
-    htmlContent: `
+  const mailOptions = {
+    from: 'Infinite Frame Admin Portal<onboarding@infiniteframe.online>', // Use your verified domain or resend.dev for testing
+    to: email,
+    subject: 'Infinite Frame Registration - OTP Code',
+    html: `
       <div style="background-color: #ffffff; padding: 50px 20px; font-family: 'IBM Plex Sans', Helvetica, Arial, sans-serif; color: #000000; text-align: center;">
         <div style="max-width: 500px; margin: 0 auto; border: 3px solid #000000; padding: 50px 30px; box-shadow: 12px 12px 0px #000000; background-color: #ffffff;">
           <h1 style="font-size: 22px; text-transform: uppercase; letter-spacing: 6px; margin-bottom: 40px; font-weight: 700;">
@@ -38,35 +44,19 @@ const sendOTP = async (email, otp) => {
           </div>
         </div>
       </div>
-    `
+    `,
   };
 
   try {
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        "accept": "application/json",
-        "api-key": BREVO_API_KEY,
-        "content-type": "application/json"
-      },
-      body: JSON.stringify(emailData)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("❌ Brevo API Error:", errorData);
-      return { success: false, error: errorData.message || "Email API Error" };
-    }
-
-    console.log("✅ Email sent successfully via Brevo API");
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent successfully via Resend SMTP:", info.messageId);
     return { success: true };
   } catch (error) {
-    console.error("❌ Network Error:", error);
+    console.error("❌ Email Sending Failed:", error);
     return { success: false, error: error.message };
   }
 };
 
-// 1. INITIATE REGISTER (Renamed from /send-otp or /register)
 // 1. INITIATE REGISTER (Renamed from /send-otp or /register)
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
