@@ -48,20 +48,21 @@ const sendOTP = async (email, otp) => {
 };
 
 // 1. INITIATE REGISTER (Renamed from /send-otp or /register)
+// 1. INITIATE REGISTER (Renamed from /send-otp or /register)
 router.post('/register', async (req, res) => {
-  const { username, email, password, account_type, slug } = req.body;
+  const { username, email, password } = req.body;
 
   try {
-    // Check if Email or Slug (URL) or Username already exists
+    // Check if Email or Username already exists
     const checkUser = await pool.query(
-      "SELECT * FROM admins WHERE email = $1 OR slug = $2 OR username = $3", 
-      [email, slug, username]
+      "SELECT * FROM admins WHERE email = $1 OR username = $2", 
+      [email, username]
     );
 
     if (checkUser.rows.length > 0) {
       const existing = checkUser.rows[0];
       if (existing.is_verified) {
-        return res.status(400).json({ message: "Email, Username or URL already exists!" });
+        return res.status(400).json({ message: "Email or Username already exists!" });
       }
       // If unverified, we'll just update it (or delete and re-insert)
       await pool.query("DELETE FROM admins WHERE email = $1", [email]);
@@ -70,9 +71,10 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
+    // Register endpoint (Values hardcoded: role='individual')
     await pool.query(
-      "INSERT INTO admins (username, email, password_hash, account_type, slug, otp_code) VALUES ($1, $2, $3, $4, $5, $6)",
-      [username, email, hashedPassword, account_type, slug, otpCode]
+      "INSERT INTO admins (username, email, password_hash, role, otp_code) VALUES ($1, $2, $3, 'individual', $4)",
+      [username, email, hashedPassword, otpCode]
     );
 
     await sendOTP(email, otpCode);
@@ -107,7 +109,7 @@ router.post('/verify-otp', async (req, res) => {
 
     res.json({ 
       message: "Registration Successful!", 
-      user: { id: user.id, username: user.username, email: user.email } 
+      user: { id: user.id, username: user.username, email: user.email, role: user.role } 
     });
   } catch (err) {
     console.error(err.message);
@@ -125,12 +127,23 @@ router.post('/login', async (req, res) => {
     }
 
     const user = userResult.rows[0];
+
+    // Check Status
+    if (user.status !== 'active') {
+      return res.status(403).json({ message: "Your account has been suspended or disabled." });
+    }
+
     const validPassword = await bcrypt.compare(password, user.password_hash);
 
     if (validPassword) {
       res.json({ 
         message: "Login Success", 
-        user: { id: user.id, username: user.username, email: user.email } 
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          email: user.email,
+          role: user.role // Return Role
+        } 
       });
     } else {
       res.status(400).json({ message: "Password is not correct!" });

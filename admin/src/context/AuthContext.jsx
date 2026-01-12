@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
 const AuthContext = createContext(null);
 
 // Base URL for API
-const API_BASE_URL = 'https://api.infiniteframe.online/api';
+// Imported from config
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

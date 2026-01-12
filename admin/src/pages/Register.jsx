@@ -22,9 +22,7 @@ const Register = () => {
     username: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    accountType: 'individual',
-    adminUrl: ''
+    confirmPassword: ''
   });
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
@@ -35,13 +33,7 @@ const Register = () => {
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
-    if (id === 'adminUrl') {
-      // Regex to prevent spaces: only lowercase and hyphens
-      const filteredValue = value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z-]/g, '');
-      setFormData(prev => ({ ...prev, [id]: filteredValue }));
-    } else {
-      setFormData(prev => ({ ...prev, [id]: value }));
-    }
+    setFormData(prev => ({ ...prev, [id]: value }));
   };
 
   const handleOtpChange = (index, value) => {
@@ -69,7 +61,7 @@ const Register = () => {
     setError('');
 
     if (step === 1) {
-      if (!formData.username || !formData.email || !formData.password || !formData.adminUrl) {
+      if (!formData.username || !formData.email || !formData.password) {
         setError('Please fill all fields!');
         return;
       }
@@ -82,9 +74,7 @@ const Register = () => {
       const result = await register({
         username: formData.username,
         email: formData.email,
-        password: formData.password,
-        account_type: formData.accountType,
-        slug: formData.adminUrl
+        password: formData.password
       });
       setLoading(false);
 
@@ -190,51 +180,7 @@ const Register = () => {
                   icon={LockClosedIcon}
                 />
 
-                {/* Account Type Selection */}
-                <div className="space-y-2">
-                  <label className={`block font-sans text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>Account Type</label>
-                  <div className={`flex p-1 rounded-md border-2 ${panelBorder} ${isDark ? 'bg-black' : 'bg-gray-50'}`}>
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, accountType: 'individual' }))}
-                      className={`flex-1 py-2 px-4 rounded-md text-sm font-sans transition-all cursor-pointer ${formData.accountType === 'individual'
-                        ? (isDark ? 'bg-white text-black font-bold' : 'bg-black text-white font-bold')
-                        : (isDark ? 'text-gray-500 hover:text-white' : 'text-gray-500 hover:text-black')
-                        }`}
-                    >
-                      Individual Artist
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, accountType: 'gallery' }))}
-                      className={`flex-1 py-2 px-4 rounded-md text-sm font-sans transition-all cursor-pointer ${formData.accountType === 'gallery'
-                        ? (isDark ? 'bg-white text-black font-bold' : 'bg-black text-white font-bold')
-                        : (isDark ? 'text-gray-500 hover:text-white' : 'text-gray-500 hover:text-black')
-                        }`}
-                    >
-                      Art Gallery
-                    </button>
-                  </div>
-                </div>
 
-                {/* Portfolio / Admin URL Selection */}
-                <div className="space-y-2">
-                  <label className={`block font-sans text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>Admin URL (Slug)</label>
-                  <div className={`flex items-center border-2 ${panelBorder} rounded-md overflow-hidden focus-within:ring-2 ${isDark ? 'focus-within:ring-white' : 'focus-within:ring-black'} transition-all ${isDark ? 'bg-[#0a0a0a]' : 'bg-white'}`}>
-                    <div className={`px-3 py-3 text-sm font-sans border-r ${panelBorder} ${isDark ? 'bg-white/5 text-gray-500' : 'bg-gray-50 text-gray-400'}`}>
-                      infiniteframe.online/
-                    </div>
-                    <input
-                      id="adminUrl"
-                      type="text"
-                      value={formData.adminUrl}
-                      onChange={handleInputChange}
-                      placeholder="your-name"
-                      className={`flex-1 px-4 py-3 bg-transparent outline-none text-sm font-sans ${headingColor} placeholder:text-gray-600`}
-                    />
-                  </div>
-                  <p className={`text-[10px] ${footerColor} uppercase tracking-wider`}>Letters and hyphens only, no spaces or special characters</p>
-                </div>
 
                 {error && <div className="text-red-500 text-sm font-sans mt-2">{error}</div>}
 

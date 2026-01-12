@@ -10,6 +10,9 @@ import {
   SunIcon,
   MoonIcon,
   Cog6ToothIcon,
+  TagIcon,
+  SwatchIcon,
+  UserGroupIcon
 } from "@heroicons/react/24/outline";
 
 const SidebarLink = ({ to, children, icon: Icon, onClick, isDark }) => {
@@ -37,7 +40,7 @@ const SidebarLink = ({ to, children, icon: Icon, onClick, isDark }) => {
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -120,8 +123,13 @@ const AdminLayout = ({ children }) => {
               <h2 className={`font-sans text-xl font-semibold ${textColor}`}>
                 Infinite Frame
               </h2>
-              <div className={`font-sans text-xs ${subtextColor}`}>
-                Admin Portal
+              <div className={`font-sans text-xs ${subtextColor} flex items-center gap-2`}>
+                User Portal
+                {user?.role === 'super_admin' && (
+                  <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                    Super
+                  </span>
+                )}
               </div>
             </div>
             <button
@@ -151,13 +159,33 @@ const AdminLayout = ({ children }) => {
             </SidebarLink>
 
             <SidebarLink
-              to="/settings"
-              icon={Cog6ToothIcon}
+              to="/categories"
+              icon={TagIcon}
               onClick={closeSidebar}
               isDark={isDark}
             >
-              Settings
+              Categories
             </SidebarLink>
+
+            <SidebarLink
+              to="/artwork-attributes"
+              icon={SwatchIcon}
+              onClick={closeSidebar}
+              isDark={isDark}
+            >
+              Artwork Attributes
+            </SidebarLink>
+
+            {user?.role === 'super_admin' && (
+              <SidebarLink
+                to="/manage-admins"
+                icon={UserGroupIcon}
+                onClick={closeSidebar}
+                isDark={isDark}
+              >
+                Manage Admins
+              </SidebarLink>
+            )}
           </nav>
 
           {/* Theme Toggle & Logout */}

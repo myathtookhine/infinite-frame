@@ -6,7 +6,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
-import Settings from './pages/Settings';
+import Categories from './pages/Categories';
+import ArtworkAttributes from './pages/ArtworkAttributes';
+import ManageAdmins from './pages/ManageAdmins';
 import AdminLayout from './layout/AdminLayout';
 import './App.css';
 
@@ -42,11 +44,33 @@ function App() {
               }
             />
             <Route
-              path="/settings"
+              path="/categories"
               element={
                 <ProtectedRoute>
                   <AdminLayout>
-                    <Settings />
+                    <Categories />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/artwork-attributes"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <ArtworkAttributes />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Super Admin Route */}
+            <Route
+              path="/manage-admins"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <ManageAdmins />
                   </AdminLayout>
                 </ProtectedRoute>
               }
