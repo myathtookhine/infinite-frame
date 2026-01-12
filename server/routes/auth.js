@@ -5,16 +5,16 @@ const nodemailer = require('nodemailer');
 const pool = require('../db');
 
 // Nodemailer Transporter Setup
-// Nodemailer Transporter Setup (Official Gmail Service + IPv4 Fix)
+// Nodemailer Transporter Setup (Explicit Config)
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // Automatically handles host & port (465)
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // true for 465
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  family: 4, // Force IPv4 (Fixes Timeout on Render/Cloud)
-  logger: true, // Log information to console
-  debug: true   // Include SMTP traffic in logs
+  family: 4 // Force IPv4 to prevent timeouts on Render
 });
 
 // Helper to send OTP email
