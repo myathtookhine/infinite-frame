@@ -14,7 +14,8 @@ const GalleryView = () => {
         setLoading(true);
         setError(null);
         
-        const response = await axios.get(`http://localhost:5000/api/public/gallery/${slug}`);
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await axios.get(`${apiUrl}/api/public/gallery/${slug}`);
         
         if (response.data.success) {
           setGallery(response.data.data);
