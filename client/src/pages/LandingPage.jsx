@@ -49,7 +49,7 @@ const LandingPage = () => {
         <p className="cta-description">
           Join Infinite Frame and create your professional gallery today.
         </p>
-        <a href="/admin" className="cta-button">
+        <a href="https://admin.infiniteframe.online" className="cta-button">
           Get Started
         </a>
       </section>
