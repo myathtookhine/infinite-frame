@@ -284,7 +284,13 @@ router.post('/login', loginLimiter, validateLogin, async (req, res) => {
         id: user.id, 
         username: user.username, 
         email: user.email,
-        role: user.role
+        role: user.role,
+        slug: user.slug,
+        gallery_name: user.gallery_name,
+        description: user.description,
+        address: user.address,
+        phone_numbers: user.phone_numbers,
+        social_links: user.social_links
       } 
     });
   } catch (err) {
