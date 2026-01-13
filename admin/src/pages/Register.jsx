@@ -201,7 +201,7 @@ const Register = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="name@example.com"
+                  placeholder="name@gmail.com"
                   icon={EnvelopeIcon}
                   error={errors.email}
                 />

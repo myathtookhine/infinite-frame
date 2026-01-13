@@ -7,7 +7,6 @@ import Input from '../components/ui/Input';
 import { 
   PlusIcon, 
   TrashIcon, 
-  PencilIcon, 
   NoSymbolIcon, 
   CheckCircleIcon,
   XMarkIcon
@@ -18,8 +17,8 @@ const ManageAdmins = () => {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({ username: '', email: '', password: '', isSuperAdmin: false });
+  const [errors, setErrors] = useState({});
   
   const { user } = useAuth();
   const { isDark } = useTheme();
@@ -44,18 +43,63 @@ const ManageAdmins = () => {
     }
   };
 
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    // Handle checkbox vs text input
+    const val = type === 'checkbox' ? checked : value;
+
+    // Clear error
+    if (errors[id]) {
+      setErrors(prev => ({ ...prev, [id]: '' }));
+    }
+
+    if (id === 'username') {
+      const isValid = /^[a-zA-Z0-9]*$/.test(value);
+      if (!isValid) {
+        setErrors(prev => ({ ...prev, username: 'Username can only contain letters and numbers.' }));
+        return;
+      }
+    }
+
+    setFormData(prev => ({ ...prev, [id]: val }));
+  };
+
   const handleCreate = async (e) => {
     e.preventDefault();
-    setError('');
+    setErrors({});
+
+    // Basic Validation
+    const newErrors = {};
+    if (!formData.username) newErrors.username = 'Username is required';
+    // Email is optional now
+    if (!formData.password) newErrors.password = 'Password is required';
+    else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     try {
       await axios.post(ENDPOINTS.ADMIN_MANAGEMENT.BASE, formData, config);
       setShowModal(false);
-      setFormData({ username: '', email: '', password: '' });
+      resetForm();
       fetchAdmins();
-      alert("New Admin Created Successfully!");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to create admin");
+      const msg = err.response?.data?.message?.toLowerCase() || "failed to create admin";
+      if (msg.includes('email')) {
+        setErrors({ email: err.response.data.message });
+      } else if (msg.includes('username')) {
+        setErrors({ username: err.response.data.message });
+      } else {
+        setErrors({ general: err.response?.data?.message || "Failed to create admin" });
+      }
     }
+  };
+
+  const resetForm = () => {
+    setFormData({ username: '', email: '', password: '', isSuperAdmin: false });
+    setErrors({});
   };
 
   const toggleStatus = async (id, currentStatus) => {
@@ -112,6 +156,7 @@ const ManageAdmins = () => {
                   <tr>
                     <th className="px-6 py-3 whitespace-nowrap">Username</th>
                     <th className="px-6 py-3 whitespace-nowrap">Email</th>
+                    <th className="px-6 py-3 whitespace-nowrap">Role</th>
                     <th className="px-6 py-3 whitespace-nowrap">Status</th>
                     <th className="px-6 py-3 whitespace-nowrap">Created At</th>
                     <th className="px-6 py-3 text-right whitespace-nowrap">Actions</th>
@@ -120,13 +165,19 @@ const ManageAdmins = () => {
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {admins.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center text-gray-500">No admins found. Create one!</td>
+                      <td colSpan="6" className="px-6 py-8 text-center text-gray-500">No admins found. Create one!</td>
                     </tr>
                   ) : (
                     admins.map((admin) => (
                       <tr key={admin.id} className={tableRowClass}>
                         <td className={`px-6 py-4 font-medium whitespace-nowrap ${textClass}`}>{admin.username}</td>
-                        <td className={`px-6 py-4 whitespace-nowrap ${textClass}`}>{admin.email}</td>
+                        <td className={`px-6 py-4 whitespace-nowrap ${textClass}`}>{admin.email || '-'}</td>
+                        <td className={`px-6 py-4 whitespace-nowrap ${textClass}`}>
+                          <span className={`text-xs uppercase font-bold px-2 py-1 rounded border ${admin.role === 'super_admin' ? 'border-purple-500 text-purple-600 bg-purple-50' : 'border-gray-300 text-gray-600'
+                            }`}>
+                            {admin.role === 'super_admin' ? 'Super Admin' : 'Individual'}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${admin.status === 'active'
                             ? 'bg-green-100 text-green-800'
@@ -139,7 +190,6 @@ const ManageAdmins = () => {
                           {new Date(admin.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right whitespace-nowrap space-x-2">
-                          {/* Toggle Status */}
                           <button
                             onClick={() => toggleStatus(admin.id, admin.status)}
                             title={admin.status === 'active' ? "Suspend User" : "Activate User"}
@@ -151,7 +201,6 @@ const ManageAdmins = () => {
                             {admin.status === 'active' ? <NoSymbolIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
                           </button>
 
-                          {/* Delete */}
                           <button
                             onClick={() => handleDelete(admin.id)}
                             title="Delete User"
@@ -174,7 +223,7 @@ const ManageAdmins = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className={`w-full max-w-md p-6 rounded-lg shadow-xl relative ${modalBg}`}>
             <button 
-              onClick={() => setShowModal(false)}
+              onClick={() => { setShowModal(false); resetForm(); }}
               className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
             >
               <XMarkIcon className="w-6 h-6" />
@@ -184,36 +233,50 @@ const ManageAdmins = () => {
             
             <form onSubmit={handleCreate} className="space-y-4">
               <Input 
-                id="new-username"
+                id="username"
                 label="Username"
                 value={formData.username}
-                onChange={(e) => setFormData({...formData, username: e.target.value})}
-                placeholder="Ex: artist_one"
-                required
+                onChange={handleInputChange}
+                placeholder="Ex: adminhtoo"
+                error={errors.username}
               />
               <Input 
-                id="new-email"
-                label="Email"
+                id="email"
+                label="Email (Optional)"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                onChange={handleInputChange}
                 placeholder="Ex: artist@example.com"
-                required
+                error={errors.email}
               />
               <Input 
-                id="new-password"
+                id="password"
                 label="Password"
                 type="password"
                 value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                onChange={handleInputChange}
                 placeholder="Strong Password"
-                required
+                error={errors.password}
               />
 
-              {error && <p className="text-red-500 text-sm">{error}</p>}
+              {/* Super Admin Checkbox */}
+              <div className="flex items-center gap-3 pt-2">
+                <input
+                  type="checkbox"
+                  id="isSuperAdmin"
+                  checked={formData.isSuperAdmin}
+                  onChange={handleInputChange}
+                  className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black cursor-pointer"
+                />
+                <label htmlFor="isSuperAdmin" className={`text-sm font-medium cursor-pointer ${textClass}`}>
+                  Set as Superadmin
+                </label>
+              </div>
+
+              {errors.general && <p className="text-red-500 text-sm">{errors.general}</p>}
 
               <div className="flex justify-end gap-3 mt-6">
-                <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>
+                <Button type="button" variant="secondary" onClick={() => { setShowModal(false); resetForm(); }}>
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary">
