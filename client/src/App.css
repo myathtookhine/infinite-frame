@@ -1,42 +1,260 @@
-#root {
-  max-width: 1280px;
+/* Home Container */
+.home-container {
+  max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 4rem 2rem;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.home-container h1 {
+  font-size: 3rem;
+  font-weight: 300;
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
 }
 
-@keyframes logo-spin {
-  from {
+.home-container p {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0.5rem 0;
+}
+
+.home-container .example {
+  font-family: 'Courier New', monospace;
+  background: #f5f5f5;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 1rem;
+}
+
+/* Gallery Container */
+.gallery-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.gallery-content {
+  max-width: 800px;
+  width: 100%;
+}
+
+/* Gallery Header */
+.gallery-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.gallery-title {
+  font-size: 3rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  margin: 0 0 1.5rem 0;
+  text-transform: uppercase;
+}
+
+.gallery-divider {
+  width: 80px;
+  height: 1px;
+  background: #000;
+  margin: 0 auto;
+}
+
+/* Gallery Description */
+.gallery-description {
+  text-align: center;
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: #333;
+  margin: 3rem 0;
+  padding: 0 2rem;
+}
+
+.gallery-description p {
+  margin: 1rem 0;
+}
+
+/* Contact Information */
+.gallery-contact {
+  margin: 3rem 0;
+  padding: 2rem;
+  background: #fafafa;
+    border-radius: 8px;
+  }
+  
+  .contact-title {
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+  
+  .contact-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .contact-item:last-child {
+    border-bottom: none;
+  }
+  
+  .contact-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  
+  .contact-value {
+    font-size: 1rem;
+    color: #1a1a1a;
+    line-height: 1.6;
+  }
+  
+  .contact-link {
+    color: #1a1a1a;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .contact-link:hover {
+    color: #666;
+  }
+  
+  .contact-phones {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .phone-link {
+    font-size: 1rem;
+  }
+  
+  /* Social Links */
+  .gallery-social {
+    margin: 3rem 0;
+  text-align: center;
+}
+
+.social-title {
+  font-size: 1.3rem;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.03em;
+}
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.social-link {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #1a1a1a;
+  border-radius: 4px;
+  color: #1a1a1a;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.social-link:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+/* Gallery Footer */
+.gallery-footer {
+  text-align: center;
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+}
+
+.gallery-username {
+  font-size: 0.9rem;
+  color: #999;
+  font-style: italic;
+}
+
+/* Loading State */
+.gallery-loading {
+  text-align: center;
+}
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% {
     transform: rotate(0deg);
   }
-  to {
+100% {
     transform: rotate(360deg);
   }
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.gallery-loading p {
+  color: #666;
+  font-size: 1rem;
 }
 
-.card {
-  padding: 2em;
+/* Not Found State */
+.gallery-not-found {
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
-.read-the-docs {
-  color: #888;
+.gallery-not-found h1 {
+  font-size: 6rem;
+  font-weight: 300;
+  margin: 0;
+  color: #ddd;
 }
+.gallery-not-found h2 {
+  font-size: 2rem;
+  font-weight: 400;
+  margin: 1rem 0;
+}
+
+.gallery-not-found p {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0.75rem 0;
+}
+
+.slug-info {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.slug-info code {
+  background: #fff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  color: #e74c3c;
+}
+
