@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +30,11 @@ const Register = () => {
   const { isDark, toggleTheme } = useTheme();
   const { register, verifyOtp } = useAuth();
   const navigate = useNavigate();
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -143,10 +148,10 @@ const Register = () => {
   const panelBg = isDark ? 'bg-[#141414]' : 'bg-white';
   const panelBorder = isDark ? "border-[#262626]" : "border-black";
   const headingColor = isDark ? "text-white" : "text-black";
-  const footerColor = isDark ? "text-gray-400" : "text-gray-500";
+  const footerColor = isDark ? "text-gray-100" : "text-gray-500";
 
   return (
-    <div className={`min-h-screen ${bgColor} flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-y-auto transition-colors duration-300`}>
+    <div className={`min-h-screen ${bgColor} flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-y-auto transition-colors duration-300`}>
       {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
@@ -174,7 +179,7 @@ const Register = () => {
           </button>
         </div>
 
-        <div className={`border-2 ${panelBorder} ${panelBg} p-5 sm:p-8 md:p-10 rounded-md transition-shadow hover:shadow-xl`}>
+        <div className={`border-2 ${panelBorder} ${panelBg} p-5 sm:p-8 md:p-10 rounded-md transition-shadow hover:shadow-xl mb-32`}>
           {step === 1 && (
             <div className="animate-in fade-in slide-in-from-right-8 duration-700">
               <h2 className={`font-sans text-2xl sm:text-3xl mb-2 text-left ${headingColor}`}>Create Account</h2>
@@ -287,6 +292,12 @@ const Register = () => {
               </Button>
             </div>
           )}
+        </div>
+
+        <div className="text-center mt-60">
+          <p className={`font-sans text-4xl font-light uppercase tracking-widest ${footerColor}`}>
+            Infinite Frame.
+          </p>
         </div>
       </div>
     </div>

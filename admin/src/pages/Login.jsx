@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -14,6 +14,12 @@ const Login = () => {
   const { login } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,7 +49,7 @@ const Login = () => {
   const rightPanelBg = isDark ? 'bg-[#141414]' : 'bg-white';
   const rightPanelBorder = isDark ? "border-[#262626]" : "border-black";
   const headingColor = isDark ? "text-white" : "text-black";
-  const footerColor = isDark ? "text-gray-400" : "text-gray-500";
+  const footerColor = isDark ? "text-gray-500" : "text-gray-500";
 
   return (
     <div
@@ -151,7 +157,7 @@ const Login = () => {
               </Button>
 
               <div className="text-center mt-4">
-                <p className={`font-sans text-sm ${footerColor}`}>
+                <p className={`font-sans text-xs ${footerColor}`}>
                   Don't have an account? Please register now!
                 </p>
               </div>
@@ -177,7 +183,7 @@ const Login = () => {
             </form>
 
             {/* Footer */}
-            <div className="text-center mt-8">
+            <div className="text-center mt-12">
               <p className={`font-sans text-xs ${footerColor}`}>
                 @2026 Infinite Frame. All rights reserved.
               </p>
