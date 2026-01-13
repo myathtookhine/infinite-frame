@@ -77,7 +77,7 @@ const validateRegistration = (req, res, next) => {
   }
 
   // Validate Username (alphanumeric, 3-30 characters)
-  if (!validator.isAlphanumeric(username.replace(/_/g, '')) || 
+  if (!validator.isAlphanumeric(username) || 
       username.length < 3 || username.length > 30) {
     return res.status(400).json({ 
       message: "Username must be 3-30 alphanumeric characters." 
