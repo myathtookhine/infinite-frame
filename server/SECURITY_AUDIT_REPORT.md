@@ -319,7 +319,7 @@ if (currentPassword === newPassword) {
 | Endpoint | Window | Max Attempts | Lockout |
 |----------|--------|--------------|---------|
 | `/login` | 15 min | 5 | IP blocked for 15 min |
-| `/register` | 1 hour | 3 | IP blocked for 1 hour |
+| `/register` | 1 hour | 10 | IP blocked for 1 hour |
 | `/verify-otp` | 10 min | 5 | IP blocked for 10 min |
 | `/change-password` | 1 hour | 3 | IP blocked for 1 hour |
 
