@@ -146,7 +146,7 @@ const Register = () => {
   const footerColor = isDark ? "text-gray-400" : "text-gray-500";
 
   return (
-    <div className={`min-h-screen ${bgColor} flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden transition-colors duration-300`}>
+    <div className={`min-h-screen ${bgColor} flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-y-auto transition-colors duration-300`}>
       {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">

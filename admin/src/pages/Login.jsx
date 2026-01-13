@@ -47,7 +47,7 @@ const Login = () => {
 
   return (
     <div
-      className={`min-h-screen ${bgColor} flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden`}
+      className={`min-h-screen ${bgColor} flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-y-auto`}
     >
       {/* Full Page Loading Overlay */}
       {loading && (
