@@ -12,6 +12,7 @@ export const ENDPOINTS = {
     VERIFY_OTP: `${API_BASE_URL}/verify-otp`,
     LOGOUT: `${API_BASE_URL}/logout`,
     UPDATE_PROFILE: `${API_BASE_URL}/update-profile`,
+    UPDATE_GALLERY_INFO: `${API_BASE_URL}/update-gallery-info`,
     CHANGE_PASSWORD: `${API_BASE_URL}/change-password`,
   },
   // Attributes

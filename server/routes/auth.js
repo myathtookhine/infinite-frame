@@ -432,4 +432,166 @@ router.post('/change-password', passwordChangeLimiter, async (req, res) => {
   }
 });
 
+// =====================================================
+// 7. UPDATE GALLERY INFO
+// =====================================================
+router.post('/update-gallery-info', async (req, res) => {
+  const { userId, slug, gallery_name, description, address, phone_numbers, social_links } = req.body;
+
+  // ✅ Input validation
+  if (!userId) {
+    return res.status(400).json({ 
+      message: "User ID is required." 
+    });
+  }
+
+  const validator = require('validator');
+  const updates = {};
+  
+  // ✅ Validate and sanitize slug (optional)
+  if (slug !== undefined) {
+    if (slug && slug.trim() !== '') {
+      const slugPattern = /^[a-z0-9-]+$/;
+      const trimmedSlug = slug.trim().toLowerCase();
+      
+      if (!slugPattern.test(trimmedSlug) || trimmedSlug.length < 3 || trimmedSlug.length > 50) {
+        return res.status(400).json({ 
+          message: "Slug must be 3-50 characters, lowercase, alphanumeric and hyphens only." 
+        });
+      }
+      
+      updates.slug = trimmedSlug;
+    } else {
+      updates.slug = null;
+    }
+  }
+  
+  // ✅ Validate gallery_name (optional)
+  if (gallery_name !== undefined) {
+    if (gallery_name && gallery_name.trim() !== '') {
+      const trimmedName = gallery_name.trim();
+      if (trimmedName.length < 3 || trimmedName.length > 255) {
+        return res.status(400).json({ 
+          message: "Gallery name must be 3-255 characters." 
+        });
+      }
+      updates.gallery_name = validator.escape(trimmedName);
+    } else {
+      updates.gallery_name = null;
+    }
+  }
+  
+  // ✅ Validate description (optional)
+  if (description !== undefined) {
+    if (description && description.trim() !== '') {
+      const trimmedDesc = description.trim();
+      if (trimmedDesc.length > 2000) {
+        return res.status(400).json({ 
+          message: "Description must not exceed 2000 characters." 
+        });
+      }
+      updates.description = validator.escape(trimmedDesc);
+    } else {
+      updates.description = null;
+    }
+  }
+  
+  // ✅ Validate address (optional)
+  if (address !== undefined) {
+    if (address && address.trim() !== '') {
+      const trimmedAddress = address.trim();
+      if (trimmedAddress.length > 500) {
+        return res.status(400).json({ 
+          message: "Address must not exceed 500 characters." 
+        });
+      }
+      updates.address = validator.escape(trimmedAddress);
+    } else {
+      updates.address = null;
+    }
+  }
+  
+  // ✅ Validate phone_numbers (optional JSON array)
+  if (phone_numbers !== undefined) {
+    if (Array.isArray(phone_numbers)) {
+      // Filter out empty values
+      const validPhones = phone_numbers
+        .filter(p => p && p.trim() !== '')
+        .map(p => p.trim());
+      
+      if (validPhones.length > 10) {
+        return res.status(400).json({ 
+          message: "Maximum 10 phone numbers allowed." 
+        });
+      }
+      
+      updates.phone_numbers = JSON.stringify(validPhones);
+    } else {
+      updates.phone_numbers = '[]';
+    }
+  }
+  
+  // ✅ Validate social_links (optional JSON object)
+  if (social_links !== undefined) {
+    if (typeof social_links === 'object' && social_links !== null && !Array.isArray(social_links)) {
+      // Validate URLs
+      const validLinks = {};
+      for (const [platform, url] of Object.entries(social_links)) {
+        if (url && url.trim() !== '') {
+          if (!validator.isURL(url.trim())) {
+            return res.status(400).json({ 
+              message: `Invalid URL for ${platform}` 
+            });
+          }
+          validLinks[platform.trim()] = url.trim();
+        }
+      }
+      updates.social_links = JSON.stringify(validLinks);
+    } else {
+      updates.social_links = '{}';
+    }
+  }
+
+  try {
+    // Build dynamic UPDATE query
+    const fields = Object.keys(updates);
+    if (fields.length === 0) {
+      return res.status(400).json({ 
+        message: "No fields to update." 
+      });
+    }
+
+    const setClause = fields.map((field, index) => `${field} = $${index + 1}`).join(', ');
+    const values = [...fields.map(f => updates[f]), userId];
+    
+    const query = `
+      UPDATE admins 
+      SET ${setClause}
+      WHERE id = $${fields.length + 1}
+      RETURNING id, username, email, role, slug, gallery_name, description, address, phone_numbers, social_links
+    `;
+    
+    const result = await pool.query(query, values);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    
+    res.json({ 
+      message: "Gallery information updated successfully!", 
+      user: result.rows[0] 
+    });
+  } catch (err) {
+    console.error('[UPDATE-GALLERY-INFO ERROR]', err.message);
+    if (err.code === '23505') { // Unique constraint violation
+      return res.status(400).json({ 
+        message: "This slug is already taken. Please choose another." 
+      });
+    }
+    res.status(500).json({ 
+      message: "Server error. Please try again later." 
+    });
+  }
+});
+
 module.exports = router;

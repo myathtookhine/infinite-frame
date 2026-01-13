@@ -126,6 +126,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateGalleryInfo = async (galleryData) => {
+    try {
+      const response = await axios.post(ENDPOINTS.AUTH.UPDATE_GALLERY_INFO, {
+        userId: user.id,
+        ...galleryData
+      });
+
+      const updatedUserData = response.data.user;
+      localStorage.setItem('adminUser', JSON.stringify(updatedUserData));
+      setUser(updatedUserData);
+
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Update failed.'
+      };
+    }
+  };
+
   const value = {
     isAuthenticated,
     user,
@@ -136,6 +156,7 @@ export const AuthProvider = ({ children }) => {
     verifyOtp,
     changePassword,
     updateProfile,
+    updateGalleryInfo,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
