@@ -43,16 +43,12 @@ router.get('/types', async (req, res) => {
     const targetUserId = req.query.target_user_id; // For Super Admin filtering
 
     if (req.user.role === 'super_admin') {
-      if (targetUserId) {
+      if (targetUserId && targetUserId !== 'all') {
         // Super Admin viewing SPECIFIC Artist
         query = "SELECT DISTINCT type FROM attributes WHERE admin_id = $1 ORDER BY type";
         params = [targetUserId];
       } else {
-        // Super Admin viewing ALL (maybe distinct globally? or just empty until selected?)
-        // User requested: "artist dropdown select... category कोဆွဲထုတ်ပြတာ"
-        // It implies if nothing selected, maybe Show Nothing or Show All?
-        // Let's Show All Unique Types globally for overview, but usually filtering is better.
-        // Let's stick to Global Unique for now if no filter.
+        // Super Admin viewing ALL - Show all unique types globally
         query = "SELECT DISTINCT type FROM attributes ORDER BY type";
       }
     } else {
@@ -81,12 +77,12 @@ router.get('/:type', async (req, res) => {
     let params = [type];
 
     if (req.user.role === 'super_admin') {
-      if (targetUserId) {
+      if (targetUserId && targetUserId !== 'all') {
          // View Specific Artist
          query = "SELECT * FROM attributes WHERE type = $1 AND admin_id = $2 ORDER BY name";
          params.push(targetUserId);
       } else {
-         // View ALL (with owner info) - Legacy/Fallback
+         // View ALL (with owner info)
          query = `
             SELECT a.id, a.name, a.type, a.is_active, adm.email as owner_email, adm.username as owner_name
             FROM attributes a

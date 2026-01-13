@@ -27,9 +27,12 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
 
   const fetchData = async () => {
     setLoading(true);
+    const isSuperAdmin = user?.role === 'super_admin';
     const config = { 
         headers: { 'x-admin-id': user.id },
-        params: { target_user_id: targetUserId || undefined }
+      params: {
+        target_user_id: targetUserId ? targetUserId : (isSuperAdmin ? 'all' : undefined)
+      }
     }; 
 
     try {

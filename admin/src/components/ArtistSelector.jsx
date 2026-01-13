@@ -47,7 +47,7 @@ const ArtistSelector = ({ onSelect, selectedId }) => {
       </div>
       <div className="flex-1">
         <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${subtextColor}`}>
-          Select Artist to View
+          Filter by User
         </label>
         <select
           value={selectedId || ''}
@@ -55,7 +55,7 @@ const ArtistSelector = ({ onSelect, selectedId }) => {
           className={`w-full bg-transparent font-sans font-semibold text-sm ${textColor} focus:outline-none cursor-pointer`}
           disabled={loading}
         >
-          <option value="" className="text-black">-- Select an Artist --</option>
+          <option value="" className="text-black">-- All Users (Default) --</option>
           {artists.map(artist => (
             <option key={artist.id} value={artist.id} className="text-black">
               {artist.username} ({artist.email})

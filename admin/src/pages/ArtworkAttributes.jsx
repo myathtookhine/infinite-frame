@@ -41,7 +41,9 @@ const ArtworkAttributes = () => {
     setLoading(true);
     const config = { 
       headers: { 'x-admin-id': user.id },
-      params: { target_user_id: selectedArtist || undefined } // Filter by artist if selected
+      params: {
+        target_user_id: selectedArtist ? selectedArtist : (isSuperAdmin ? 'all' : undefined)
+      }
     }; 
 
     try {
@@ -146,7 +148,7 @@ const ArtworkAttributes = () => {
         <div className="flex flex-wrap gap-2 pb-4 mb-6 -mx-4 px-4 no-scrollbar md:mx-0 md:px-0 md:flex-col md:w-64 md:space-y-1 md:pb-0 md:mb-0 scroll-smooth">
           {types.length === 0 && !loading && (
              <div className={`p-4 text-xs ${subtextColor} text-center border-2 border-dashed ${borderColor} rounded-md`}>
-               {isSuperAdmin && !selectedArtist ? "Select an artist to view attributes." : "No attributes found. Create one."}
+              {isSuperAdmin && !selectedArtist ? "No attributes found in the system." : "No attributes found. Create one."}
              </div>
           )}
 
