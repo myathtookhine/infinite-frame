@@ -14,8 +14,28 @@ const GalleryView = () => {
         setLoading(true);
         setError(null);
         
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${apiUrl}/api/public/gallery/${slug}`);
+        const getBaseUrl = () => {
+          let envUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+          // Remove trailing slash if present
+          if (envUrl.endsWith('/')) {
+            envUrl = envUrl.slice(0, -1);
+          }
+          return envUrl;
+        };
+
+        const baseUrl = getBaseUrl();
+        // Check if baseUrl already allows ends with /api
+        // If user provided '.../api', we should NOT add another '/api'
+        // If user provided '.../api/', stripping slash above handles it
+
+        let endpoint = '';
+        if (baseUrl.endsWith('/api')) {
+          endpoint = `${baseUrl}/public/gallery/${slug}`;
+        } else {
+          endpoint = `${baseUrl}/api/public/gallery/${slug}`;
+        }
+
+        const response = await axios.get(endpoint);
         
         if (response.data.success) {
           setGallery(response.data.data);
