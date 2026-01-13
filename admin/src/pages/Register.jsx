@@ -139,7 +139,7 @@ const Register = () => {
 
         <div className={`border-2 ${panelBorder} ${panelBg} p-5 sm:p-8 md:p-10 rounded-md transition-shadow hover:shadow-xl`}>
           {step === 1 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="animate-in fade-in slide-in-from-right-8 duration-700">
               <h2 className={`font-sans text-2xl sm:text-3xl mb-2 text-left ${headingColor}`}>Create Account</h2>
               <p className={`${footerColor} text-sm mb-8`}>Step 1: Your essential details</p>
               

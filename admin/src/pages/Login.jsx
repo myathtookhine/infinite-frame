@@ -109,7 +109,7 @@ const Login = () => {
             )}
           </button>
 
-          <div className="w-full">
+          <div className="w-full animate-in fade-in slide-in-from-left-8 duration-700">
             <h2 className={`font-sans text-3xl mb-8 text-left ${headingColor}`}>
               Sign In
             </h2>
@@ -152,16 +152,21 @@ const Login = () => {
 
               <div className="text-center mt-4">
                 <p className={`font-sans text-sm ${footerColor}`}>
-                  Don't have an account?{' '}
-                  <button
-                    type="button"
-                    onClick={() => navigate('/register')}
-                    className="font-bold hover:underline cursor-pointer"
-                  >
-                    Register
-                  </button>
+                  Don't have an account? Please register now!
                 </p>
               </div>
+              {/* Register Button - Full Width Outline */}
+              <Button
+                type="button" 
+                variant="secondary"
+                size="lg"
+                block
+                onClick={() => navigate('/register')}
+              >
+                Register Account
+              </Button>
+
+
 
               {/* Default Credentials Hint */}
               {/* <div
@@ -173,7 +178,7 @@ const Login = () => {
 
             {/* Footer */}
             <div className="text-center mt-8">
-              <p className={`font-sans text-sm ${footerColor}`}>
+              <p className={`font-sans text-xs ${footerColor}`}>
                 @2026 Infinite Frame. All rights reserved.
               </p>
             </div>
