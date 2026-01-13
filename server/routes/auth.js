@@ -81,23 +81,40 @@ router.post('/register', registerLimiter, validateRegistration, async (req, res)
   const { username, email, password } = req.body; // Already sanitized by middleware
 
   try {
-    // Check if Email or Username already exists
-    const checkUser = await pool.query(
-      "SELECT * FROM admins WHERE email = $1 OR username = $2", 
-      [email, username]
+    // Check if Email already exists
+    const checkEmail = await pool.query(
+      "SELECT * FROM admins WHERE email = $1", 
+      [email]
     );
 
-    if (checkUser.rows.length > 0) {
-      const existing = checkUser.rows[0];
-      if (existing.is_verified) {
-        // ⚠️ SECURITY: Generic message to prevent user enumeration
+    if (checkEmail.rows.length > 0) {
+      const existingEmail = checkEmail.rows[0];
+      if (existingEmail.is_verified) {
         return res.status(400).json({ 
-          message: "Registration failed. Please check your details." 
+          message: "This email is already used. Please try with another!" 
         });
       }
-      // If unverified, delete and allow re-registration
+      // If unverified, delete old attempt and allow re-registration
       await pool.query("DELETE FROM admins WHERE email = $1", [email]);
     }
+
+    // Check if Username already exists
+    const checkUsername = await pool.query(
+      "SELECT * FROM admins WHERE username = $1", 
+      [username]
+    );
+
+    if (checkUsername.rows.length > 0) {
+      const existingUsername = checkUsername.rows[0];
+      if (existingUsername.is_verified) {
+        return res.status(400).json({ 
+          message: "This username is already taken. Please choose another!" 
+        });
+      }
+      // If unverified, delete old attempt
+      await pool.query("DELETE FROM admins WHERE username = $1", [username]);
+    }
+
 
     const hashedPassword = await bcrypt.hash(password, 12); // ✅ Increased salt rounds from 10 to 12
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
