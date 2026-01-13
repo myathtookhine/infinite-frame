@@ -20,6 +20,7 @@ app.get('/', (req, res) => {
 
 app.use('/api', authRoutes); 
 app.use('/api/attributes', require('./routes/attributes'));
+app.use('/api/categories', require('./routes/categories'));
 app.use('/api/config', require('./routes/config')); // Master Data (Categories, etc.)
 app.use('/api/admin-management', require('./routes/adminManagement')); // Super Admin Utils
 
