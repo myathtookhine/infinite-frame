@@ -58,12 +58,6 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   const { username, email, password, isSuperAdmin } = req.body;
 
-  // Debug logging
-  console.log('=== CREATE ADMIN REQUEST ===');
-  console.log('Received data:', { username, email: email || 'null', isSuperAdmin });
-  console.log('isSuperAdmin type:', typeof isSuperAdmin);
-  console.log('isSuperAdmin value:', isSuperAdmin);
-
   // Email is now optional, only Username and Password are required
   if (!username || !password) {
     return res.status(400).json({ message: "Username and Password are required" });
@@ -87,9 +81,6 @@ router.post('/', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const role = isSuperAdmin ? 'super_admin' : 'individual';
     const cleanEmail = email && email.trim() !== '' ? email : null;
-
-    console.log('Calculated role:', role);
-    console.log('Will insert with role:', role);
 
     // Create auto-verified admin
     const newUser = await pool.query(
