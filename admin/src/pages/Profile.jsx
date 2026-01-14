@@ -34,13 +34,21 @@ const Profile = () => {
   const { isDark } = useTheme();
   const navigate = useNavigate();
 
+  // Helper to decode HTML entities (e.g. &#x27; -> ')
+  const decodeHtml = (html) => {
+    if (!html) return "";
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+  };
+
   useEffect(() => {
     if (user) {
       setUsername(user.username);
       setSlug(user.slug || "");
-      setGalleryName(user.gallery_name || "");
-      setDescription(user.description || "");
-      setAddress(user.address || "");
+      setGalleryName(decodeHtml(user.gallery_name || ""));
+      setDescription(decodeHtml(user.description || ""));
+      setAddress(decodeHtml(user.address || ""));
       setPhoneNumbers(user.phone_numbers || []);
       setSocialLinks(user.social_links || {});
     }
