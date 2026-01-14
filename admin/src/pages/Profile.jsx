@@ -240,8 +240,13 @@ const Profile = () => {
             label="Gallery Slug (URL)"
             type="text"
             value={slug}
-            onChange={(e) => setSlug(e.target.value)}
             placeholder="e.g., lawkanatgallery"
+            onChange={(e) => {
+              let val = e.target.value.toLowerCase();
+              val = val.replace(/\s+/g, '-'); // Replace spaces with -
+              val = val.replace(/[^a-z0-9-]/g, ''); // Remove illegal chars
+              setSlug(val);
+            }}
           />
           <p className={`text-xs ${subtextColor} -mt-2`}>
             Your gallery will be accessible at: infiniteframe.online/{slug || "your-slug"}
