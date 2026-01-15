@@ -1,438 +1,97 @@
-/* Home Container */
-.home-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 4rem 2rem;
-  text-align: center;
+/* Brutalist Theme - Custom CSS */
+
+/* Typography - Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Myanmar:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+body {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.home-container h1 {
-  font-size: 3rem;
-  font-weight: 300;
-  margin-bottom: 1rem;
-  letter-spacing: 0.05em;
+/* Myanmar Language Font Settings */
+/* 1. Body and general text - Noto Sans Myanmar */
+html[lang="my"] body:not(.gallery-view),
+html[lang="my"] *:not(.gallery-view):not(.gallery-view *) {
+    font-family: 'Noto Sans Myanmar', sans-serif;
+    line-height: 1.95;
 }
 
-.home-container p {
-  font-size: 1.1rem;
-  color: #666;
-  margin: 0.5rem 0;
+/* 2. Headings and Titles - Noto Serif Myanmar */
+html[lang="my"] h1,
+html[lang="my"] h2,
+html[lang="my"] h3,
+html[lang="my"] h4,
+html[lang="my"] h5,
+html[lang="my"] h6 {
+    font-family: 'Noto Serif Myanmar', serif !important;
+    line-height: 1.95;
 }
 
-.home-container .example {
-  font-family: 'Courier New', monospace;
-  background: #f5f5f5;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  display: inline-block;
-  margin-top: 1rem;
+/* English Language Font */
+html[lang="en"] body,
+html[lang="en"] * {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-/* Gallery Container */
-.gallery-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+/* Gallery View - Always English Font (Override Myanmar) */
+html[lang="my"] .gallery-view,
+html[lang="my"] .gallery-view *,
+html[lang="en"] .gallery-view,
+html[lang="en"] .gallery-view *,
+.gallery-view,
+.gallery-view * {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    line-height: 1.6 !important;
 }
-
-.gallery-content {
-  max-width: 800px;
-  width: 100%;
+/* Theme-aware Classes */
+.bg-theme {
+    background-color: var(--color-bg);
 }
-
-/* Gallery Header */
-.gallery-header {
-  text-align: center;
-  margin-bottom: 3rem;
+.text-theme {
+    color: var(--color-text);
 }
-
-.gallery-title {
-  font-size: 3rem;
-  font-weight: 300;
-  letter-spacing: 0.05em;
-  margin: 0 0 1.5rem 0;
-  text-transform: uppercase;
+.text-theme-muted {
+    color: var(--color-text-muted);
 }
-
-.gallery-divider {
-  width: 80px;
-  height: 1px;
-  background: #000;
-  margin: 0 auto;
+.border-theme {
+    border-color: var(--color-border);
 }
-
-/* Gallery Description */
-.gallery-description {
-  text-align: center;
-  font-size: 1.2rem;
-  line-height: 1.8;
-  color: #333;
-  margin: 3rem 0;
-  padding: 0 2rem;
+/* Inverse Colors (for buttons, etc) */
+.bg-theme-inverse {
+    background-color: var(--color-text);
+    color: var(--color-bg);
 }
-
-.gallery-description p {
-  margin: 1rem 0;
+.border-theme-inverse {
+    border-color: var(--color-text);
 }
-
-/* Contact Information */
-.gallery-contact {
-  margin: 3rem 0;
-  padding: 2rem;
-  background: #fafafa;
-    border-radius: 8px;
-  }
-  
-  .contact-title {
-    font-size: 1.3rem;
-    font-weight: 400;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    letter-spacing: 0.03em;
-  }
-  
-  .contact-item {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1rem;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .contact-item:last-child {
-    border-bottom: none;
-  }
-  
-  .contact-label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
-  }
-  
-  .contact-value {
-    font-size: 1rem;
-    color: #1a1a1a;
-    line-height: 1.6;
-  }
-  
-  .contact-link {
-    color: #1a1a1a;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  
-  .contact-link:hover {
-    color: #666;
-  }
-  
-  .contact-phones {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .phone-link {
-    font-size: 1rem;
-  }
-  
-  /* Social Links */
-  .gallery-social {
-    margin: 3rem 0;
-  text-align: center;
+/* Smooth Transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
-
-.social-title {
-  font-size: 1.3rem;
-  font-weight: 400;
-  margin-bottom: 1.5rem;
-  letter-spacing: 0.03em;
+/* Scroll Reveal Animation */
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.social-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
-
-.social-link {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  border: 1px solid #1a1a1a;
-  border-radius: 4px;
-  color: #1a1a1a;
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 500;
-  transition: all 0.2s;
+/* Hover Effects */
+.hover-lift {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-.social-link:hover {
-  background: #1a1a1a;
-  color: #fff;
+.hover-lift:hover {
+    transform: translateY(-4px);
 }
-
-/* Gallery Footer */
-.gallery-footer {
-  text-align: center;
-  margin-top: 4rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
-}
-
-.gallery-username {
-  font-size: 0.9rem;
-  color: #999;
-  font-style: italic;
-}
-
-/* Loading State */
-.gallery-loading {
-  text-align: center;
-}
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #000;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-100% {
-    transform: rotate(360deg);
-  }
-}
-.gallery-loading p {
-  color: #666;
-  font-size: 1rem;
-}
-
-/* Not Found State */
-.gallery-not-found {
-  text-align: center;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.gallery-not-found h1 {
-  font-size: 6rem;
-  font-weight: 300;
-  margin: 0;
-  color: #ddd;
-}
-.gallery-not-found h2 {
-  font-size: 2rem;
-  font-weight: 400;
-  margin: 1rem 0;
-}
-
-.gallery-not-found p {
-  color: #666;
-  font-size: 1.1rem;
-  margin: 0.75rem 0;
-}
-
-.slug-info {
-  margin-top: 2rem;
-  padding: 1rem;
-  background: #f9f9f9;
-  border-radius: 4px;
-  font-size: 0.95rem;
-}
-
-.slug-info code {
-  background: #fff;
-  padding: 0.25rem 0.5rem;
-  border-radius: 3px;
-  font-family: 'Courier New', monospace;
-  color: #e74c3c;
-}
-
-/* ============================================ */
-/* Landing Page Styles */
-/* ============================================ */
-
-.landing-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Hero Section */
-.hero-section {
-  min-height: 80vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  background: linear-gradient(to bottom, #ffffff 0%, #fafafa 100%);
-}
-
-.hero-content {
-  max-width: 900px;
-  text-align: center;
-}
-
-.hero-title {
-  font-size: 5rem;
-  font-weight: 300;
-  letter-spacing: 0.1em;
-  margin: 0 0 2rem 0;
-  text-transform: uppercase;
-}
-
-.hero-divider {
-  width: 120px;
-  height: 2px;
-  background: #000;
-  margin: 0 auto 2rem;
-}
-
-.hero-subtitle {
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: #333;
-  margin: 0 0 1.5rem 0;
-  letter-spacing: 0.05em;
-}
-
-.hero-description {
-  font-size: 1.1rem;
-  color: #666;
-  line-height: 1.8;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* Features Section */
-.features-section {
-  padding: 6rem 2rem;
-  background: #fff;
-}
-
-.features-title {
-  font-size: 2.5rem;
-  font-weight: 300;
-  text-align: center;
-  margin: 0 0 4rem 0;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.features-grid {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 3rem;
-}
-
-.feature-card {
-  padding: 2rem;
-  border: 1px solid #eee;
-  text-align: center;
-  transition: all 0.3s;
-}
-
-.feature-card:hover {
-  border-color: #1a1a1a;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.feature-title {
-  font-size: 1.3rem;
-  font-weight: 400;
-  margin: 0 0 1rem 0;
-  letter-spacing: 0.03em;
-}
-
-.feature-description {
-  font-size: 1rem;
-  color: #666;
-  line-height: 1.7;
-  margin: 0;
-}
-
-/* CTA Section */
-.cta-section {
-  padding: 6rem 2rem;
-  background: #fafafa;
-  text-align: center;
-}
-
-.cta-title {
-  font-size: 2.5rem;
-  font-weight: 300;
-  margin: 0 0 1.5rem 0;
-  letter-spacing: 0.05em;
-}
-
-.cta-description {
-  font-size: 1.1rem;
-  color: #666;
-  margin: 0 0 2.5rem 0;
-}
-
-.cta-button {
-  display: inline-block;
-  padding: 1rem 3rem;
-  background: #1a1a1a;
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 500;
-  text-decoration: none;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: all 0.3s;
-}
-
-.cta-button:hover {
-  background: #333;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Landing Footer */
-.landing-footer {
-  padding: 3rem 2rem;
-  background: #fff;
-  text-align: center;
-  border-top: 1px solid #eee;
-  margin-top: auto;
-}
-
-.footer-text {
-  font-size: 0.9rem;
-  color: #999;
-  margin: 0;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 3rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1.2rem;
-  }
-
-  .features-title,
-  .cta-title {
-    font-size: 2rem;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
+/* Focus States */
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 4px;
 }

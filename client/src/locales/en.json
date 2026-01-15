@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "brand": "Infinite Frame",
+    "start": "Start"
+  },
+  "hero": {
+    "badge": "Now Open for Artists",
+    "title": "Where\nArt\nLives",
+    "description": "A minimalist platform for artists to showcase their work. Clean. Simple. Focused.",
+    "cta": "Create Gallery",
+    "learn": "Learn More"
+  },
+  "features": {
+    "title": "Built for Artists",
+    "subtitle": "Everything you need to present your work professionally.",
+    "items": {
+      "space": {
+        "title": "Your Space",
+        "desc": "Custom URL. Personal gallery. Full control over how your work is presented to the world."
+      },
+      "hassle": {
+        "title": "Zero Hassle",
+        "desc": "We handle hosting, security, and maintenance. You focus entirely on creating art."
+      },
+      "access": {
+        "title": "Direct Access",
+        "desc": "Contact information, social links, exhibition history. Make it easy for collectors to reach you."
+      },
+      "quality": {
+        "title": "High Quality",
+        "desc": "Upload high-resolution images. We optimize delivery without compromising quality."
+      }
+    }
+  },
+  "about": {
+    "title": "Art Deserves Better",
+    "description": "No algorithms. No distractions. No noise. Just your work, presented exactly as you intended."
+  },
+  "cta": {
+    "title": "Ready?",
+    "button": "Create Your Gallery"
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "contact": "Contact"
+  },
+  "gallery": {
+    "loading": "Loading...",
+    "notFound": {
+      "title": "Not Found",
+      "description": "The gallery you're looking for doesn't exist."
+    },
+    "contact": {
+      "title": "Contact",
+      "address": "Address",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "social": {
+      "title": "Connect"
+    }
+  }
+}
