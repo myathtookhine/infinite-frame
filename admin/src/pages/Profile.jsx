@@ -4,11 +4,16 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from "../context/ThemeContext";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
+import InputTextarea from "../components/ui/InputTextarea";
+import ContentCard from "../components/ui/ContentCard";
 import {
   UserIcon,
   LockClosedIcon,
-  ArrowRightOnRectangleIcon,
+  TrashIcon,
+  ArrowRightStartOnRectangleIcon,
+  ClipboardIcon,
 } from "@heroicons/react/24/outline";
+import Toast from "../components/ui/Toast";
 
 const Profile = () => {
   const { user, changePassword, updateProfile, updateGalleryInfo, logout } = useAuth();
@@ -30,6 +35,7 @@ const Profile = () => {
   const [socialLinks, setSocialLinks] = useState(user?.social_links || {});
   const [galleryError, setGalleryError] = useState("");
   const [gallerySuccess, setGallerySuccess] = useState("");
+  const [toast, setToast] = useState({ isVisible: false, message: "", type: "info" });
 
   const { isDark } = useTheme();
   const navigate = useNavigate();
@@ -56,11 +62,6 @@ const Profile = () => {
 
   const textColor = isDark ? "text-white" : "text-black";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
-  const cardBg = isDark ? "bg-[#1a1a1a]" : "bg-white";
-  const cardBorder = isDark ? "border-[#262626]" : "border-gray-300";
-  const hoverBorder = isDark
-    ? "hover:border-[#404040]"
-    : "hover:border-gray-400";
 
   const handleUsernameUpdate = async (e) => {
     e.preventDefault();
@@ -173,34 +174,34 @@ const Profile = () => {
     navigate("/login");
   };
 
+  const copyToClipboard = () => {
+    const url = `infiniteframe.online/${slug || "your-slug"}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setToast({ isVisible: true, message: "URL Copied to Clipboard", type: "info" });
+    });
+  };
+
   return (
     <main className="max-w-7xl mx-auto">
       <div className="mb-6">
-        <h2 className={`font-sans text-3xl sm:text-5xl mb-2 ${textColor}`}>
-          Profile Settings
-        </h2>
-        <p className={`font-sans ${subtextColor} text-sm sm:text-base`}>
+        <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>Profile Settings</h1>
+        <p className={`font-sans text-sm sm:text-base ${subtextColor}`}>
           Manage your account information
         </p>
       </div>
 
       {/* Username Update Form */}
-      <div
-        className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-lg mb-6 transition-all ${hoverBorder}`}
-      >
-        <h3 className={`font-sans text-xl sm:text-2xl mb-4 ${textColor}`}>
-          Update Username
-        </h3>
+      <ContentCard title="Update Username">
         <form onSubmit={handleUsernameUpdate} className="space-y-4">
           {/* Username Error/Success Messages */}
           {usernameError && (
-            <div className="bg-red-50 border-2 border-red-600 text-red-700 px-4 py-3 text-sm font-sans rounded font-medium">
+            <div className={`border-2 px-4 py-3 text-sm font-sans rounded font-medium ${isDark ? 'bg-red-900/20 border-red-800 text-red-400' : 'bg-red-50 border-red-600 text-red-700'}`}>
               {usernameError}
             </div>
           )}
 
           {usernameSuccess && (
-            <div className="bg-green-50 border-2 border-green-600 text-green-700 px-4 py-3 text-sm font-sans rounded font-medium">
+            <div className={`border-2 px-4 py-3 text-sm font-sans rounded font-medium ${isDark ? 'bg-green-900/20 border-green-800 text-green-400' : 'bg-green-50 border-green-600 text-green-700'}`}>
               {usernameSuccess}
             </div>
           )}
@@ -220,28 +221,11 @@ const Profile = () => {
             Update Username
           </Button>
         </form>
-      </div>
+      </ContentCard>
 
       {/* Gallery Information Form */}
-      <div
-        className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-lg mb-6 transition-all ${hoverBorder}`}
-      >
-        <h3 className={`font-sans text-xl sm:text-2xl mb-4 ${textColor}`}>
-          Gallery Information
-        </h3>
+      <ContentCard title="Gallery Information">
         <form onSubmit={handleGalleryInfoUpdate} className="space-y-4">
-          {/* Gallery Error/Success Messages */}
-          {galleryError && (
-            <div className="bg-red-50 border-2 border-red-600 text-red-700 px-4 py-3 text-sm font-sans rounded font-medium">
-              {galleryError}
-            </div>
-          )}
-
-          {gallerySuccess && (
-            <div className="bg-green-50 border-2 border-green-600 text-green-700 px-4 py-3 text-sm font-sans rounded font-medium">
-              {gallerySuccess}
-            </div>
-          )}
 
           <Input
             id="slug"
@@ -256,9 +240,28 @@ const Profile = () => {
               setSlug(val);
             }}
           />
-          <p className={`text-xs ${subtextColor} -mt-2`}>
-            Your gallery will be accessible at: infiniteframe.online/{slug || "your-slug"}
-          </p>
+          <div className={`mt-2 p-4 rounded-md border-2 ${isDark ? 'bg-blue-900/20 border-blue-800/40' : 'bg-blue-50 border-blue-100'} transition-all`}>
+            <p className={`text-xs mb-2 flex items-center gap-1.5 font-sans font-semibold ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-blue-400' : 'bg-blue-500'}`}></span>
+              Only lowercase letters and hyphens are allowed.
+            </p>
+            <p className={`text-xs font-sans mt-4 mb-2 opacity-70 ${isDark ? 'text-white font-semibold' : 'text-black font-semibold'}`}>
+              Live URL :
+            </p>
+            <div className="flex items-end justify-between">
+              <p className="text-sm font-sans">
+                <strong className={isDark ? 'text-white font-black' : 'text-black font-black'}>infiniteframe.online/{slug || "your-slug"}</strong>
+              </p>
+              <button
+                type="button"
+                onClick={copyToClipboard}
+                className={`flex items-center gap-1.5 text-xs font-sans font-bold transition-all cursor-pointer ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+              >
+                <ClipboardIcon className="h-4 w-4" />
+                Copy
+              </button>
+            </div>
+          </div>
 
           <Input
             id="galleryName"
@@ -269,52 +272,43 @@ const Profile = () => {
             placeholder="Enter gallery display name"
           />
 
-          <div>
-            <label htmlFor="description" className={`block text-sm font-sans font-medium mb-2 ${textColor}`}>
-              Description
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your gallery..."
-              maxLength={2000}
-              rows={4}
-              className={`w-full px-4 py-3 border-2 ${cardBorder} rounded-md font-sans text-sm focus:outline-none focus:ring-2 focus:ring-black ${isDark ? 'bg-[#1a1a1a] text-white' : 'bg-white text-black'}`}
-            />
-            <p className={`text-xs ${subtextColor} mt-1`}>
-              {description.length}/2000 characters
-            </p>
-          </div>
+          <InputTextarea
+            id="description"
+            label="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe your gallery..."
+            maxLength={2000}
+            rows={4}
+            height="200px"
+          />
+          <p className={`text-xs mt-1 ${subtextColor}`}>
+            {description.length}/2000 characters
+          </p>
 
-          <div>
-            <label htmlFor="address" className={`block text-sm font-sans font-medium mb-2 ${textColor}`}>
-              Address
-            </label>
-            <textarea
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter your gallery address..."
-              maxLength={500}
-              rows={3}
-              className={`w-full px-4 py-3 border-2 ${cardBorder} rounded-md font-sans text-sm focus:outline-none focus:ring-2 focus:ring-black ${isDark ? 'bg-[#1a1a1a] text-white' : 'bg-white text-black'}`}
-            />
-          </div>
+          <InputTextarea
+            id="address"
+            label="Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Enter your gallery address..."
+            maxLength={500}
+            rows={3}
+          />
 
           {/* Phone Numbers */}
           <div>
-            <label className={`block text-sm font-sans font-medium mb-2 ${textColor}`}>
+            <label className={`block text-sm font-sans font-medium mb-2 ${textColor} opacity-70`}>
               Phone Numbers
             </label>
             {phoneNumbers.map((phone, index) => (
               <div key={index} className="flex gap-2 mb-2">
-                <input
+                <Input
+                  containerClassName="flex-1"
                   type="text"
                   value={phone}
                   onChange={(e) => updatePhoneNumber(index, e.target.value)}
                   placeholder="Enter phone number"
-                  className={`flex-1 px-4 py-3 border-2 ${cardBorder} rounded-md font-sans text-sm focus:outline-none focus:ring-2 focus:ring-black ${isDark ? 'bg-[#1a1a1a] text-white' : 'bg-white text-black'}`}
                 />
                 <Button
                   type="button"
@@ -322,7 +316,7 @@ const Profile = () => {
                   variant="secondary"
                   size="md"
                 >
-                  Remove
+                  <TrashIcon className="h-5 w-5" />
                 </Button>
               </div>
             ))}
@@ -330,7 +324,7 @@ const Profile = () => {
               type="button"
               onClick={addPhoneNumber}
               variant="secondary"
-              size="md"
+              size="sm"
               className="mt-2"
             >
               + Add Phone Number
@@ -338,31 +332,31 @@ const Profile = () => {
           </div>
 
           {/* Social Links */}
-          <div>
-            <label className={`block text-sm font-sans font-medium mb-2 ${textColor}`}>
+          <div className='mt-6 mb-6'>
+            <label className={`block text-sm font-sans font-medium mb-2 ${textColor} opacity-70`}>
               Social Links
             </label>
             {Object.entries(socialLinks).map(([platform, url]) => (
               <div key={platform} className="mb-3">
-                <label className={`block text-xs font-sans mb-1 ${subtextColor} capitalize`}>
-                  {platform}
-                </label>
                 <div className="flex gap-2">
-                  <input
+                  <Input
+                    containerClassName="flex-1"
+                    label={platform.charAt(0).toUpperCase() + platform.slice(1)}
                     type="url"
                     value={url}
                     onChange={(e) => updateSocialLink(platform, e.target.value)}
                     placeholder={`Enter ${platform} URL`}
-                    className={`flex-1 px-4 py-3 border-2 ${cardBorder} rounded-md font-sans text-sm focus:outline-none focus:ring-2 focus:ring-black ${isDark ? 'bg-[#1a1a1a] text-white' : 'bg-white text-black'}`}
                   />
-                  <Button
-                    type="button"
-                    onClick={() => removeSocialLink(platform)}
-                    variant="secondary"
-                    size="md"
-                  >
-                    Remove
-                  </Button>
+                  <div className="flex flex-col justify-end">
+                    <Button
+                      type="button"
+                      onClick={() => removeSocialLink(platform)}
+                      variant="secondary"
+                      size="md"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -370,36 +364,43 @@ const Profile = () => {
               type="button"
               onClick={addSocialLink}
               variant="secondary"
-              size="md"
+              size="sm"
               className="mt-2"
             >
               + Add Social Link
             </Button>
           </div>
 
+          {/* Gallery update messages */}
+          {galleryError && (
+            <div className={`border-2 px-4 py-3 text-sm font-sans rounded font-medium ${isDark ? 'bg-red-900/20 border-red-800 text-red-400' : 'bg-red-50 border-red-600 text-red-700'}`}>
+              {galleryError}
+            </div>
+          )}
+
+          {gallerySuccess && (
+            <div className={`border-2 px-4 py-3 text-sm font-sans rounded font-medium ${isDark ? 'bg-green-900/20 border-green-800 text-green-400' : 'bg-green-50 border-green-600 text-green-700'}`}>
+              {gallerySuccess}
+            </div>
+          )}
           <Button type="submit" variant="primary" size="md" block>
             Update Gallery Info
           </Button>
         </form>
-      </div>
+      </ContentCard>
 
       {/* Change Password Form */}
-      <div
-        className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-lg mb-6 transition-all ${hoverBorder}`}
-      >
-        <h3 className={`font-sans text-xl sm:text-2xl mb-4 ${textColor}`}>
-          Change Password
-        </h3>
+      <ContentCard title="Change Password">
         <form onSubmit={handlePasswordChange} className="space-y-4">
           {/* Password Error/Success Messages */}
           {passwordError && (
-            <div className="bg-red-50 border-2 border-red-600 text-red-700 px-4 py-3 text-sm font-sans rounded font-medium">
+            <div className={`border-2 px-4 py-3 text-sm font-sans rounded font-medium ${isDark ? 'bg-red-900/20 border-red-800 text-red-400' : 'bg-red-50 border-red-600 text-red-700'}`}>
               {passwordError}
             </div>
           )}
 
           {passwordSuccess && (
-            <div className="bg-green-50 border-2 border-green-600 text-green-700 px-4 py-3 text-sm font-sans rounded font-medium">
+            <div className={`border-2 px-4 py-3 text-sm font-sans rounded font-medium ${isDark ? 'bg-green-900/20 border-green-800 text-green-400' : 'bg-green-50 border-green-600 text-green-700'}`}>
               {passwordSuccess}
             </div>
           )}
@@ -444,28 +445,31 @@ const Profile = () => {
             Update Password
           </Button>
         </form>
-      </div>
+      </ContentCard>
 
       {/* Sign Out Section */}
-      <div
-        className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-lg transition-all ${hoverBorder}`}
+      <ContentCard
+        title="Sign Out"
+        subtitle="Sign out from your admin account"
       >
-        <h3 className={`font-sans text-xl sm:text-2xl mb-2 ${textColor}`}>
-          Sign Out
-        </h3>
-        <p className={`font-sans ${subtextColor} mb-4 text-sm sm:text-base`}>
-          Sign out from your admin account
-        </p>
         <Button
           onClick={handleSignOut}
           variant="secondary"
           size="md"
           className="flex items-center gap-2"
         >
-          <ArrowRightOnRectangleIcon className="h-5 w-5" />
-          Sign Out
+          <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
+          Sign Out Now
         </Button>
-      </div>
+      </ContentCard>
+
+      {/* Toast Notification */}
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, isVisible: false })}
+      />
     </main>
   );
 };

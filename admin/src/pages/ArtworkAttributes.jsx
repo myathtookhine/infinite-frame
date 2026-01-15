@@ -6,7 +6,7 @@ import ConfigManager from '../components/ConfigManager';
 import ArtistSelector from '../components/ArtistSelector';
 import { 
   FolderPlusIcon,
-  TagIcon,
+  FolderIcon,
   ArchiveBoxIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -145,7 +145,7 @@ const ArtworkAttributes = () => {
 
       <div className="flex flex-col md:flex-row md:gap-8 flex-wrap">
         {/* Dynamic Sidebar/Tabs */}
-        <div className="flex flex-wrap gap-2 pb-4 mb-6 -mx-4 px-4 no-scrollbar md:mx-0 md:px-0 md:flex-col md:w-64 md:space-y-1 md:pb-0 md:mb-0 scroll-smooth">
+        <div className="flex flex-wrap gap-2 mb-4 lg:mb-6 -mx-4 px-4 no-scrollbar md:mx-0 md:px-0 md:flex-col md:w-64 md:space-y-1 md:pb-0 md:mb-0 scroll-smooth">
           {types.length === 0 && !loading && (
              <div className={`p-4 text-xs ${subtextColor} text-center border-2 border-dashed ${borderColor} rounded-md`}>
               {isSuperAdmin && !selectedArtist ? "No attributes found in the system." : "No attributes found. Create one."}
@@ -164,7 +164,7 @@ const ArtworkAttributes = () => {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                   <TagIcon className="h-4 w-4 flex-shrink-0" />
+                   <FolderIcon className="h-4 w-4 flex-shrink-0" />
                    <span>{item.type}</span>
                 </div>
               </button>
@@ -194,7 +194,7 @@ const ArtworkAttributes = () => {
         </div>
       </div>
 
-      {/* Access Control: Only Non-Super Admin can create new groups */}
+      {/* Access Control: Only Admin can create new groups */}
       {!isReadOnly && isNewTypeModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsNewTypeModalOpen(false)}></div>

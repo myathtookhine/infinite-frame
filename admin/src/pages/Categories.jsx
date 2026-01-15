@@ -9,9 +9,11 @@ import {
   TrashIcon,
   XMarkIcon,
   PencilSquareIcon,
-  TagIcon
+  TagIcon,
+  ArchiveBoxIcon
 } from '@heroicons/react/24/outline';
 import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
 
 const Categories = () => {
   const { isDark } = useTheme();
@@ -135,7 +137,7 @@ const Categories = () => {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Page Header with Add Button */}
-      <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+      <div className="mb-4 lg:mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
           <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>Categories</h1>
           <p className={`${subtextColor} font-sans`}>
@@ -146,16 +148,13 @@ const Categories = () => {
         </div>
 
         {!isReadOnly && (
-          <button
+          <Button
             onClick={openAddModal}
-            className={`w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-md font-sans font-bold text-sm cursor-pointer transition-all duration-300 ${isDark
-                ? 'bg-white text-black hover:bg-gray-200'
-                : 'bg-black text-white hover:bg-gray-800'
-              }`}
+            className="w-full md:w-auto flex items-center justify-center gap-2"
           >
             <PlusIcon className="h-4 w-4" />
             <span className="whitespace-nowrap">Add Category</span>
-          </button>
+          </Button>
         )}
       </div>
 
@@ -188,7 +187,7 @@ const Categories = () => {
               className={`flex items-center justify-between p-4 sm:p-5 rounded-xl border-2 ${borderColor} ${cardBg} hover:shadow-md transition-all group animate-in fade-in slide-in-from-left-2 duration-300`}
             >
               <div className="min-w-0 flex-1 flex items-center gap-3">
-                <TagIcon className={`h-5 w-5 flex-shrink-0 ${textColor}`} />
+                <ArchiveBoxIcon className={`h-5 w-5 flex-shrink-0 ${textColor}`} />
                 <span className={`text-sm sm:text-base font-sans font-semibold ${textColor} block truncate ${!category.is_active ? 'opacity-50 line-through decoration-2' : ''}`}>
                   {category.name}
                 </span>
@@ -201,7 +200,7 @@ const Categories = () => {
                   onClick={() => !isReadOnly && handleToggleStatus(category)}
                   disabled={isReadOnly}
                   title={isReadOnly ? (category.is_active ? "Active" : "Disabled") : (category.is_active ? "Click to Disable" : "Click to Enable")}
-                  className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isReadOnly ? 'cursor-default opacity-80' : 'cursor-pointer'
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none me-2 ${isReadOnly ? 'cursor-default opacity-80' : 'cursor-pointer'
                     } ${category.is_active
                       ? (isDark ? 'bg-white' : 'bg-black')
                       : (isDark ? 'bg-[#262626]' : 'bg-gray-200')
@@ -216,22 +215,26 @@ const Categories = () => {
 
                 {!isReadOnly && (
                   <>
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={() => openEditModal(category)}
-                      className={`p-2.5 rounded-lg transition-all cursor-pointer ${isDark ? 'text-blue-400 hover:bg-white/5' : 'text-blue-600 hover:bg-black/5'
+                      className={`p-2 !border-0 ${isDark ? 'text-blue-400 hover:bg-white/5' : 'text-blue-600 hover:bg-black/5'
                         }`}
                       title="Edit"
                     >
                       <PencilSquareIcon className="h-5 w-5" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={() => handleDelete(category.id)}
-                      className={`p-2.5 rounded-lg transition-all cursor-pointer ${isDark ? 'text-red-400 hover:bg-white/5' : 'text-red-500 hover:bg-black/5'
+                      className={`p-2 !border-0 ${isDark ? 'text-red-400 hover:bg-white/5' : 'text-red-500 hover:bg-black/5'
                         }`}
                       title="Delete"
                     >
                       <TrashIcon className="h-5 w-5" />
-                    </button>
+                    </Button>
                   </>
                 )}
               </div>
@@ -249,12 +252,13 @@ const Categories = () => {
               <h3 className={`text-xl font-sans font-bold ${textColor}`}>
                 {editingCategory ? `Edit ${editingCategory.name}` : 'Add New Category'}
               </h3>
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => setIsModalOpen(false)}
-                className={`p-1 rounded-md cursor-pointer ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/10'} transition-colors`}
+                className="p-1 !border-0"
               >
                 <XMarkIcon className={`h-6 w-6 ${subtextColor}`} />
-              </button>
+              </Button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -268,24 +272,21 @@ const Categories = () => {
               />
               {error && <p className="text-red-500 text-xs">{error}</p>}
               <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
                   onClick={() => setIsModalOpen(false)}
-                  className={`flex-1 py-3 rounded-md font-sans font-bold text-sm border-2 ${borderColor} ${textColor} cursor-pointer ${isDark ? 'hover:bg-white/5' : 'hover:bg-black/5'} transition-all`}
+                  className="flex-1"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={loading || !categoryName.trim()}
-                  className={`flex-1 py-3 rounded-md flex items-center justify-center gap-2 font-sans font-bold text-sm cursor-pointer transition-all duration-300 ${isDark
-                    ? 'bg-white text-black hover:bg-gray-200'
-                    : 'bg-black text-white hover:bg-gray-800'
-                    } disabled:opacity-50`}
+                  className="flex-1 flex items-center justify-center gap-2"
                 >
                   {editingCategory ? <PencilSquareIcon className="h-4 w-4" /> : <PlusIcon className="h-4 w-4" />}
                   {editingCategory ? 'Update' : 'Save'}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

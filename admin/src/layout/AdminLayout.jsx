@@ -13,7 +13,7 @@ import {
   SwatchIcon,
   UserGroupIcon,
   ClockIcon,
-  TagIcon
+  ArchiveBoxIcon
 } from "@heroicons/react/24/outline";
 
 const SidebarLink = ({ to, children, icon: Icon, onClick, isDark }) => {
@@ -161,7 +161,7 @@ const AdminLayout = ({ children }) => {
 
             <SidebarLink
               to="/categories"
-              icon={TagIcon}
+              icon={ArchiveBoxIcon}
               onClick={closeSidebar}
               isDark={isDark}
             >

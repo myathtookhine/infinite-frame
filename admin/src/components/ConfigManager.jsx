@@ -8,11 +8,12 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
   PencilSquareIcon,
-  TagIcon
+  FolderIcon
 } from '@heroicons/react/24/outline';
 
 import { ENDPOINTS } from '../config';
 import Input from './ui/Input';
+import Button from './ui/Button';
 
 const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserId, hideHeader = false, renderAddButton }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -149,16 +150,14 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
 
   // Expose openAddModal for external button
   const addButton = !isReadOnly && (
-    <button
+    <Button
       onClick={openAddModal}
-      className={`w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-md font-sans font-bold text-sm cursor-pointer transition-all duration-300 ${isDark
-        ? 'bg-white text-black hover:bg-gray-200'
-        : 'bg-black text-white hover:bg-gray-800'
-        }`}
+      className="w-full sm:w-auto flex items-center justify-center gap-2"
+      variant="secondary"
     >
       <PlusIcon className="h-4 w-4" />
-      <span className="whitespace-nowrap">Add Item</span>
-    </button>
+      <span className="whitespace-nowrap">Add New</span>
+    </Button>
   );
 
   // Call renderAddButton callback if provided
@@ -169,11 +168,8 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       {!hideHeader && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-4 lg:mb-8">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg flex-shrink-0 ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
-              <TagIcon className={`h-6 w-6 ${textColor}`} />
-            </div>
             <div className="min-w-0">
               <h2 className={`text-xl sm:text-2xl font-sans font-bold ${textColor} truncate`}>{title}</h2>
               <p className={`text-sm ${subtextColor} truncate`}>
@@ -229,7 +225,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
                         onClick={() => !isReadOnly && handleToggleStatus(item)}
                         disabled={isReadOnly}
                         title={isReadOnly ? (item.is_active ? "Active" : "Disabled") : (item.is_active ? "Click to Disable" : "Click to Enable")}
-                        className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none me-2 ${
                           isReadOnly ? 'cursor-default opacity-80' : 'cursor-pointer'
                         } ${
                           item.is_active 
@@ -247,24 +243,28 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
 
                       {!isReadOnly && (
                         <>
-                          <button
+                        <Button
+                          variant="secondary"
                             onClick={() => openEditModal(item)}
-                            className={`p-2.5 rounded-lg transition-all cursor-pointer ${
+                          className={`p-2 !border-0 ${
                               isDark ? 'text-blue-400 hover:bg-white/5' : 'text-blue-600 hover:bg-black/5'
                             }`}
                             title="Edit"
+                          size="sm"
                           >
                             <PencilSquareIcon className="h-5 w-5" />
-                          </button>
-                          <button
+                        </Button>
+                        <Button
+                          variant="secondary"
                             onClick={() => handleDelete(item.id)}
-                            className={`p-2.5 rounded-lg transition-all cursor-pointer ${
+                          className={`p-2 !border-0 ${
                               isDark ? 'text-red-400 hover:bg-white/5' : 'text-red-500 hover:bg-black/5'
                             }`}
                             title="Delete"
+                          size="sm"
                           >
                             <TrashIcon className="h-5 w-5" />
-                          </button>
+                        </Button>
                         </>
                       )}
                   </div>
@@ -284,12 +284,13 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
               <h3 className={`text-xl font-sans font-bold ${textColor}`}>
                 {editingItem ? `Edit ${editingItem.name}` : `Add New to ${title}`}
               </h3>
-              <button 
+              <Button
+                variant="secondary"
                 onClick={() => setIsModalOpen(false)}
-                className={`p-1 rounded-md cursor-pointer ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/10'} transition-colors`}
+                className="p-1 !border-0"
               >
                 <XMarkIcon className={`h-6 w-6 ${subtextColor}`} />
-              </button>
+              </Button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -303,25 +304,21 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
               />
               {error && <p className="text-red-500 text-xs">{error}</p>}
               <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
                   onClick={() => setIsModalOpen(false)}
-                  className={`flex-1 py-3 rounded-md font-sans font-bold text-sm border-2 ${borderColor} ${textColor} cursor-pointer ${isDark ? 'hover:bg-white/5' : 'hover:bg-black/5'} transition-all`}
+                  className="flex-1"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={loading || !newItemName.trim()}
-                  className={`flex-1 py-3 rounded-md flex items-center justify-center gap-2 font-sans font-bold text-sm cursor-pointer transition-all duration-300 ${
-                    isDark 
-                      ? 'bg-white text-black hover:bg-gray-200' 
-                      : 'bg-black text-white hover:bg-gray-800'
-                  } disabled:opacity-50`}
+                  className="flex-1 flex items-center justify-center gap-2"
                 >
                   {editingItem ? <PencilSquareIcon className="h-4 w-4" /> : <PlusIcon className="h-4 w-4" />}
                   {editingItem ? 'Update' : 'Save'}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
