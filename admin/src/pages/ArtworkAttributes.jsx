@@ -198,7 +198,7 @@ const ArtworkAttributes = () => {
       {!isReadOnly && isNewTypeModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsNewTypeModalOpen(false)}></div>
-          <div className={`relative w-full max-w-md p-8 rounded-2xl border-2 ${borderColor} ${cardBg} shadow-2xl animate-in fade-in zoom-in duration-300`}>
+          <div className={`relative w-full max-w-md p-6 rounded-2xl border-2 ${borderColor} ${cardBg} shadow-2xl animate-in fade-in zoom-in duration-300`}>
              <div className="flex items-center justify-between mb-6">
               <h3 className={`text-xl font-sans font-bold ${textColor}`}>
                 New Attribute Group

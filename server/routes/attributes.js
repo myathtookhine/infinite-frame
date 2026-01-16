@@ -105,43 +105,49 @@ router.get('/:type', async (req, res) => {
   }
 });
 
-// 3. CREATE ATTRIBUTE (Individual Only)
+// 3. CREATE ATTRIBUTE (Admin & Super Admin)
 router.post('/', async (req, res) => {
-  const { type, name } = req.body;
+  const { type, name, admin_id } = req.body;
 
-  if (req.user.role === 'super_admin') {
-    return res.status(403).json({ message: "Super Admin is Read-Only." });
-  }
+  // Super admin can create attributes for any admin, regular admin can only create for themselves
+  const targetAdminId = req.user.role === 'super_admin' && admin_id ? admin_id : req.user.id;
 
   try {
     const newAttrib = await pool.query(
       "INSERT INTO attributes (admin_id, type, name) VALUES ($1, $2, $3) RETURNING *",
-      [req.user.id, type, name]
+      [targetAdminId, type, name]
     );
     res.json(newAttrib.rows[0]);
   } catch (err) {
     console.error(err.message);
     if (err.code === '23505') {
-        return res.status(400).json({ message: "This item already exists in your list!" });
+        return res.status(400).json({ message: "This item already exists in the list!" });
     }
     res.status(500).send("Server Error");
   }
 });
 
-// 4. UPDATE ATTRIBUTE (Individual Only - Own Data)
+// 4. UPDATE ATTRIBUTE (Admin & Super Admin)
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { name, is_active } = req.body;
 
-  if (req.user.role === 'super_admin') {
-    return res.status(403).json({ message: "Super Admin is Read-Only." });
-  }
-
   try {
-    const updateAttrib = await pool.query(
-      "UPDATE attributes SET name = COALESCE($1, name), is_active = COALESCE($2, is_active) WHERE id = $3 AND admin_id = $4 RETURNING *",
-      [name, is_active, id, req.user.id]
-    );
+    let updateAttrib;
+    
+    if (req.user.role === 'super_admin') {
+      // Super admin can update any attribute
+      updateAttrib = await pool.query(
+        "UPDATE attributes SET name = COALESCE($1, name), is_active = COALESCE($2, is_active) WHERE id = $3 RETURNING *",
+        [name, is_active, id]
+      );
+    } else {
+      // Regular admin can only update their own attributes
+      updateAttrib = await pool.query(
+        "UPDATE attributes SET name = COALESCE($1, name), is_active = COALESCE($2, is_active) WHERE id = $3 AND admin_id = $4 RETURNING *",
+        [name, is_active, id, req.user.id]
+      );
+    }
 
     if (updateAttrib.rows.length === 0) {
       return res.status(404).json({ message: "Item not found or unauthorized." });
@@ -154,19 +160,23 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// 5. DELETE ATTRIBUTE (Individual Only - Own Data + Dependency Check)
+// 5. DELETE ATTRIBUTE (Admin & Super Admin)
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
-  if (req.user.role === 'super_admin') {
-    return res.status(403).json({ message: "Super Admin is Read-Only." });
-  }
-
   try {
-    // 1. Check Ownership
-    const checkOwner = await pool.query("SELECT * FROM attributes WHERE id = $1 AND admin_id = $2", [id, req.user.id]);
-    if (checkOwner.rows.length === 0) {
-        return res.status(404).json({ message: "Item not found or unauthorized." });
+    // 1. Check if attribute exists and ownership (for regular admins)
+    if (req.user.role !== 'super_admin') {
+      const checkOwner = await pool.query("SELECT * FROM attributes WHERE id = $1 AND admin_id = $2", [id, req.user.id]);
+      if (checkOwner.rows.length === 0) {
+          return res.status(404).json({ message: "Item not found or unauthorized." });
+      }
+    } else {
+      // Super admin - just check if attribute exists
+      const checkExists = await pool.query("SELECT * FROM attributes WHERE id = $1", [id]);
+      if (checkExists.rows.length === 0) {
+        return res.status(404).json({ message: "Item not found." });
+      }
     }
 
     // 2. Delete

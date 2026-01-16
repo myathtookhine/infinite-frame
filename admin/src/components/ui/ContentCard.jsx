@@ -13,7 +13,7 @@ const ContentCard = ({ title, children, className = "", subtitle }) => {
 
   return (
     <div
-      className={`border-2 ${cardBorder} ${cardBg} p-6 sm:p-8 rounded-lg mb-6 transition-all duration-300 hover:${hoverBorder} ${className}`}
+      className={`border ${cardBorder} ${cardBg} p-4 sm:p-6 rounded-lg mb-4 transition-all duration-300 hover:${hoverBorder} ${className}`}
     >
       {title && (
         <h3 className={`font-sans font-bold text-2xl sm:text-2xl mb-1 ${textColor}`}>

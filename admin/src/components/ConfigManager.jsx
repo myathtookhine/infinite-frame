@@ -26,6 +26,9 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
   const { isDark } = useTheme();
   const { user } = useAuth();
 
+  // Super admin can edit but not delete
+  const isSuperAdmin = user?.role === 'super_admin';
+
   const fetchData = async () => {
     setLoading(true);
     const isSuperAdmin = user?.role === 'super_admin';
@@ -148,8 +151,8 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
   const textColor = isDark ? 'text-white' : 'text-black';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
 
-  // Expose openAddModal for external button
-  const addButton = !isReadOnly && (
+  // Expose openAddModal for external button (hide for super_admin)
+  const addButton = !isReadOnly && !isSuperAdmin && (
     <Button
       onClick={openAddModal}
       className="w-full sm:w-auto flex items-center justify-center gap-2"
@@ -161,7 +164,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
   );
 
   // Call renderAddButton callback if provided
-  if (renderAddButton && !isReadOnly) {
+  if (renderAddButton && !isReadOnly && !isSuperAdmin) {
     renderAddButton(openAddModal);
   }
 
@@ -173,7 +176,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
             <div className="min-w-0">
               <h2 className={`text-xl sm:text-2xl font-sans font-bold ${textColor} truncate`}>{title}</h2>
               <p className={`text-sm ${subtextColor} truncate`}>
-                {isReadOnly ? `View available ${title} options` : `Manage ${title} options`}
+                {isSuperAdmin ? `Manage ${title} options for all artists` : `Manage ${title} options`}
               </p>
             </div>
           </div>
@@ -220,53 +223,31 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
-                      {/* Status Switch - Visible to All, Interactive only if !isReadOnly */}
-                      <button
-                        onClick={() => !isReadOnly && handleToggleStatus(item)}
-                        disabled={isReadOnly}
-                        title={isReadOnly ? (item.is_active ? "Active" : "Disabled") : (item.is_active ? "Click to Disable" : "Click to Enable")}
-                      className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none me-2 ${
-                          isReadOnly ? 'cursor-default opacity-80' : 'cursor-pointer'
-                        } ${
-                          item.is_active 
-                            ? (isDark ? 'bg-white' : 'bg-black') 
-                            : (isDark ? 'bg-[#262626]' : 'bg-gray-200')
+                    {/* Edit button for everyone */}
+                    <Button
+                      variant="secondary"
+                      onClick={() => openEditModal(item)}
+                      className={`p-2 !border-0 ${isDark ? 'text-blue-400 hover:bg-white/5' : 'text-blue-600 hover:bg-black/5'
                         }`}
-                      >
-                        <span
-                          aria-hidden="true"
-                          className={`${
-                            item.is_active ? 'translate-x-5' : 'translate-x-0'
-                          } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isDark && item.is_active ? '!bg-black' : ''}`} 
-                        />
-                      </button>
+                      title="Edit"
+                      size="sm"
+                    >
+                      <PencilSquareIcon className="h-5 w-5" />
+                    </Button>
 
-                      {!isReadOnly && (
-                        <>
-                        <Button
-                          variant="secondary"
-                            onClick={() => openEditModal(item)}
-                          className={`p-2 !border-0 ${
-                              isDark ? 'text-blue-400 hover:bg-white/5' : 'text-blue-600 hover:bg-black/5'
-                            }`}
-                            title="Edit"
-                          size="sm"
-                          >
-                            <PencilSquareIcon className="h-5 w-5" />
-                        </Button>
-                        <Button
-                          variant="secondary"
-                            onClick={() => handleDelete(item.id)}
-                          className={`p-2 !border-0 ${
-                              isDark ? 'text-red-400 hover:bg-white/5' : 'text-red-500 hover:bg-black/5'
-                            }`}
-                            title="Delete"
-                          size="sm"
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                        </Button>
-                        </>
-                      )}
+                    {/* Delete button only for non-super-admin */}
+                    {!isSuperAdmin && (
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleDelete(item.id)}
+                        className={`p-2 !border-0 ${isDark ? 'text-red-400 hover:bg-white/5' : 'text-red-500 hover:bg-black/5'
+                          }`}
+                        title="Delete"
+                        size="sm"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))
@@ -279,7 +260,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-          <div className={`relative w-full max-w-md p-8 rounded-2xl border-2 ${borderColor} ${cardBg} shadow-2xl animate-in fade-in zoom-in duration-300`}>
+          <div className={`relative w-full max-w-md p-6 rounded-2xl border-2 ${borderColor} ${cardBg} shadow-2xl animate-in fade-in zoom-in duration-300`}>
             <div className="flex items-center justify-between mb-6">
               <h3 className={`text-xl font-sans font-bold ${textColor}`}>
                 {editingItem ? `Edit ${editingItem.name}` : `Add New to ${title}`}
@@ -303,6 +284,39 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
                 placeholder="Enter name"
               />
               {error && <p className="text-red-500 text-xs">{error}</p>}
+
+              {editingItem && (
+                <div className="space-y-4 mt-4">
+                  {/* Status Toggle */}
+                  <div className="flex items-center justify-between">
+                    <span className={`text-sm font-medium ${textColor}`}>
+                      Status
+                      <p className={`text-xs ${subtextColor} font-normal`}>
+                        {editingItem.is_active ? 'Currently Active' : 'Currently Disabled'}
+                      </p>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const newStatus = !editingItem.is_active;
+                        await handleToggleStatus(editingItem);
+                        setEditingItem({ ...editingItem, is_active: newStatus });
+                      }}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${editingItem.is_active
+                        ? (isDark ? 'bg-white' : 'bg-black')
+                        : (isDark ? 'bg-[#262626]' : 'bg-gray-200')
+                        }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`${editingItem.is_active ? 'translate-x-5' : 'translate-x-0'
+                          } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isDark && editingItem.is_active ? '!bg-black' : ''}`}
+                      />
+                    </button>
+                  </div>
+
+                </div>
+              )}
               <div className="flex gap-3 pt-2">
                 <Button
                   variant="secondary"

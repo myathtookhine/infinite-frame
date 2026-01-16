@@ -26,10 +26,10 @@ const Categories = () => {
   const [categoryName, setCategoryName] = useState('');
   const [error, setError] = useState('');
   
-  // Super Admin: View Only
-  // Others: CRUD
+  // Super Admin: Can Edit but Not Delete
+  // Others: Full CRUD
   const isSuperAdmin = user?.role === 'super_admin';
-  const isReadOnly = isSuperAdmin;
+  const isReadOnly = false; // Allow super admin to edit
 
   const textColor = isDark ? 'text-white' : 'text-black';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
@@ -141,13 +141,13 @@ const Categories = () => {
         <div>
           <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>Categories</h1>
           <p className={`${subtextColor} font-sans`}>
-            {isReadOnly
-              ? "View categories created by artists."
+            {isSuperAdmin
+              ? "Manage categories for all artists."
               : "Manage your artwork categories (e.g., Painting, Photography)."}
           </p>
         </div>
 
-        {!isReadOnly && (
+        {!isSuperAdmin && (
           <Button
             onClick={openAddModal}
             className="w-full md:w-auto flex items-center justify-center gap-2"
@@ -196,46 +196,30 @@ const Categories = () => {
               </div>
 
               <div className="flex items-center gap-2 ml-4">
-                <button
-                  onClick={() => !isReadOnly && handleToggleStatus(category)}
-                  disabled={isReadOnly}
-                  title={isReadOnly ? (category.is_active ? "Active" : "Disabled") : (category.is_active ? "Click to Disable" : "Click to Enable")}
-                  className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none me-2 ${isReadOnly ? 'cursor-default opacity-80' : 'cursor-pointer'
-                    } ${category.is_active
-                      ? (isDark ? 'bg-white' : 'bg-black')
-                      : (isDark ? 'bg-[#262626]' : 'bg-gray-200')
+                {/* Edit button for everyone */}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => openEditModal(category)}
+                  className={`p-2 !border-0 ${isDark ? 'text-blue-400 hover:bg-white/5' : 'text-blue-600 hover:bg-black/5'
                     }`}
+                  title="Edit"
                 >
-                  <span
-                    aria-hidden="true"
-                    className={`${category.is_active ? 'translate-x-5' : 'translate-x-0'
-                      } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isDark && category.is_active ? '!bg-black' : ''}`}
-                  />
-                </button>
+                  <PencilSquareIcon className="h-5 w-5" />
+                </Button>
 
-                {!isReadOnly && (
-                  <>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => openEditModal(category)}
-                      className={`p-2 !border-0 ${isDark ? 'text-blue-400 hover:bg-white/5' : 'text-blue-600 hover:bg-black/5'
-                        }`}
-                      title="Edit"
-                    >
-                      <PencilSquareIcon className="h-5 w-5" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleDelete(category.id)}
-                      className={`p-2 !border-0 ${isDark ? 'text-red-400 hover:bg-white/5' : 'text-red-500 hover:bg-black/5'
-                        }`}
-                      title="Delete"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </Button>
-                  </>
+                {/* Delete button only for non-super-admin */}
+                {!isSuperAdmin && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleDelete(category.id)}
+                    className={`p-2 !border-0 ${isDark ? 'text-red-400 hover:bg-white/5' : 'text-red-500 hover:bg-black/5'
+                      }`}
+                    title="Delete"
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                  </Button>
                 )}
               </div>
             </div>
@@ -247,7 +231,7 @@ const Categories = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-          <div className={`relative w-full max-w-md p-8 rounded-2xl border-2 ${borderColor} ${cardBg} shadow-2xl animate-in fade-in zoom-in duration-300`}>
+          <div className={`relative w-full max-w-md p-6 rounded-2xl border-2 ${borderColor} ${cardBg} shadow-2xl animate-in fade-in zoom-in duration-300`}>
             <div className="flex items-center justify-between mb-6">
               <h3 className={`text-xl font-sans font-bold ${textColor}`}>
                 {editingCategory ? `Edit ${editingCategory.name}` : 'Add New Category'}
@@ -271,6 +255,38 @@ const Categories = () => {
                 placeholder="e.g. Painting, Sculpture, Photography"
               />
               {error && <p className="text-red-500 text-xs">{error}</p>}
+              {editingCategory && (
+                <div className="space-y-4 mt-4">
+                  {/* Status Toggle */}
+                  <div className="flex items-center justify-between">
+                    <span className={`text-sm font-medium ${textColor}`}>
+                      Status
+                      <p className={`text-xs ${subtextColor} font-normal`}>
+                        {editingCategory.is_active ? 'Currently Active' : 'Currently Disabled'}
+                      </p>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const newStatus = !editingCategory.is_active;
+                        await handleToggleStatus(editingCategory);
+                        setEditingCategory({ ...editingCategory, is_active: newStatus });
+                      }}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${editingCategory.is_active
+                        ? (isDark ? 'bg-white' : 'bg-black')
+                        : (isDark ? 'bg-[#262626]' : 'bg-gray-200')
+                        }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`${editingCategory.is_active ? 'translate-x-5' : 'translate-x-0'
+                          } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isDark && editingCategory.is_active ? '!bg-black' : ''}`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-3 pt-2">
                 <Button
                   variant="secondary"

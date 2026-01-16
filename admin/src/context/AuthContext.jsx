@@ -32,9 +32,9 @@ export const AuthProvider = ({ children }) => {
       });
 
       const userData = response.data.user;
+      const token = response.data.token; // ← Get REAL JWT token from backend
 
-      // Login successful
-      const token = 'admin-token-' + Date.now();
+      // Store JWT token and user data
       localStorage.setItem('adminToken', token);
       localStorage.setItem('adminUser', JSON.stringify(userData));
 

@@ -57,47 +57,53 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 2. CREATE CATEGORY (Individual Only)
+// 2. CREATE CATEGORY (Admin & Super Admin)
 router.post('/', async (req, res) => {
-  const { name } = req.body;
-
-  if (req.user.role === 'super_admin') {
-    return res.status(403).json({ message: "Super Admin is Read-Only." });
-  }
+  const { name, admin_id } = req.body;
 
   if (!name || !name.trim()) {
     return res.status(400).json({ message: "Category name is required." });
   }
 
+  // Super admin can create categories for any admin, regular admin can only create for themselves
+  const targetAdminId = req.user.role === 'super_admin' && admin_id ? admin_id : req.user.id;
+
   try {
     const newCategory = await pool.query(
       "INSERT INTO categories (admin_id, name) VALUES ($1, $2) RETURNING *",
-      [req.user.id, name.trim()]
+      [targetAdminId, name.trim()]
     );
     res.json(newCategory.rows[0]);
   } catch (err) {
     console.error(err.message);
     if (err.code === '23505') {
-      return res.status(400).json({ message: "This category already exists in your list!" });
+      return res.status(400).json({ message: "This category already exists in the list!" });
     }
     res.status(500).send("Server Error");
   }
 });
 
-// 3. UPDATE CATEGORY (Individual Only - Own Data)
+// 3. UPDATE CATEGORY (Admin & Super Admin)
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { name, is_active } = req.body;
 
-  if (req.user.role === 'super_admin') {
-    return res.status(403).json({ message: "Super Admin is Read-Only." });
-  }
-
   try {
-    const updateCategory = await pool.query(
-      "UPDATE categories SET name = COALESCE($1, name), is_active = COALESCE($2, is_active) WHERE id = $3 AND admin_id = $4 RETURNING *",
-      [name, is_active, id, req.user.id]
-    );
+    let updateCategory;
+    
+    if (req.user.role === 'super_admin') {
+      // Super admin can update any category
+      updateCategory = await pool.query(
+        "UPDATE categories SET name = COALESCE($1, name), is_active = COALESCE($2, is_active) WHERE id = $3 RETURNING *",
+        [name, is_active, id]
+      );
+    } else {
+      // Regular admin can only update their own categories
+      updateCategory = await pool.query(
+        "UPDATE categories SET name = COALESCE($1, name), is_active = COALESCE($2, is_active) WHERE id = $3 AND admin_id = $4 RETURNING *",
+        [name, is_active, id, req.user.id]
+      );
+    }
 
     if (updateCategory.rows.length === 0) {
       return res.status(404).json({ message: "Category not found or unauthorized." });
@@ -107,25 +113,29 @@ router.put('/:id', async (req, res) => {
   } catch (err) {
     console.error(err.message);
     if (err.code === '23505') {
-      return res.status(400).json({ message: "This category name already exists in your list!" });
+      return res.status(400).json({ message: "This category name already exists!" });
     }
     res.status(500).send("Server Error");
   }
 });
 
-// 4. DELETE CATEGORY (Individual Only - Own Data + Dependency Check)
+// 4. DELETE CATEGORY (Admin & Super Admin)
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
-  if (req.user.role === 'super_admin') {
-    return res.status(403).json({ message: "Super Admin is Read-Only." });
-  }
-
   try {
-    // 1. Check Ownership
-    const checkOwner = await pool.query("SELECT * FROM categories WHERE id = $1 AND admin_id = $2", [id, req.user.id]);
-    if (checkOwner.rows.length === 0) {
-      return res.status(404).json({ message: "Category not found or unauthorized." });
+    // 1. Check if category exists and ownership (for regular admins)
+    if (req.user.role !== 'super_admin') {
+      const checkOwner = await pool.query("SELECT * FROM categories WHERE id = $1 AND admin_id = $2", [id, req.user.id]);
+      if (checkOwner.rows.length === 0) {
+        return res.status(404).json({ message: "Category not found or unauthorized." });
+      }
+    } else {
+      // Super admin - just check if category exists
+      const checkExists = await pool.query("SELECT * FROM categories WHERE id = $1", [id]);
+      if (checkExists.rows.length === 0) {
+        return res.status(404).json({ message: "Category not found." });
+      }
     }
 
     // 2. Delete (foreign key constraints will prevent if linked to artworks)

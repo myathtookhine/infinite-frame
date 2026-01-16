@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const pool = require('../db');
 const {
@@ -267,6 +268,7 @@ router.post('/login', loginLimiter, validateLogin, async (req, res) => {
       });
     }
 
+
     // ✅ SUCCESS: Reset failed login counter
     resetFailedLogin(username);
 
@@ -277,9 +279,22 @@ router.post('/login', loginLimiter, validateLogin, async (req, res) => {
       [user.id, clientIp]
     );
 
+    // ✅ GENERATE JWT TOKEN
+    const token = jwt.sign(
+      {
+        sub: user.id,           // Subject (user's UUID)
+        role: user.role,        // User's role (super_admin or admin)
+        email: user.email,      // User's email
+        username: user.username // User's username
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
+
     // ✅ SECURITY: Don't send password_hash or sensitive data
     res.json({ 
-      message: "Login successful!", 
+      message: "Login successful!",
+      token: token, // ← JWT Token for authentication
       user: { 
         id: user.id, 
         username: user.username, 
