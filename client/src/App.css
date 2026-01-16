@@ -1,42 +1,97 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Brutalist Theme - Custom CSS */
+
+/* Typography - Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Myanmar:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+body {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Myanmar Language Font Settings */
+/* 1. Body and general text - Noto Sans Myanmar */
+html[lang="my"] body:not(.gallery-view),
+html[lang="my"] *:not(.gallery-view):not(.gallery-view *) {
+    font-family: 'Noto Sans Myanmar', sans-serif;
+    line-height: 1.95;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* 2. Headings and Titles - Noto Serif Myanmar */
+html[lang="my"] h1,
+html[lang="my"] h2,
+html[lang="my"] h3,
+html[lang="my"] h4,
+html[lang="my"] h5,
+html[lang="my"] h6 {
+    font-family: 'Noto Serif Myanmar', serif !important;
+    line-height: 1.95;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* English Language Font */
+html[lang="en"] body,
+html[lang="en"] * {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-.card {
-  padding: 2em;
+/* Gallery View - Always English Font (Override Myanmar) */
+html[lang="my"] .gallery-view,
+html[lang="my"] .gallery-view *,
+html[lang="en"] .gallery-view,
+html[lang="en"] .gallery-view *,
+.gallery-view,
+.gallery-view * {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    line-height: 1.6 !important;
 }
-
-.read-the-docs {
-  color: #888;
+/* Theme-aware Classes */
+.bg-theme {
+    background-color: var(--color-bg);
+}
+.text-theme {
+    color: var(--color-text);
+}
+.text-theme-muted {
+    color: var(--color-text-muted);
+}
+.border-theme {
+    border-color: var(--color-border);
+}
+/* Inverse Colors (for buttons, etc) */
+.bg-theme-inverse {
+    background-color: var(--color-text);
+    color: var(--color-bg);
+}
+.border-theme-inverse {
+    border-color: var(--color-text);
+}
+/* Smooth Transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+/* Scroll Reveal Animation */
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* Hover Effects */
+.hover-lift {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-lift:hover {
+    transform: translateY(-4px);
+}
+/* Focus States */
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 4px;
 }

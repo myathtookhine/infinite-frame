@@ -71,9 +71,7 @@ const Dashboard = () => {
   return (
     <main className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
       <div>
-        <h2 className={`font-sans text-3xl sm:text-5xl font-black tracking-tight mb-2 ${textColor}`}>
-          Dashboard
-        </h2>
+        <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>Dashboard</h1>
         <p className={`font-sans ${subtextColor} text-sm sm:text-lg`}>
           Overview of your gallery's performance.
         </p>

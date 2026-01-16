@@ -80,7 +80,7 @@ const Input = forwardRef(
         </div>
 
         {error && (
-          <p className="mt-1 text-sm font-sans text-red-600">{error}</p>
+          <p className="mt-2 text-sm font-sans text-red-600">{error}</p>
         )}
       </div>
     );

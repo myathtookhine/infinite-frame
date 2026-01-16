@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -26,13 +26,37 @@ const Register = () => {
   });
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({}); // Changed to object for field-specific errors
   const { isDark, toggleTheme } = useTheme();
   const { register, verifyOtp } = useAuth();
   const navigate = useNavigate();
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
+
+    // Clear error for the field being edited
+    if (errors[id]) {
+      setErrors(prev => ({ ...prev, [id]: '' }));
+    }
+
+    // Real-time validation for Username
+    if (id === 'username') {
+      const isValid = /^[a-zA-Z0-9]*$/.test(value);
+
+      if (!isValid) {
+        setErrors(prev => ({
+          ...prev,
+          username: 'Username can only contain letters and numbers.'
+        }));
+        return;
+      }
+    }
+
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
@@ -41,6 +65,9 @@ const Register = () => {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
+
+    // Clear OTP error
+    if (errors.otp) setErrors(prev => ({ ...prev, otp: '' }));
 
     // Auto focus next input
     if (value && index < 5) {
@@ -58,15 +85,20 @@ const Register = () => {
 
   const handleNextStep = async (e) => {
     e.preventDefault();
-    setError('');
+    setErrors({}); // Clear all errors
 
     if (step === 1) {
-      if (!formData.username || !formData.email || !formData.password) {
-        setError('Please fill all fields!');
-        return;
-      }
+      const newErrors = {};
+
+      if (!formData.username) newErrors.username = 'Username is required';
+      if (!formData.email) newErrors.email = 'Email is required';
+      if (!formData.password) newErrors.password = 'Password is required';
       if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match!');
+        newErrors.confirmPassword = 'Passwords do not match';
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
         return;
       }
       
@@ -81,12 +113,22 @@ const Register = () => {
       if (result.success) {
         setStep(2);
       } else {
-        setError(result.error);
+        // Map backend errors to fields based on message content
+        const msg = result.error.toLowerCase();
+        if (msg.includes('email')) {
+          setErrors({ email: result.error });
+        } else if (msg.includes('username')) {
+          setErrors({ username: result.error });
+        } else if (msg.includes('password')) {
+          setErrors({ password: result.error });
+        } else {
+          setErrors({ general: result.error });
+        }
       }
     } else if (step === 2) {
       const otpCode = otp.join('');
       if (otpCode.length < 6) {
-        setError('Please enter the 6-digit OTP!');
+        setErrors({ otp: 'Please enter the 6-digit OTP!' });
         return;
       }
 
@@ -97,7 +139,7 @@ const Register = () => {
       if (result.success) {
         setStep(3);
       } else {
-        setError(result.error);
+        setErrors({ otp: result.error });
       }
     }
   };
@@ -106,10 +148,10 @@ const Register = () => {
   const panelBg = isDark ? 'bg-[#141414]' : 'bg-white';
   const panelBorder = isDark ? "border-[#262626]" : "border-black";
   const headingColor = isDark ? "text-white" : "text-black";
-  const footerColor = isDark ? "text-gray-400" : "text-gray-500";
+  const footerColor = isDark ? "text-gray-100" : "text-gray-500";
 
   return (
-    <div className={`min-h-screen ${bgColor} flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden transition-colors duration-300`}>
+    <div className={`min-h-screen ${bgColor} flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-y-auto transition-colors duration-300`}>
       {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
@@ -137,9 +179,9 @@ const Register = () => {
           </button>
         </div>
 
-        <div className={`border-2 ${panelBorder} ${panelBg} p-5 sm:p-8 md:p-10 rounded-md transition-shadow hover:shadow-xl`}>
+        <div className={`border-2 ${panelBorder} ${panelBg} p-5 sm:p-8 md:p-10 rounded-md transition-shadow hover:shadow-xl mb-32`}>
           {step === 1 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="animate-in fade-in slide-in-from-right-8 duration-700">
               <h2 className={`font-sans text-2xl sm:text-3xl mb-2 text-left ${headingColor}`}>Create Account</h2>
               <p className={`${footerColor} text-sm mb-8`}>Step 1: Your essential details</p>
               
@@ -151,6 +193,7 @@ const Register = () => {
                   onChange={handleInputChange}
                   placeholder="Enter your username"
                   icon={UserIcon}
+                  error={errors.username}
                 />
                 <Input
                   id="email"
@@ -158,8 +201,9 @@ const Register = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="name@example.com"
+                  placeholder="name@gmail.com"
                   icon={EnvelopeIcon}
+                  error={errors.email}
                 />
                 <Input
                   id="password"
@@ -169,6 +213,7 @@ const Register = () => {
                   onChange={handleInputChange}
                   placeholder="Create a password"
                   icon={LockClosedIcon}
+                  error={errors.password}
                 />
                 <Input
                   id="confirmPassword"
@@ -178,11 +223,10 @@ const Register = () => {
                   onChange={handleInputChange}
                   placeholder="Repeat your password"
                   icon={LockClosedIcon}
+                  error={errors.confirmPassword}
                 />
 
-
-
-                {error && <div className="text-red-500 text-sm font-sans mt-2">{error}</div>}
+                {errors.general && <div className="text-red-500 text-sm font-sans mt-2 text-center">{errors.general}</div>}
 
                 <Button type="submit" variant="primary" size="lg" block>
                   Next Step
@@ -213,12 +257,13 @@ const Register = () => {
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     className={`w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all
-                      ${isDark ? 'bg-transparent border-[#262626] text-white' : 'bg-white border-black text-black'}`}
+                      ${isDark ? 'bg-transparent border-[#262626] text-white' : 'bg-white border-black text-black'}
+                      ${errors.otp ? 'border-red-500 ring-1 ring-red-500' : ''}`}
                   />
                 ))}
               </div>
 
-              {error && <div className="text-red-500 text-sm font-sans mb-4">{error}</div>}
+              {errors.otp && <div className="text-red-500 text-sm font-sans mb-4">{errors.otp}</div>}
 
               <Button onClick={handleNextStep} variant="primary" size="lg" block>
                 Verify & Register
@@ -247,6 +292,12 @@ const Register = () => {
               </Button>
             </div>
           )}
+        </div>
+
+        <div className="text-center mt-60">
+          <p className={`font-sans text-4xl font-light uppercase tracking-widest ${footerColor}`}>
+            Infinite Frame.
+          </p>
         </div>
       </div>
     </div>

@@ -6,14 +6,13 @@ import ConfigManager from '../components/ConfigManager';
 import ArtistSelector from '../components/ArtistSelector';
 import { 
   FolderPlusIcon,
-  TagIcon,
+  FolderIcon,
   ArchiveBoxIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
 
 import { ENDPOINTS } from '../config';
-
-const API_BASE_URL = ENDPOINTS.ATTRIBUTES;
+import Input from '../components/ui/Input';
 
 const ArtworkAttributes = () => {
   const [types, setTypes] = useState([]);
@@ -42,11 +41,13 @@ const ArtworkAttributes = () => {
     setLoading(true);
     const config = { 
       headers: { 'x-admin-id': user.id },
-      params: { target_user_id: selectedArtist || undefined } // Filter by artist if selected
+      params: {
+        target_user_id: selectedArtist ? selectedArtist : (isSuperAdmin ? 'all' : undefined)
+      }
     }; 
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/types`, config);
+      const response = await axios.get(`${ENDPOINTS.ATTRIBUTES}/types`, config);
       const fetchedTypes = response.data.filter(t => t.type !== 'Category');
       
       setTypes(fetchedTypes);
@@ -87,13 +88,13 @@ const ArtworkAttributes = () => {
     const config = { headers: { 'x-admin-id': user.id } };
 
     try {
-      await axios.post(`${API_BASE_URL}`, { 
+      await axios.post(ENDPOINTS.ATTRIBUTES, { 
         type: newTypeName, 
         name: newTypeFirstItem 
       }, config);
       
       // Refresh
-      const response = await axios.get(`${API_BASE_URL}/types`, config);
+      const response = await axios.get(`${ENDPOINTS.ATTRIBUTES}/types`, config);
       const fetchedTypes = response.data.filter(t => t.type !== 'Category');
       setTypes(fetchedTypes);
       setActiveTab(newTypeName);
@@ -144,10 +145,10 @@ const ArtworkAttributes = () => {
 
       <div className="flex flex-col md:flex-row md:gap-8 flex-wrap">
         {/* Dynamic Sidebar/Tabs */}
-        <div className="flex flex-wrap gap-2 pb-4 mb-6 -mx-4 px-4 no-scrollbar md:mx-0 md:px-0 md:flex-col md:w-64 md:space-y-1 md:pb-0 md:mb-0 scroll-smooth">
+        <div className="flex flex-wrap gap-2 mb-4 lg:mb-6 -mx-4 px-4 no-scrollbar md:mx-0 md:px-0 md:flex-col md:w-64 md:space-y-1 md:pb-0 md:mb-0 scroll-smooth">
           {types.length === 0 && !loading && (
              <div className={`p-4 text-xs ${subtextColor} text-center border-2 border-dashed ${borderColor} rounded-md`}>
-               {isSuperAdmin && !selectedArtist ? "Select an artist to view attributes." : "No attributes found. Create one."}
+              {isSuperAdmin && !selectedArtist ? "No attributes found in the system." : "No attributes found. Create one."}
              </div>
           )}
 
@@ -163,7 +164,7 @@ const ArtworkAttributes = () => {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                   <TagIcon className="h-4 w-4 flex-shrink-0" />
+                   <FolderIcon className="h-4 w-4 flex-shrink-0" />
                    <span>{item.type}</span>
                 </div>
               </button>
@@ -193,11 +194,11 @@ const ArtworkAttributes = () => {
         </div>
       </div>
 
-      {/* Access Control: Only Non-Super Admin can create new groups */}
+      {/* Access Control: Only Admin can create new groups */}
       {!isReadOnly && isNewTypeModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsNewTypeModalOpen(false)}></div>
-          <div className={`relative w-full max-w-md p-8 rounded-2xl border-2 ${borderColor} ${cardBg} shadow-2xl animate-in fade-in zoom-in duration-300`}>
+          <div className={`relative w-full max-w-md p-6 rounded-2xl border-2 ${borderColor} ${cardBg} shadow-2xl animate-in fade-in zoom-in duration-300`}>
              <div className="flex items-center justify-between mb-6">
               <h3 className={`text-xl font-sans font-bold ${textColor}`}>
                 New Attribute Group
@@ -216,29 +217,23 @@ const ArtworkAttributes = () => {
                </p>
 
                {/* Group Name */}
-               <div>
-                <label className={`block text-xs font-sans font-bold uppercase tracking-widest mb-2 ${subtextColor}`}>Group Name</label>
-                <input
-                  autoFocus
-                  type="text"
-                  value={newTypeName}
-                  onChange={(e) => setNewTypeName(e.target.value)}
-                  placeholder="e.g. Materials"
-                  className={`w-full px-4 py-3 rounded-md border-2 ${borderColor} ${inputBg} ${textColor} focus:outline-none focus:ring-2 ${isDark ? 'focus:ring-white' : 'focus:ring-black'} transition-all font-sans text-sm`}
-                />
-              </div>
+              <Input
+                autoFocus
+                label="Group Name"
+                type="text"
+                value={newTypeName}
+                onChange={(e) => setNewTypeName(e.target.value)}
+                placeholder="e.g. Materials"
+              />
 
                {/* First Item */}
-               <div>
-                <label className={`block text-xs font-sans font-bold uppercase tracking-widest mb-2 ${subtextColor}`}>First Item Name</label>
-                <input
-                  type="text"
-                  value={newTypeFirstItem}
-                  onChange={(e) => setNewTypeFirstItem(e.target.value)}
-                  placeholder="e.g. Wood"
-                  className={`w-full px-4 py-3 rounded-md border-2 ${borderColor} ${inputBg} ${textColor} focus:outline-none focus:ring-2 ${isDark ? 'focus:ring-white' : 'focus:ring-black'} transition-all font-sans text-sm`}
-                />
-              </div>
+              <Input
+                label="First Item Name"
+                type="text"
+                value={newTypeFirstItem}
+                onChange={(e) => setNewTypeFirstItem(e.target.value)}
+                placeholder="e.g. Wood"
+              />
 
               {createError && <p className="text-red-500 text-xs">{createError}</p>}
 

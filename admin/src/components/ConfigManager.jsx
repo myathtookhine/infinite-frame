@@ -8,14 +8,14 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
   PencilSquareIcon,
-  TagIcon
+  FolderIcon
 } from '@heroicons/react/24/outline';
 
 import { ENDPOINTS } from '../config';
+import Input from './ui/Input';
+import Button from './ui/Button';
 
-const API_BASE_URL = ENDPOINTS.ATTRIBUTES;
-
-const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserId }) => {
+const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserId, hideHeader = false, renderAddButton }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null); // { id, name }
   const [items, setItems] = useState([]);
@@ -26,15 +26,21 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
   const { isDark } = useTheme();
   const { user } = useAuth();
 
+  // Super admin can edit but not delete
+  const isSuperAdmin = user?.role === 'super_admin';
+
   const fetchData = async () => {
     setLoading(true);
+    const isSuperAdmin = user?.role === 'super_admin';
     const config = { 
         headers: { 'x-admin-id': user.id },
-        params: { target_user_id: targetUserId || undefined }
+      params: {
+        target_user_id: targetUserId ? targetUserId : (isSuperAdmin ? 'all' : undefined)
+      }
     }; 
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/${type}`, config);
+      const response = await axios.get(`${ENDPOINTS.ATTRIBUTES}/${type}`, config);
       setItems(response.data);
     } catch (err) {
       console.error(`Error fetching ${type}:`, err);
@@ -58,14 +64,14 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
     try {
       if (editingItem) {
         // UPDATE (PUT)
-        const response = await axios.put(`${API_BASE_URL}/${editingItem.id}`, { name: newItemName }, config);
+        const response = await axios.put(`${ENDPOINTS.ATTRIBUTES}/${editingItem.id}`, { name: newItemName }, config);
         setItems(items.map(item => item.id === editingItem.id ? response.data : item));
         setIsModalOpen(false);
         setEditingItem(null);
         setNewItemName('');
       } else {
         // CREATE (POST)
-        const response = await axios.post(`${API_BASE_URL}`, { type, name: newItemName }, config);
+        const response = await axios.post(ENDPOINTS.ATTRIBUTES, { type, name: newItemName }, config);
         setItems([...items, response.data]);
         setNewItemName('');
         setIsModalOpen(false);
@@ -100,7 +106,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
     const config = { headers: { 'x-admin-id': user.id } };
     
     try {
-      await axios.delete(`${API_BASE_URL}/${id}`, config);
+      await axios.delete(`${ENDPOINTS.ATTRIBUTES}/${id}`, config);
       setItems(items.filter(item => item.id !== id));
       onRefresh && onRefresh();
     } catch (err) {
@@ -120,7 +126,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
     const newStatus = !item.is_active;
 
     try {
-        const response = await axios.put(`${API_BASE_URL}/${item.id}`, { 
+      const response = await axios.put(`${ENDPOINTS.ATTRIBUTES}/${item.id}`, { 
             is_active: newStatus 
         }, config);
         
@@ -145,49 +151,53 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
   const textColor = isDark ? 'text-white' : 'text-black';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
 
+  // Expose openAddModal for external button (hide for super_admin)
+  const addButton = !isReadOnly && !isSuperAdmin && (
+    <Button
+      onClick={openAddModal}
+      className="w-full sm:w-auto flex items-center justify-center gap-2"
+      variant="secondary"
+    >
+      <PlusIcon className="h-4 w-4" />
+      <span className="whitespace-nowrap">Add New</span>
+    </Button>
+  );
+
+  // Call renderAddButton callback if provided
+  if (renderAddButton && !isReadOnly && !isSuperAdmin) {
+    renderAddButton(openAddModal);
+  }
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
-        <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg flex-shrink-0 ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
-            <TagIcon className={`h-6 w-6 ${textColor}`} />
+      {!hideHeader && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-4 lg:mb-8">
+          <div className="flex items-center gap-3">
+            <div className="min-w-0">
+              <h2 className={`text-xl sm:text-2xl font-sans font-bold ${textColor} truncate`}>{title}</h2>
+              <p className={`text-sm ${subtextColor} truncate`}>
+                {isSuperAdmin ? `Manage ${title} options for all artists` : `Manage ${title} options`}
+              </p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <h2 className={`text-xl sm:text-2xl font-sans font-bold ${textColor} truncate`}>{title}</h2>
-            <p className={`text-sm ${subtextColor} truncate`}>
-               {isReadOnly ? `View available ${title} options` : `Manage ${title} options`}
-            </p>
-          </div>
-        </div>
 
-        {!isReadOnly && (
-          <button
-            onClick={openAddModal}
-            className={`w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-md font-sans font-bold text-sm cursor-pointer transition-all duration-300 ${
-              isDark 
-                ? 'bg-white text-black hover:bg-gray-200' 
-                : 'bg-black text-white hover:bg-gray-800'
-            }`}
-          >
-            <PlusIcon className="h-4 w-4" />
-            <span className="whitespace-nowrap">Add Item</span>
-          </button>
-        )}
-      </div>
+          {addButton}
+        </div>
+      )}
 
       <div className="w-full">
         {/* List Entries */}
         <div className="w-full">
-          <div className="mb-6 relative">
-            <MagnifyingGlassIcon className={`absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 ${subtextColor}`} />
-            <input
+          {/* <div className="mb-6">
+            <Input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={`Search ${title.toLowerCase()}...`}
-              className={`w-full pl-12 pr-4 py-3 rounded-md border-2 ${borderColor} ${inputBg} ${textColor} focus:outline-none focus:ring-2 ${isDark ? 'focus:ring-white' : 'focus:ring-black'} transition-all font-sans text-sm`}
+              icon={MagnifyingGlassIcon}
+              containerClassName=""
             />
-          </div>
+          </div> */}
 
           <div className="space-y-3">
             {loading && items.length === 0 ? (
@@ -213,49 +223,31 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
-                      {/* Status Switch - Visible to All, Interactive only if !isReadOnly */}
-                      <button
-                        onClick={() => !isReadOnly && handleToggleStatus(item)}
-                        disabled={isReadOnly}
-                        title={isReadOnly ? (item.is_active ? "Active" : "Disabled") : (item.is_active ? "Click to Disable" : "Click to Enable")}
-                        className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          isReadOnly ? 'cursor-default opacity-80' : 'cursor-pointer'
-                        } ${
-                          item.is_active 
-                            ? (isDark ? 'bg-white' : 'bg-black') 
-                            : (isDark ? 'bg-[#262626]' : 'bg-gray-200')
+                    {/* Edit button for everyone */}
+                    <Button
+                      variant="secondary"
+                      onClick={() => openEditModal(item)}
+                      className={`p-2 !border-0 ${isDark ? 'text-blue-400 hover:bg-white/5' : 'text-blue-600 hover:bg-black/5'
                         }`}
-                      >
-                        <span
-                          aria-hidden="true"
-                          className={`${
-                            item.is_active ? 'translate-x-5' : 'translate-x-0'
-                          } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isDark && item.is_active ? '!bg-black' : ''}`} 
-                        />
-                      </button>
+                      title="Edit"
+                      size="sm"
+                    >
+                      <PencilSquareIcon className="h-5 w-5" />
+                    </Button>
 
-                      {!isReadOnly && (
-                        <>
-                          <button
-                            onClick={() => openEditModal(item)}
-                            className={`p-2.5 rounded-lg transition-all cursor-pointer ${
-                              isDark ? 'text-blue-400 hover:bg-white/5' : 'text-blue-600 hover:bg-black/5'
-                            }`}
-                            title="Edit"
-                          >
-                            <PencilSquareIcon className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item.id)}
-                            className={`p-2.5 rounded-lg transition-all cursor-pointer ${
-                              isDark ? 'text-red-400 hover:bg-white/5' : 'text-red-500 hover:bg-black/5'
-                            }`}
-                            title="Delete"
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                          </button>
-                        </>
-                      )}
+                    {/* Delete button only for non-super-admin */}
+                    {!isSuperAdmin && (
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleDelete(item.id)}
+                        className={`p-2 !border-0 ${isDark ? 'text-red-400 hover:bg-white/5' : 'text-red-500 hover:bg-black/5'
+                          }`}
+                        title="Delete"
+                        size="sm"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))
@@ -268,52 +260,79 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-          <div className={`relative w-full max-w-md p-8 rounded-2xl border-2 ${borderColor} ${cardBg} shadow-2xl animate-in fade-in zoom-in duration-300`}>
+          <div className={`relative w-full max-w-md p-6 rounded-2xl border-2 ${borderColor} ${cardBg} shadow-2xl animate-in fade-in zoom-in duration-300`}>
             <div className="flex items-center justify-between mb-6">
               <h3 className={`text-xl font-sans font-bold ${textColor}`}>
                 {editingItem ? `Edit ${editingItem.name}` : `Add New to ${title}`}
               </h3>
-              <button 
+              <Button
+                variant="secondary"
                 onClick={() => setIsModalOpen(false)}
-                className={`p-1 rounded-md cursor-pointer ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/10'} transition-colors`}
+                className="p-1 !border-0"
               >
                 <XMarkIcon className={`h-6 w-6 ${subtextColor}`} />
-              </button>
+              </Button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className={`block text-xs font-sans font-bold uppercase tracking-widest mb-2 ${subtextColor}`}>Name</label>
-                <input
-                  autoFocus
-                  type="text"
-                  value={newItemName}
-                  onChange={(e) => setNewItemName(e.target.value)}
-                  placeholder={`Enter name`}
-                  className={`w-full px-4 py-3 rounded-md border-2 ${borderColor} ${inputBg} ${textColor} focus:outline-none focus:ring-2 ${isDark ? 'focus:ring-white' : 'focus:ring-black'} transition-all font-sans text-sm`}
-                />
-              </div>
+              <Input
+                autoFocus
+                label="Name"
+                type="text"
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+                placeholder="Enter name"
+              />
               {error && <p className="text-red-500 text-xs">{error}</p>}
+
+              {editingItem && (
+                <div className="space-y-4 mt-4">
+                  {/* Status Toggle */}
+                  <div className="flex items-center justify-between">
+                    <span className={`text-sm font-medium ${textColor}`}>
+                      Status
+                      <p className={`text-xs ${subtextColor} font-normal`}>
+                        {editingItem.is_active ? 'Currently Active' : 'Currently Disabled'}
+                      </p>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const newStatus = !editingItem.is_active;
+                        await handleToggleStatus(editingItem);
+                        setEditingItem({ ...editingItem, is_active: newStatus });
+                      }}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${editingItem.is_active
+                        ? (isDark ? 'bg-white' : 'bg-black')
+                        : (isDark ? 'bg-[#262626]' : 'bg-gray-200')
+                        }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`${editingItem.is_active ? 'translate-x-5' : 'translate-x-0'
+                          } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isDark && editingItem.is_active ? '!bg-black' : ''}`}
+                      />
+                    </button>
+                  </div>
+
+                </div>
+              )}
               <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
                   onClick={() => setIsModalOpen(false)}
-                  className={`flex-1 py-3 rounded-md font-sans font-bold text-sm border-2 ${borderColor} ${textColor} cursor-pointer ${isDark ? 'hover:bg-white/5' : 'hover:bg-black/5'} transition-all`}
+                  className="flex-1"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={loading || !newItemName.trim()}
-                  className={`flex-1 py-3 rounded-md flex items-center justify-center gap-2 font-sans font-bold text-sm cursor-pointer transition-all duration-300 ${
-                    isDark 
-                      ? 'bg-white text-black hover:bg-gray-200' 
-                      : 'bg-black text-white hover:bg-gray-800'
-                  } disabled:opacity-50`}
+                  className="flex-1 flex items-center justify-center gap-2"
                 >
                   {editingItem ? <PencilSquareIcon className="h-4 w-4" /> : <PlusIcon className="h-4 w-4" />}
                   {editingItem ? 'Update' : 'Save'}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE_URL } from '../config';
+import { ENDPOINTS } from '../config';
 
 const AuthContext = createContext(null);
 
@@ -26,15 +26,15 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       // Make API call to the backend login endpoint using axios
-      const response = await axios.post(`${API_BASE_URL}/login`, {
+      const response = await axios.post(ENDPOINTS.AUTH.LOGIN, {
         username,
         password,
       });
 
       const userData = response.data.user;
+      const token = response.data.token; // ← Get REAL JWT token from backend
 
-      // Login successful
-      const token = 'admin-token-' + Date.now();
+      // Store JWT token and user data
       localStorage.setItem('adminToken', token);
       localStorage.setItem('adminUser', JSON.stringify(userData));
 
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/register`, userData);
+      const response = await axios.post(ENDPOINTS.AUTH.REGISTER, userData);
       return { success: true, message: response.data.message };
     } catch (error) {
       return {
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
 
   const verifyOtp = async (email, otp) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/verify-otp`, { email, otp });
+      const response = await axios.post(ENDPOINTS.AUTH.VERIFY_OTP, { email, otp });
       return { success: true, user: response.data.user };
     } catch (error) {
       return {
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       if (user?.id) {
-        await axios.post(`${API_BASE_URL}/logout`, { userId: user.id });
+        await axios.post(ENDPOINTS.AUTH.LOGOUT, { userId: user.id });
       }
     } catch (err) {
       console.error("Logout log failed:", err);
@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (newUsername) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/update-profile`, {
+      const response = await axios.post(ENDPOINTS.AUTH.UPDATE_PROFILE, {
         userId: user.id,
         newUsername
       });
@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }) => {
 
   const changePassword = async (currentPassword, newPassword) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/change-password`, {
+      const response = await axios.post(ENDPOINTS.AUTH.CHANGE_PASSWORD, {
         userId: user.id,
         currentPassword,
         newPassword
@@ -122,6 +122,26 @@ export const AuthProvider = ({ children }) => {
       return {
         success: false,
         error: error.response?.data?.message || 'Password change failed.'
+      };
+    }
+  };
+
+  const updateGalleryInfo = async (galleryData) => {
+    try {
+      const response = await axios.post(ENDPOINTS.AUTH.UPDATE_GALLERY_INFO, {
+        userId: user.id,
+        ...galleryData
+      });
+
+      const updatedUserData = response.data.user;
+      localStorage.setItem('adminUser', JSON.stringify(updatedUserData));
+      setUser(updatedUserData);
+
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Update failed.'
       };
     }
   };
@@ -136,6 +156,7 @@ export const AuthProvider = ({ children }) => {
     verifyOtp,
     changePassword,
     updateProfile,
+    updateGalleryInfo,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

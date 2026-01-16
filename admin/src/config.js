@@ -1,13 +1,33 @@
 // Centralized Configuration
 
-// Check if Vite environment variable exists, otherwise default to localhost
 // Use environment variable if available (Production), otherwise use localhost (Development)
-// config.js
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Helper to get specific endpoints if needed
+// All API Endpoints
 export const ENDPOINTS = {
-  AUTH: `${API_BASE_URL}/auth`,
+  // Auth
+  AUTH: {
+    LOGIN: `${API_BASE_URL}/login`,
+    REGISTER: `${API_BASE_URL}/register`,
+    VERIFY_OTP: `${API_BASE_URL}/verify-otp`,
+    LOGOUT: `${API_BASE_URL}/logout`,
+    UPDATE_PROFILE: `${API_BASE_URL}/update-profile`,
+    UPDATE_GALLERY_INFO: `${API_BASE_URL}/update-gallery-info`,
+    CHANGE_PASSWORD: `${API_BASE_URL}/change-password`,
+  },
+  // Attributes
   ATTRIBUTES: `${API_BASE_URL}/attributes`,
-  // Add more as needed
+  // Categories
+  CATEGORIES: `${API_BASE_URL}/categories`,
+  // Config (Master Data)
+  CONFIG: (table) => `${API_BASE_URL}/config/${table}`,
+  CONFIG_DELETE: (table, id) => `${API_BASE_URL}/config/${table}/${id}`,
+  // Admin Management
+  ADMIN_MANAGEMENT: {
+    BASE: `${API_BASE_URL}/admin-management`,
+    LOGS: `${API_BASE_URL}/admin-management/logs`,
+    STATUS: (id) => `${API_BASE_URL}/admin-management/${id}/status`,
+    DELETE: (id) => `${API_BASE_URL}/admin-management/${id}`,
+    RESET_PASSWORD: (id) => `${API_BASE_URL}/admin-management/${id}/reset-password`,
+  },
 };

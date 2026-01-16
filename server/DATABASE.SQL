@@ -49,7 +49,20 @@ CREATE TABLE IF NOT EXISTS attributes (
 );
 
 -- ==========================================
--- 5. ARTWORKS
+-- 5. CATEGORIES (Separate from Attributes)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS categories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    admin_id UUID REFERENCES admins(id) ON DELETE CASCADE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(admin_id, name)
+);
+
+-- ==========================================
+-- 6. ARTWORKS
 -- ==========================================
 CREATE TABLE IF NOT EXISTS artworks (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -65,7 +78,7 @@ CREATE TABLE IF NOT EXISTS artworks (
 );
 
 -- ==========================================
--- 6. ARTWORK ATTRIBUTES (Link Table)
+-- 7. ARTWORK ATTRIBUTES (Link Table)
 -- ==========================================
 CREATE TABLE IF NOT EXISTS artwork_attributes (
     artwork_id UUID REFERENCES artworks(id) ON DELETE CASCADE,
@@ -74,26 +87,29 @@ CREATE TABLE IF NOT EXISTS artwork_attributes (
 );
 
 -- ==========================================
--- 7. INDEXES FOR PERFORMANCE
+-- 8. INDEXES FOR PERFORMANCE
 -- ==========================================
 CREATE INDEX IF NOT EXISTS idx_admins_email ON admins(email);
 CREATE INDEX IF NOT EXISTS idx_admins_username ON admins(username);
 CREATE INDEX IF NOT EXISTS idx_attributes_admin_id ON attributes(admin_id);
 CREATE INDEX IF NOT EXISTS idx_attributes_type ON attributes(type);
+CREATE INDEX IF NOT EXISTS idx_categories_admin_id ON categories(admin_id);
+CREATE INDEX IF NOT EXISTS idx_categories_is_active ON categories(is_active);
 CREATE INDEX IF NOT EXISTS idx_artworks_admin_id ON artworks(admin_id);
 CREATE INDEX IF NOT EXISTS idx_artworks_is_active ON artworks(is_active);
 
 -- ==========================================
--- 8. ROW LEVEL SECURITY (RLS)
+-- 9. ROW LEVEL SECURITY (RLS)
 -- ==========================================
 -- Enable RLS on all tables
 ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE attributes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE artworks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE artwork_attributes ENABLE ROW LEVEL SECURITY;
 
 -- ==========================================
--- 9. RLS POLICIES (Backend Access)
+-- 10. RLS POLICIES (Backend Access)
 -- ==========================================
 -- Allow backend (service_role) to access all data
 -- Your Node.js backend uses service_role key
@@ -104,6 +120,9 @@ CREATE POLICY "Backend full access on admins" ON admins
 CREATE POLICY "Backend full access on attributes" ON attributes
     FOR ALL USING (true) WITH CHECK (true);
 
+CREATE POLICY "Backend full access on categories" ON categories
+    FOR ALL USING (true) WITH CHECK (true);
+
 CREATE POLICY "Backend full access on artworks" ON artworks
     FOR ALL USING (true) WITH CHECK (true);
 
@@ -111,7 +130,7 @@ CREATE POLICY "Backend full access on artwork_attributes" ON artwork_attributes
     FOR ALL USING (true) WITH CHECK (true);
 
 -- ==========================================
--- 10. UPDATED_AT TRIGGER FUNCTION
+-- 11. UPDATED_AT TRIGGER FUNCTION
 -- ==========================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -130,12 +149,16 @@ CREATE TRIGGER update_attributes_updated_at
     BEFORE UPDATE ON attributes
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_categories_updated_at
+    BEFORE UPDATE ON categories
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_artworks_updated_at
     BEFORE UPDATE ON artworks
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ==========================================
--- 11. SEED SUPER ADMIN (Optional)
+-- 12. SEED SUPER ADMIN (Optional)
 -- ==========================================
 -- Replace the password_hash with actual bcrypt hash
 -- You can generate one using: https://bcrypt-generator.com/

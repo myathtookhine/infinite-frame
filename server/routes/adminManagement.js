@@ -43,10 +43,9 @@ router.get('/logs', async (req, res) => {
 // 1. GET ALL ADMINS (Except self/Super Admin logic can be refined)
 router.get('/', async (req, res) => {
   try {
-    // Get all users who are NOT super_admin (or include them if you want)
-    // Usually we manage 'individual' artists here.
+    // Get all users (including other super admins)
     const result = await pool.query(
-      "SELECT id, username, email, role, status, is_verified, created_at FROM admins WHERE role = 'individual' ORDER BY created_at DESC"
+      "SELECT id, username, email, role, status, is_verified, created_at FROM admins ORDER BY created_at DESC"
     );
     res.json(result.rows);
   } catch (err) {
@@ -57,27 +56,38 @@ router.get('/', async (req, res) => {
 
 // 2. CREATE NEW ADMIN
 router.post('/', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, isSuperAdmin } = req.body;
 
-  if (!username || !email || !password) {
-    return res.status(400).json({ message: "Please fill all fields" });
+  // Email is now optional, only Username and Password are required
+  if (!username || !password) {
+    return res.status(400).json({ message: "Username and Password are required" });
   }
 
   try {
-    // Check existing
-    const check = await pool.query("SELECT * FROM admins WHERE email = $1 OR username = $2", [email, username]);
-    if (check.rows.length > 0) {
-      return res.status(400).json({ message: "Username or Email already exists" });
+    // Check Email (if provided)
+    if (email) {
+        const emailCheck = await pool.query("SELECT id FROM admins WHERE email = $1", [email]);
+        if (emailCheck.rows.length > 0) {
+            return res.status(400).json({ message: "This email is already used." });
+        }
+    }
+
+    // Check Username
+    const usernameCheck = await pool.query("SELECT id FROM admins WHERE username = $1", [username]);
+    if (usernameCheck.rows.length > 0) {
+        return res.status(400).json({ message: "This username is already taken." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const role = isSuperAdmin ? 'super_admin' : 'individual';
+    const cleanEmail = email && email.trim() !== '' ? email : null;
 
     // Create auto-verified admin
     const newUser = await pool.query(
       `INSERT INTO admins (username, email, password_hash, role, is_verified, status) 
-       VALUES ($1, $2, $3, 'individual', TRUE, 'active') 
-       RETURNING id, username, email, status, created_at`,
-      [username, email, hashedPassword]
+       VALUES ($1, $2, $3, $4, TRUE, 'active') 
+       RETURNING id, username, email, role, status, created_at`,
+      [username, cleanEmail, hashedPassword, role]
     );
 
     res.status(201).json(newUser.rows[0]);

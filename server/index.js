@@ -18,8 +18,13 @@ app.get('/', (req, res) => {
   res.send('Infinite Frame API is running peacefully...');
 });
 
+// Public routes (no authentication)
+app.use('/api/public', require('./routes/publicGallery'));
+
+// Protected routes
 app.use('/api', authRoutes); 
 app.use('/api/attributes', require('./routes/attributes'));
+app.use('/api/categories', require('./routes/categories'));
 app.use('/api/config', require('./routes/config')); // Master Data (Categories, etc.)
 app.use('/api/admin-management', require('./routes/adminManagement')); // Super Admin Utils
 

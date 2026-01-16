@@ -1,30 +1,78 @@
+# =====================================================
+# INFINITE FRAME - Root .gitignore
+# =====================================================
+
+# =====================================================
+# CRITICAL: Never commit these files!
+# =====================================================
+# Environment variables (contains API keys, passwords, etc.)
+.env
+.env.*
+!.env.example
 server/.env
+admin/.env
+client/.env
+
+# =====================================================
 # Dependencies
+# =====================================================
 node_modules/
+*/node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# =====================================================
+# Build outputs
+# =====================================================
 dist/
 dist-ssr/
+build/
+*/dist/
+*/build/
 *.local
 
-# Secrets (DANGER: DO NOT COMMIT)
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
+# =====================================================
 # Logs
+# =====================================================
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
+# =====================================================
 # OS Files
+# =====================================================
 .DS_Store
 Thumbs.db
+desktop.ini
 
+# =====================================================
 # IDE Files
+# =====================================================
 .vscode/
 .idea/
 *.suo
 *.ntvs*
 *.njsproj
+*.sln
+*.sw?
+*.swp
+
+# =====================================================
+# Testing & Coverage
+# =====================================================
+coverage/
+.nyc_output/
+*.test.js.snap
+
+# =====================================================
+# Temporary Files
+# =====================================================
+*.tmp
+*.temp
+.cache/
+.parcel-cache/

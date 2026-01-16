@@ -1,0 +1,84 @@
+# QUICK SECURITY TESTS - Windows CMD/PowerShell
+# Copy each test one by one and run
+
+# =====================================================
+# TEST 1: Server Health Check
+# =====================================================
+curl http://localhost:5000
+
+# Expected: "Infinite Frame API is running peacefully..."
+
+
+# =====================================================
+# TEST 2: Invalid Email Format
+# =====================================================
+curl -X POST http://localhost:5000/api/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"testuser\",\"email\":\"notemail\",\"password\":\"Test1234\"}"
+
+# Expected: {"message":"Invalid email format."}
+
+
+# =====================================================
+# TEST 3: Weak Password  
+# =====================================================
+curl -X POST http://localhost:5000/api/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"testuser\",\"email\":\"test@test.com\",\"password\":\"weak\"}"
+
+# Expected: {"message":"Password must be at least 8 characters..."}
+
+
+# =====================================================
+# TEST 4: Short Username
+# =====================================================
+curl -X POST http://localhost:5000/api/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"ab\",\"email\":\"test@test.com\",\"password\":\"Test1234\"}"
+
+# Expected: {"message":"Username must be 3-30 alphanumeric characters."}
+
+
+# =====================================================
+# TEST 5: Valid Registration
+# =====================================================
+curl -X POST http://localhost:5000/api/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"myuser001\",\"email\":\"myuser001@example.com\",\"password\":\"MyPass123\"}"
+
+# Expected: {"message":"OTP sent successfully! Please check your email."}
+# Check Supabase database for OTP code
+
+
+# =====================================================
+# TEST 6: Login Rate Limiting
+# Run this command 6 times in a row
+# =====================================================
+curl -X POST http://localhost:5000/api/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"rateli mituser\",\"password\":\"wrong1\"}"
+
+# Attempt 1-5: {"message":"Invalid username or password. X attempts remaining."}
+# Attempt 6: {"message":"Too many login attempts. Please try again after 15 minutes."}
+
+
+# =====================================================
+# TEST 7: Invalid OTP
+# =====================================================
+curl -X POST http://localhost:5000/api/verify-otp ^
+  -H "Content-Type: application/json" ^
+  -d "{\"email\":\"myuser001@example.com\",\"otp\":\"999999\"}"
+
+# Expected: {"message":"Invalid verification code or email."}
+
+
+# =====================================================
+# TEST 8: Check with Headers (See Rate Limit Info)
+# =====================================================
+curl -i -X POST http://localhost:5000/api/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"test\",\"password\":\"test\"}"
+
+# Look for headers:
+# X-RateLimit-Limit: 5
+# X-RateLimit-Remaining: 4
