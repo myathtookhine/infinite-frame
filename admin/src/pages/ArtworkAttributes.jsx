@@ -146,13 +146,27 @@ const ArtworkAttributes = () => {
       <div className="flex flex-col md:flex-row md:gap-8 flex-wrap">
         {/* Dynamic Sidebar/Tabs */}
         <div className="flex flex-wrap gap-2 mb-4 lg:mb-6 -mx-4 px-4 no-scrollbar md:mx-0 md:px-0 md:flex-col md:w-64 md:space-y-1 md:pb-0 md:mb-0 scroll-smooth">
+          {/* Loading skeleton for tabs */}
+          {loading && (
+            <div className="space-y-2 md:space-y-1 w-full">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className={`h-14 md:h-16 rounded-xl border-2 ${borderColor} ${cardBg} animate-pulse`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Empty state */}
           {types.length === 0 && !loading && (
              <div className={`p-4 text-xs ${subtextColor} text-center border-2 border-dashed ${borderColor} rounded-md`}>
               {isSuperAdmin && !selectedArtist ? "No attributes found in the system." : "No attributes found. Create one."}
              </div>
           )}
 
-          {types.map((item, idx) => {
+          {/* Type tabs */}
+          {!loading && types.map((item, idx) => {
              return (
               <button
                 key={`${item.type}-${idx}`}
@@ -174,7 +188,13 @@ const ArtworkAttributes = () => {
 
         {/* Content Area */}
         <div className="flex-1 min-w-0">
-          {activeTab ? (
+          {/* Loading state for content */}
+          {loading ? (
+            <div className={`rounded-xl border-2 ${borderColor} ${cardBg} p-12 text-center animate-in fade-in duration-300`}>
+              <div className={`w-8 h-8 border-2 ${isDark ? 'border-white/20 border-t-white' : 'border-black/10 border-t-black'} rounded-full animate-spin mx-auto mb-4`}></div>
+              <p className={subtextColor}>Loading attributes...</p>
+            </div>
+          ) : activeTab ? (
             <ConfigManager 
               key={`${activeTab}-${selectedArtist}`} // Re-mount when artist changes
               type={activeTab} 
@@ -183,13 +203,11 @@ const ArtworkAttributes = () => {
               targetUserId={selectedArtist} // Pass down specific filter
               onRefresh={() => fetchTypes()}
             />
-          ) : (
-             !loading && (
-              <div className={`flex flex-col items-center justify-center h-64 border-2 border-dashed ${borderColor} rounded-2xl`}>
-                 <ArchiveBoxIcon className={`h-12 w-12 mb-4 ${subtextColor}`} />
-                 <p className={subtextColor}>Select an attribute type.</p>
-              </div>
-            )
+            ) : (
+                <div className={`flex flex-col items-center justify-center h-64 border-2 border-dashed ${borderColor} rounded-2xl`}>
+                  <ArchiveBoxIcon className={`h-12 w-12 mb-4 ${subtextColor}`} />
+                  <p className={subtextColor}>Select an attribute type.</p>
+                </div>
           )}
         </div>
       </div>
