@@ -140,12 +140,12 @@ const GalleryView = () => {
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-8 md:px-16 lg:px-24 py-32">
+      <div className="max-w-6xl mx-auto px-8 md:px-16 lg:px-24 py-28 lg:py-32">
 
         {/* Banner */}
         {gallery.banner_enabled && gallery.banner_image_url && (
-          <div className="reveal mb-16 -mx-8 md:-mx-16 lg:-mx-24">
-            <div className="overflow-hidden">
+          <div className="reveal mb-8 sm:mb-8">
+            <div className="overflow-hidden rounded-lg">
               <img
                 src={gallery.banner_image_url}
                 alt={`${decodeHtml(gallery.gallery_name) || gallery.username} banner`}
@@ -157,8 +157,8 @@ const GalleryView = () => {
         )}
 
         {/* Header */}
-        <header className="reveal text-center mb-32 pt-16">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-tighter leading-tight mb-8">
+        <header className="reveal text-center pt-0 sm:pt-16">
+          <h1 className="text-3xl md:text-7xl lg:text-8xl font-bold capitalize tracking-tighter leading-tight mb-4 sm:mb-4">
             {decodeHtml(gallery.gallery_name) || gallery.username}
           </h1>
           <div className="w-32 h-1 bg-theme mx-auto"></div>
@@ -166,8 +166,8 @@ const GalleryView = () => {
         
         {/* Description */}
         {gallery.description && (
-          <section className="reveal text-center mb-32 max-w-3xl mx-auto">
-            <p className="text-xl md:text-2xl font-light leading-relaxed opacity-70">
+          <section className="reveal text-left mb-20 mx-auto">
+            <p className="text-md md:text-xl font-light leading-relaxed opacity-70 text-center">
               {decodeHtml(gallery.description)}
             </p>
           </section>
