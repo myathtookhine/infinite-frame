@@ -148,7 +148,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
   const cardBg = isDark ? 'bg-[#141414]' : 'bg-white';
   const inputBg = isDark ? 'bg-[#0a0a0a]' : 'bg-white';
   const borderColor = isDark ? 'border-[#262626]' : 'border-gray-200';
-  const textColor = isDark ? 'text-white' : 'text-black';
+  const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
 
   // Expose openAddModal for external button (hide for super_admin)
@@ -303,7 +303,7 @@ const ConfigManager = ({ type, title, isReadOnly = false, onRefresh, targetUserI
                         setEditingItem({ ...editingItem, is_active: newStatus });
                       }}
                       className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${editingItem.is_active
-                        ? (isDark ? 'bg-white' : 'bg-black')
+                        ? (isDark ? 'bg-white' : 'bg-[#151416]')
                         : (isDark ? 'bg-[#262626]' : 'bg-gray-200')
                         }`}
                     >

@@ -3,7 +3,7 @@ import { useTheme } from "../../context/ThemeContext";
 const ContentCard = ({ title, children, className = "", subtitle }) => {
   const { isDark } = useTheme();
 
-  const textColor = isDark ? "text-white" : "text-black";
+  const textColor = isDark ? "text-white" : "text-[#151416]";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
   const cardBg = isDark ? "bg-[#1a1a1a]" : "bg-white";
   const cardBorder = isDark ? "border-[#262626]" : "border-gray-300";

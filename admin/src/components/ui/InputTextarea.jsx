@@ -20,7 +20,7 @@ const InputTextarea = forwardRef(
     const labelClass = isDark ? "text-gray-300" : "text-gray-700";
     const inputClass = isDark
       ? "border-[#262626] bg-[#0a0a0a] text-white placeholder:text-gray-600 focus:ring-white focus:border-white"
-      : "border-gray-300 bg-white text-black placeholder:text-gray-400 focus:ring-black focus:border-black";
+      : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:ring-gray-900 focus:border-gray-900";
 
     const customStyles = {
       minHeight: minHeight,

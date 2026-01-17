@@ -18,7 +18,7 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
   const fileInputRef = useRef(null);
   const imgRef = useRef(null);
 
-  const textColor = isDark ? 'text-white' : 'text-black';
+  const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-600';
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -271,14 +271,17 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
               disabled={uploading}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 enabled 
-                  ? (isDark ? 'bg-white' : 'bg-black')
+                ? (isDark ? 'bg-white' : 'bg-[#151416]')
                   : (isDark ? 'bg-gray-700' : 'bg-gray-300')
               } disabled:opacity-50`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
                   enabled ? 'translate-x-6' : 'translate-x-1'
-                } ${isDark && enabled ? 'bg-black' : ''}`}
+                  } ${enabled
+                    ? (isDark ? 'bg-gray-900' : 'bg-white')
+                    : (isDark ? 'bg-gray-400' : 'bg-white')
+                  }`}
               />
             </button>
           </div>

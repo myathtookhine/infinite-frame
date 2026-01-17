@@ -31,7 +31,7 @@ const Categories = () => {
   const isSuperAdmin = user?.role === 'super_admin';
   const isReadOnly = false; // Allow super admin to edit
 
-  const textColor = isDark ? 'text-white' : 'text-black';
+  const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
   const borderColor = isDark ? 'border-[#262626]' : 'border-gray-200';
   const cardBg = isDark ? 'bg-[#141414]' : 'bg-white';
@@ -57,6 +57,7 @@ const Categories = () => {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchCategories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedArtist]);
@@ -273,7 +274,7 @@ const Categories = () => {
                         setEditingCategory({ ...editingCategory, is_active: newStatus });
                       }}
                       className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${editingCategory.is_active
-                        ? (isDark ? 'bg-white' : 'bg-black')
+                        ? (isDark ? 'bg-white' : 'bg-[#151416]')
                         : (isDark ? 'bg-[#262626]' : 'bg-gray-200')
                         }`}
                     >

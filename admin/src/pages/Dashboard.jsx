@@ -53,7 +53,7 @@ const Dashboard = () => {
   const { isDark } = useTheme();
   const [timeFilter, setTimeFilter] = useState('week');
 
-  const textColor = isDark ? "text-white" : "text-black";
+  const textColor = isDark ? "text-white" : "text-[#151416]";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
   const cardBg = isDark ? "bg-[#141414]" : "bg-white";
   const cardBorder = isDark ? "border-[#262626]" : "border-gray-200";
@@ -113,7 +113,7 @@ const Dashboard = () => {
                 key={filter}
                 onClick={() => setTimeFilter(filter)}
                 className={`px-4 py-1.5 rounded-md text-sm font-bold capitalize transition-all duration-200 ${timeFilter === filter
-                  ? (isDark ? 'bg-white text-black' : 'bg-black text-white')
+                  ? (isDark ? 'bg-white text-black' : 'bg-[#151416] text-white')
                   : (isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black')
                   }`}
               >

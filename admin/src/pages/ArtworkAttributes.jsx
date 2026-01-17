@@ -23,7 +23,7 @@ const ArtworkAttributes = () => {
   const { user } = useAuth();
 
   const borderColor = isDark ? 'border-[#262626]' : 'border-gray-200';
-  const textColor = isDark ? 'text-white' : 'text-black';
+  const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
   const inputBg = isDark ? 'bg-[#0a0a0a]' : 'bg-white';
   const cardBg = isDark ? 'bg-[#141414]' : 'bg-white';
@@ -74,6 +74,7 @@ const ArtworkAttributes = () => {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedArtist]); // Refetch when artist changes
@@ -127,7 +128,7 @@ const ArtworkAttributes = () => {
             className={`flex items-center gap-2 px-5 py-3 rounded-lg font-sans font-bold text-sm cursor-pointer transition-all ${
               isDark 
                 ? 'bg-white text-black hover:bg-gray-200' 
-                : 'bg-black text-white hover:bg-gray-800'
+              : 'bg-[#151416] text-white hover:bg-[#2a2a2c]'
             }`}
           >
             <FolderPlusIcon className="h-5 w-5" />
@@ -173,7 +174,7 @@ const ArtworkAttributes = () => {
                 onClick={() => setActiveTab(item.type)}
                 className={`flex flex-col items-start justify-center gap-1 px-4 py-3 md:px-5 md:py-4 rounded-xl font-sans text-[10px] md:text-sm font-bold transition-all duration-300 whitespace-nowrap min-w-[70px] md:min-w-0 cursor-pointer border ${
                   activeTab === item.type
-                    ? (isDark ? 'bg-white text-black' : 'bg-black text-white')
+                  ? (isDark ? 'bg-white text-black' : 'bg-[#151416] text-white')
                     : (isDark ? 'text-gray-400 hover:bg-white/5' : 'text-gray-600 hover:bg-black/5')
                 }`}
               >
@@ -261,7 +262,7 @@ const ArtworkAttributes = () => {
                   className={`w-full py-3 rounded-md flex items-center justify-center gap-2 font-sans font-bold text-sm cursor-pointer transition-all duration-300 ${
                     isDark 
                       ? 'bg-white text-black hover:bg-gray-200' 
-                      : 'bg-black text-white hover:bg-gray-800'
+                    : 'bg-[#151416] text-white hover:bg-[#2a2a2c]'
                   } disabled:opacity-50`}
                 >
                   <FolderPlusIcon className="h-4 w-4" />

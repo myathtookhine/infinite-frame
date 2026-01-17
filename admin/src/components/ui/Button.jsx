@@ -26,10 +26,10 @@ const Button = forwardRef(
     const variantStyles = {
       primary: isDark
         ? "bg-white text-black border-white hover:bg-gray-200 hover:border-gray-200 focus:ring-white cursor-pointer"
-        : "bg-black text-white border-black hover:bg-gray-800 hover:border-gray-800 focus:ring-black cursor-pointer",
+        : "bg-gray-900 text-white border-gray-900 hover:bg-gray-800 hover:border-gray-800 focus:ring-gray-900 cursor-pointer",
       secondary: isDark
         ? "bg-transparent text-white border-white hover:bg-white/10 focus:ring-white cursor-pointer"
-        : "bg-transparent text-black border-black hover:bg-black/5 focus:ring-black cursor-pointer",
+        : "bg-transparent text-gray-900 border-gray-900 hover:bg-gray-900/5 focus:ring-gray-900 cursor-pointer",
     };
 
     // Size styles

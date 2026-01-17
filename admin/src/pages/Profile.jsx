@@ -17,7 +17,7 @@ import Toast from "../components/ui/Toast";
 import BannerUpload from "../components/BannerUpload";
 
 const Profile = () => {
-  const { user, changePassword, updateProfile, updateGalleryInfo, logout } = useAuth();
+  const { user, changePassword, updateProfile, updateGalleryInfo, updateUser, logout } = useAuth();
   const [username, setUsername] = useState(user?.username || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -54,6 +54,7 @@ const Profile = () => {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (user) {
       setUsername(user.username);
       setSlug(user.slug || "");
@@ -67,7 +68,7 @@ const Profile = () => {
     }
   }, [user]);
 
-  const textColor = isDark ? "text-white" : "text-black";
+  const textColor = isDark ? "text-white" : "text-[#151416]";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
 
   const handleUsernameUpdate = async (e) => {
@@ -189,8 +190,15 @@ const Profile = () => {
   };
 
   const handleBannerUpdate = (bannerData) => {
+    // Update local state
     setBannerUrl(bannerData.banner_image_url);
     setBannerEnabled(bannerData.banner_enabled);
+
+    // Update user context and localStorage
+    updateUser({
+      banner_image_url: bannerData.banner_image_url,
+      banner_enabled: bannerData.banner_enabled
+    });
   };
 
   return (

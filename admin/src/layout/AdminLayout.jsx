@@ -54,15 +54,15 @@ const AdminLayout = ({ children }) => {
     setSidebarOpen(false);
   };
 
-  const bgColor = isDark ? "bg-[#0a0a0a]" : "bg-gray-100";
+  const bgColor = isDark ? "bg-[#0a0a0a]" : "bg-transparent";
   const headerBg = isDark ? "bg-[#141414]" : "bg-white";
   const headerBorder = isDark ? "border-[#262626]" : "border-gray-300";
   const sidebarBg = isDark ? "bg-[#141414]" : "bg-white";
-  const textColor = isDark ? "text-white" : "text-black";
+  const textColor = isDark ? "text-white" : "text-gray-900";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
   const contentBg = isDark ? "md:bg-[#141414]" : "md:bg-white";
   const hoverBg = isDark ? "hover:bg-white/5" : "hover:bg-black/5";
-  const iconColor = isDark ? "text-white" : "text-black";
+  const iconColor = isDark ? "text-white" : "text-gray-900";
 
   return (
     <div className={`min-h-screen ${bgColor}`}>
@@ -79,9 +79,8 @@ const AdminLayout = ({ children }) => {
           <Bars3Icon className={`h-6 w-6 ${iconColor}`} />
         </button>
         <div className="flex items-center gap-2">
-          <img src="/vite.svg" alt="Logo" className="h-6 w-6" />
           <span className={`font-sans text-lg font-semibold ${textColor}`}>
-            Infinite Frame
+            {user?.gallery_name || user?.username || 'Gallery Admin'}
           </span>
         </div>
         <button
@@ -122,10 +121,10 @@ const AdminLayout = ({ children }) => {
           <div className="flex-shrink-0 flex items-center justify-between mb-4 pb-4 border-b border-current/10">
             <div>
               <h2 className={`font-sans text-xl font-semibold ${textColor}`}>
-                Infinite Frame
+                {user?.gallery_name || user?.username || 'Gallery Admin'}
               </h2>
               <div className={`font-sans text-xs ${subtextColor} flex items-center gap-2`}>
-                User Portal
+                Admin Portal
                 {user?.role === 'super_admin' && (
                   <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
                     Super

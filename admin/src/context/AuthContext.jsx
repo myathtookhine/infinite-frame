@@ -146,6 +146,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Helper to update user state directly (for real-time updates without API call)
+  const updateUser = (userData) => {
+    const updatedUser = { ...user, ...userData };
+    localStorage.setItem('adminUser', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  };
+
   const value = {
     isAuthenticated,
     user,
@@ -157,6 +164,7 @@ export const AuthProvider = ({ children }) => {
     changePassword,
     updateProfile,
     updateGalleryInfo,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
