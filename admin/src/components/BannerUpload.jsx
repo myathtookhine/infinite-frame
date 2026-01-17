@@ -3,7 +3,7 @@ import { useTheme } from '../context/ThemeContext';
 import Button from './ui/Button';
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
-import { PhotoIcon, TrashIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PhotoIcon, TrashIcon, CheckIcon, XMarkIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 
 const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) => {
   const { isDark } = useTheme();
@@ -12,7 +12,7 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [crop, setCrop] = useState({ aspect: 1200 / 630 });
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState(null); // null | 'uploading' | 'deleting'
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const fileInputRef = useRef(null);
@@ -76,7 +76,7 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
   const handleUpload = async () => {
     if (!selectedFile) return;
 
-    setUploading(true);
+    setUploading('uploading');
     setError('');
     setSuccess('');
 
@@ -108,7 +108,7 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
     } catch (err) {
       setError(err.message);
     } finally {
-      setUploading(false);
+      setUploading(null);
     }
   };
 
@@ -116,8 +116,9 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete your banner image?')) return;
 
-    setUploading(true);
+    setUploading('deleting');
     setError('');
+    setSuccess('');
 
     try {
       const response = await fetch(`${API_URL}/banner/${userId}`, {
@@ -127,12 +128,20 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Delete failed');
+        // Handle specific error cases
+        if (response.status === 400 && data.message === 'No banner to delete') {
+          // Already deleted, just update UI
+          setBannerUrl(null);
+          setEnabled(false);
+          setSuccess('Banner already removed');
+        } else {
+          throw new Error(data.message || 'Delete failed');
+        }
+      } else {
+        setBannerUrl(null);
+        setEnabled(false);
+        setSuccess('Banner deleted successfully');
       }
-
-      setBannerUrl(null);
-      setEnabled(false);
-      setSuccess('Banner deleted successfully');
       
       if (onUpdate) onUpdate({ banner_image_url: null, banner_enabled: false });
 
@@ -146,7 +155,7 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
 
   // Handle enable/disable toggle
   const handleToggle = async (newEnabled) => {
-    setUploading(true);
+    setUploading('toggling');
     setError('');
 
     try {
@@ -173,7 +182,7 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
     } catch (err) {
       setError(err.message);
     } finally {
-      setUploading(false);
+      setUploading(null);
     }
   };
 
@@ -192,8 +201,56 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
         </div>
       )}
 
+      {/* Skeleton Loading During Upload/Delete */}
+      {uploading && (
+        <div className="space-y-3">
+          <div className={`relative overflow-hidden rounded-md border-2 ${isDark ? 'border-white/20' : 'border-black/20'}`} style={{ aspectRatio: '1200/630' }}>
+            {/* Shimmer Background */}
+            <div className={`absolute inset-0 ${isDark ? 'bg-gray-800' : 'bg-gray-200'}`}>
+              <div
+                className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                style={{
+                  animation: 'shimmer 2s infinite'
+                }}
+              />
+            </div>
+
+            {/* Operation Icon & Message */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              {uploading === 'uploading' && (
+                <>
+                  <ArrowUpTrayIcon className={`h-16 w-16 mb-4 animate-pulse ${isDark ? 'text-gray-600' : 'text-gray-400'}`} />
+                  <p className={`text-sm font-sans ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                    Uploading banner...
+                  </p>
+                </>
+              )}
+              {uploading === 'deleting' && (
+                <>
+                  <TrashIcon className={`h-16 w-16 mb-4 animate-pulse ${isDark ? 'text-gray-600' : 'text-gray-400'}`} />
+                  <p className={`text-sm font-sans ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                    Deleting banner...
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+
+          <style>{`
+            @keyframes shimmer {
+              0% {
+                transform: translateX(-100%);
+              }
+              100% {
+                transform: translateX(100%);
+              }
+            }
+          `}</style>
+        </div>
+      )}
+
       {/* Current Banner Preview */}
-      {bannerUrl && !previewUrl && (
+      {bannerUrl && !previewUrl && !uploading && (
         <div className="space-y-3">
           <div className={`relative overflow-hidden rounded-md border-2 ${isDark ? 'border-white/20' : 'border-black/20'}`}>
             <img 

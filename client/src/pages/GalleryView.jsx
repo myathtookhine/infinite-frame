@@ -140,7 +140,7 @@ const GalleryView = () => {
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-8 md:px-16 lg:px-24 py-28 lg:py-32">
+      <div className="max-w-6xl mx-auto px-8 md:px-8 lg:px-8 py-28 lg:py-32">
 
         {/* Banner */}
         {gallery.banner_enabled && gallery.banner_image_url && (
