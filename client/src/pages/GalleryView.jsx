@@ -142,6 +142,20 @@ const GalleryView = () => {
 
       <div className="max-w-6xl mx-auto px-8 md:px-16 lg:px-24 py-32">
 
+        {/* Banner */}
+        {gallery.banner_enabled && gallery.banner_image_url && (
+          <div className="reveal mb-16 -mx-8 md:-mx-16 lg:-mx-24">
+            <div className="overflow-hidden">
+              <img
+                src={gallery.banner_image_url}
+                alt={`${decodeHtml(gallery.gallery_name) || gallery.username} banner`}
+                className="w-full h-auto object-cover"
+                style={{ aspectRatio: '1200/630' }}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <header className="reveal text-center mb-32 pt-16">
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-tighter leading-tight mb-8">
