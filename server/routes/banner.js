@@ -5,10 +5,17 @@ const sharp = require('sharp');
 const { createClient } = require('@supabase/supabase-js');
 const pool = require('../db');
 
-// Initialize Supabase client
+// Initialize Supabase client with service_role key
+// This bypasses RLS policies for server-side operations
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
 );
 
 // Configure multer for memory storage (we'll process the file before uploading)
