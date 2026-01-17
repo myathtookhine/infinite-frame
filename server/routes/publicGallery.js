@@ -21,7 +21,8 @@ router.get('/gallery/:slug', async (req, res) => {
 
     // Query admin by slug - only return public fields
     const result = await pool.query(
-      `SELECT id, username, gallery_name, description, address, phone_numbers, email, social_links
+      `SELECT id, username, gallery_name, description, address, phone_numbers, email, social_links, 
+              banner_image_url, banner_enabled
        FROM admins 
        WHERE slug = $1 AND status = 'active'`,
       [slug.toLowerCase().trim()]
@@ -46,7 +47,9 @@ router.get('/gallery/:slug', async (req, res) => {
         address: gallery.address,
         phone_numbers: gallery.phone_numbers,
         email: gallery.email,
-        social_links: gallery.social_links
+        social_links: gallery.social_links,
+        banner_image_url: gallery.banner_enabled ? gallery.banner_image_url : null,
+        banner_enabled: gallery.banner_enabled
       }
     });
 

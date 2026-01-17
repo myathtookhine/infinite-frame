@@ -14,6 +14,7 @@ import {
   ClipboardIcon,
 } from "@heroicons/react/24/outline";
 import Toast from "../components/ui/Toast";
+import BannerUpload from "../components/BannerUpload";
 
 const Profile = () => {
   const { user, changePassword, updateProfile, updateGalleryInfo, logout } = useAuth();
@@ -37,6 +38,10 @@ const Profile = () => {
   const [gallerySuccess, setGallerySuccess] = useState("");
   const [toast, setToast] = useState({ isVisible: false, message: "", type: "info" });
 
+  // Banner State
+  const [bannerUrl, setBannerUrl] = useState(user?.banner_image_url || null);
+  const [bannerEnabled, setBannerEnabled] = useState(user?.banner_enabled || false);
+
   const { isDark } = useTheme();
   const navigate = useNavigate();
 
@@ -57,6 +62,8 @@ const Profile = () => {
       setAddress(decodeHtml(user.address || ""));
       setPhoneNumbers(user.phone_numbers || []);
       setSocialLinks(user.social_links || {});
+      setBannerUrl(user.banner_image_url || null);
+      setBannerEnabled(user.banner_enabled || false);
     }
   }, [user]);
 
@@ -181,6 +188,11 @@ const Profile = () => {
     });
   };
 
+  const handleBannerUpdate = (bannerData) => {
+    setBannerUrl(bannerData.banner_image_url);
+    setBannerEnabled(bannerData.banner_enabled);
+  };
+
   return (
     <main className="max-w-7xl mx-auto">
       <div className="mb-6">
@@ -221,6 +233,19 @@ const Profile = () => {
             Update Username
           </Button>
         </form>
+      </ContentCard>
+
+      {/* Gallery Banner Upload */}
+      <ContentCard
+        title="Gallery Banner"
+        subtitle="Upload a banner image for your public gallery (1200x630px minimum)"
+      >
+        <BannerUpload
+          userId={user?.id}
+          initialBannerUrl={bannerUrl}
+          initialEnabled={bannerEnabled}
+          onUpdate={handleBannerUpdate}
+        />
       </ContentCard>
 
       {/* Gallery Information Form */}

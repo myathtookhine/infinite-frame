@@ -305,7 +305,9 @@ router.post('/login', loginLimiter, validateLogin, async (req, res) => {
         description: user.description,
         address: user.address,
         phone_numbers: user.phone_numbers,
-        social_links: user.social_links
+        social_links: user.social_links,
+        banner_image_url: user.banner_image_url,
+        banner_enabled: user.banner_enabled
       } 
     });
   } catch (err) {
@@ -589,7 +591,7 @@ router.post('/update-gallery-info', async (req, res) => {
       UPDATE admins 
       SET ${setClause}
       WHERE id = $${fields.length + 1}
-      RETURNING id, username, email, role, slug, gallery_name, description, address, phone_numbers, social_links
+      RETURNING id, username, email, role, slug, gallery_name, description, address, phone_numbers, social_links, banner_image_url, banner_enabled
     `;
     
     const result = await pool.query(query, values);
