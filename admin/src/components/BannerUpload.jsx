@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import Button from './ui/Button';
+import Toast from './ui/Toast';
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { PhotoIcon, TrashIcon, CheckIcon, XMarkIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
@@ -15,6 +16,7 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
   const [uploading, setUploading] = useState(null); // null | 'uploading' | 'deleting'
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
   const fileInputRef = useRef(null);
   const imgRef = useRef(null);
 
@@ -149,7 +151,7 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
     } catch (err) {
       setError(err.message);
     } finally {
-      setUploading(false);
+      setUploading(null);
     }
   };
 
@@ -174,11 +176,13 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
       }
 
       setEnabled(newEnabled);
-      setSuccess(`Banner ${newEnabled ? 'enabled' : 'disabled'} on public gallery`);
+      setToast({
+        visible: true,
+        message: `Banner ${newEnabled ? 'enabled' : 'disabled'} on public gallery`,
+        type: 'success'
+      });
       
       if (onUpdate) onUpdate(data.banner);
-
-      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -259,6 +263,18 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
               className="w-full h-auto"
               style={{ aspectRatio: '1200/630' }}
             />
+
+            {/* Disabled Overlay */}
+            {!enabled && (
+              <div className={`absolute inset-0 flex items-center justify-center ${isDark ? 'bg-black/70' : 'bg-white/70'} backdrop-blur-sm`}>
+                <div className={`text-center px-6 py-4 rounded-md ${isDark ? 'bg-gray-900/90' : 'bg-white/90'}`}>
+                  <p className={`text-xs font-sans font-medium ${isDark ? 'text-yellow-400' : 'text-yellow-700'}`}>
+                    The banner is disabled to display on the page.<br />
+                    Please enable if you want to display it!
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Enable/Disable Toggle */}
@@ -267,16 +283,18 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
               Display on public gallery
             </label>
             <button
+              type="button"
               onClick={() => handleToggle(!enabled)}
               disabled={uploading}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
                 enabled 
                 ? (isDark ? 'bg-white' : 'bg-[#151416]')
                   : (isDark ? 'bg-gray-700' : 'bg-gray-300')
-              } disabled:opacity-50`}
+                } ${uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
+                className={`inline-block h-4 w-4 transform rounded-full transition-transform duration-200 ease-in-out ${
                   enabled ? 'translate-x-6' : 'translate-x-1'
                   } ${enabled
                     ? (isDark ? 'bg-gray-900' : 'bg-white')
@@ -394,6 +412,15 @@ const BannerUpload = ({ userId, initialBannerUrl, initialEnabled, onUpdate }) =>
           </p>
         </div>
       )}
+
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.visible}
+        onClose={() => setToast({ ...toast, visible: false })}
+        duration={2000}
+      />
     </div>
   );
 };

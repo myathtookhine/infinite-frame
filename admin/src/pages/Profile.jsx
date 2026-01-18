@@ -139,10 +139,17 @@ const Profile = () => {
     });
 
     if (result.success) {
-      setGallerySuccess(result.message);
-      setTimeout(() => setGallerySuccess(""), 3000);
+      setToast({
+        isVisible: true,
+        message: result.message,
+        type: "success"
+      });
     } else {
-      setGalleryError(result.error);
+      setToast({
+        isVisible: true,
+        message: result.error,
+        type: "danger"
+      });
     }
   };
 
@@ -226,20 +233,24 @@ const Profile = () => {
             </div>
           )}
 
-          <Input
-            id="username"
-            label="Username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter new username"
-            autoComplete="username"
-            icon={UserIcon}
-          />
-
-          <Button type="submit" variant="primary" size="md" block>
-            Update Username
-          </Button>
+          <div className="flex gap-2">
+            <Input
+              containerClassName="flex-1"
+              id="username"
+              label="Username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter new username"
+              autoComplete="username"
+              icon={UserIcon}
+            />
+            <div className="flex flex-col justify-end mb-1">
+              <Button type="submit" variant="primary" size="md">
+                Update
+              </Button>
+            </div>
+          </div>
         </form>
       </ContentCard>
 
@@ -404,18 +415,7 @@ const Profile = () => {
             </Button>
           </div>
 
-          {/* Gallery update messages */}
-          {galleryError && (
-            <div className={`border-2 px-4 py-3 text-sm font-sans rounded font-medium ${isDark ? 'bg-red-900/20 border-red-800 text-red-400' : 'bg-red-50 border-red-600 text-red-700'}`}>
-              {galleryError}
-            </div>
-          )}
 
-          {gallerySuccess && (
-            <div className={`border-2 px-4 py-3 text-sm font-sans rounded font-medium ${isDark ? 'bg-green-900/20 border-green-800 text-green-400' : 'bg-green-50 border-green-600 text-green-700'}`}>
-              {gallerySuccess}
-            </div>
-          )}
           <Button type="submit" variant="primary" size="md" block>
             Update Gallery Info
           </Button>

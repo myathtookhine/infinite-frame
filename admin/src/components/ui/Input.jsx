@@ -28,10 +28,10 @@ const Input = forwardRef(
     const inputType =
       isPassword && enableToggle ? (visible ? "text" : "password") : type;
 
-    const labelClass = isDark ? "text-gray-300" : "text-gray-700";
+    const labelClass = isDark ? "text-gray-300 opacity-70" : "text-gray-700";
     const iconClass = isDark ? "text-gray-500" : "text-gray-400";
     const inputClass = isDark
-      ? "border-[#262626] bg-[#0a0a0a] text-white placeholder:text-gray-600 focus:ring-white focus:border-white"
+      ? "border-white/20 bg-[#0a0a0a] text-white placeholder:text-gray-600 focus:ring-white/20 focus:border-white/40"
       : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:ring-gray-900 focus:border-gray-900";
     const toggleClass = isDark
       ? "text-gray-400 hover:text-gray-200"
