@@ -9,6 +9,8 @@ import Profile from './pages/Profile';
 import Categories from './pages/Categories';
 import ArtworkAttributes from './pages/ArtworkAttributes';
 import Units from './pages/Units';
+import Artworks from './pages/Artworks';
+import ArtworkForm from './pages/ArtworkForm';
 import ManageAdmins from './pages/ManageAdmins';
 import ActivityLogs from './pages/ActivityLogs';
 import AdminLayout from './layout/AdminLayout';
@@ -61,6 +63,38 @@ function App() {
                 <ProtectedRoute>
                   <AdminLayout>
                     <ArtworkAttributes />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Artworks Routes */}
+            <Route
+              path="/artworks"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <Artworks />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/artworks/new"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <ArtworkForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/artworks/:id"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <ArtworkForm />
                   </AdminLayout>
                 </ProtectedRoute>
               }
