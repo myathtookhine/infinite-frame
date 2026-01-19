@@ -199,7 +199,7 @@ router.post('/', async (req, res) => {
     category_id, created_year, created_month,
     width, height, depth, unit_id,
     status, is_framed, edition_info, has_signature, has_coa,
-    price, currency,
+    price, currency, show_price, show_additional_details,
     attribute_ids
   } = req.body;
 
@@ -220,7 +220,6 @@ router.post('/', async (req, res) => {
     // Begin transaction
     await pool.query('BEGIN');
 
-    // Insert artwork
     const artworkQuery = `
       INSERT INTO artworks (
         admin_id, name, is_untitled, description,
@@ -228,8 +227,8 @@ router.post('/', async (req, res) => {
         category_id, created_year, created_month,
         width, height, depth, unit_id,
         status, is_framed, edition_info, has_signature, has_coa,
-        price, currency
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+        price, currency, show_price, show_additional_details
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
       RETURNING *
     `;
 
@@ -253,7 +252,9 @@ router.post('/', async (req, res) => {
       has_signature || false,
       has_coa || false,
       price || null,
-      currency || 'MMK'
+      currency || 'MMK',
+      show_price !== undefined ? show_price : true,
+      show_additional_details !== undefined ? show_additional_details : true
     ];
 
     const artworkResult = await pool.query(artworkQuery, artworkValues);
@@ -296,7 +297,7 @@ router.put('/:id', async (req, res) => {
     category_id, created_year, created_month,
     width, height, depth, unit_id,
     status, is_framed, edition_info, has_signature, has_coa,
-    price, currency, is_active,
+    price, currency, is_active, show_price, show_additional_details,
     attribute_ids
   } = req.body;
 
@@ -315,45 +316,54 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ message: "Artwork not found or unauthorized" });
     }
 
-    // Update artwork
+    // Update artwork - Build dynamic query to handle null vs undefined
+    const updates = [];
+    const values = [];
+    let paramIndex = 1;
+
+    const addUpdate = (column, value) => {
+      if (value !== undefined) {
+        updates.push(`${column} = $${paramIndex}`);
+        values.push(value);
+        paramIndex++;
+      }
+    };
+
+    addUpdate('name', name);
+    addUpdate('is_untitled', is_untitled);
+    addUpdate('description', description);
+    addUpdate('main_image', main_image); // Allow null to delete
+    addUpdate('additional_images', additional_images); // Allow null/empty to delete
+    addUpdate('category_id', category_id);
+    addUpdate('created_year', created_year);
+    addUpdate('created_month', created_month);
+    addUpdate('width', width);
+    addUpdate('height', height);
+    addUpdate('depth', depth);
+    addUpdate('unit_id', unit_id);
+    addUpdate('status', status);
+    addUpdate('is_framed', is_framed);
+    addUpdate('edition_info', edition_info);
+    addUpdate('has_signature', has_signature);
+    addUpdate('has_coa', has_coa);
+    addUpdate('price', price);
+    addUpdate('currency', currency);
+    addUpdate('is_active', is_active);
+    addUpdate('show_price', show_price);
+    addUpdate('show_additional_details', show_additional_details);
+
+    // Always update timestamp
+    updates.push(`updated_at = NOW()`);
+
     const updateQuery = `
-      UPDATE artworks SET
-        name = COALESCE($1, name),
-        is_untitled = COALESCE($2, is_untitled),
-        description = COALESCE($3, description),
-        main_image = COALESCE($4, main_image),
-        additional_images = COALESCE($5, additional_images),
-        category_id = COALESCE($6, category_id),
-        created_year = COALESCE($7, created_year),
-        created_month = COALESCE($8, created_month),
-        width = COALESCE($9, width),
-        height = COALESCE($10, height),
-        depth = COALESCE($11, depth),
-        unit_id = COALESCE($12, unit_id),
-        status = COALESCE($13, status),
-        is_framed = COALESCE($14, is_framed),
-        edition_info = COALESCE($15, edition_info),
-        has_signature = COALESCE($16, has_signature),
-        has_coa = COALESCE($17, has_coa),
-        price = COALESCE($18, price),
-        currency = COALESCE($19, currency),
-        is_active = COALESCE($20, is_active),
-        updated_at = NOW()
-      WHERE id = $21 AND admin_id = $22
+      UPDATE artworks SET ${updates.join(', ')}
+      WHERE id = $${paramIndex} AND admin_id = $${paramIndex + 1}
       RETURNING *
     `;
 
-    const updateValues = [
-      name, is_untitled, description,
-      main_image, additional_images,
-      category_id, created_year, created_month,
-      width, height, depth, unit_id,
-      status, is_framed, edition_info, has_signature, has_coa,
-      price, currency, is_active,
-      id, req.user.id
-    ];
+    values.push(id, req.user.id);
 
-    const updateResult = await pool.query(updateQuery, updateValues);
+    const updateResult = await pool.query(updateQuery, values);
 
     // Update attributes if provided
     if (attribute_ids !== undefined) {

@@ -37,7 +37,6 @@ const ArtworkForm = () => {
   const [hasSignature, setHasSignature] = useState(false);
   const [hasCOA, setHasCOA] = useState(false);
   const [price, setPrice] = useState('');
-  const [isForSale, setIsForSale] = useState(true);
   const [showPrice, setShowPrice] = useState(true);
   const [showAdditionalDetails, setShowAdditionalDetails] = useState(true);
 
@@ -110,13 +109,26 @@ const ArtworkForm = () => {
       setHasSignature(artwork.has_signature || false);
       setHasCOA(artwork.has_coa || false);
       setPrice(artwork.price || '');
-      setIsForSale(artwork.is_for_sale ?? true);
       setShowPrice(artwork.show_price ?? true);
       setShowAdditionalDetails(artwork.show_additional_details ?? true);
 
-      // Handle images (would need to convert URLs back to file objects for editing)
-      // For now, just show placeholders or skip image editing
+      // Handle images - set URLs for preview in edit mode
+      if (artwork.main_image) {
+        setMainImage({
+          id: 'existing-main',
+          url: artwork.main_image,
+          croppedBlob: null // No new upload, just displaying existing
+        });
+      }
 
+      if (artwork.additional_images && artwork.additional_images.length > 0) {
+        const existingAdditionalImages = artwork.additional_images.map((url, index) => ({
+          id: `existing-additional-${index}`,
+          url: url,
+          croppedBlob: null
+        }));
+        setAdditionalImages(existingAdditionalImages);
+      }
     } catch (err) {
       console.error('Error fetching artwork:', err);
       alert('Failed to load artwork');
@@ -202,8 +214,10 @@ const ArtworkForm = () => {
         name: isUntitled ? 'Untitled' : name,
         is_untitled: isUntitled,
         description,
-        main_image: isEditMode && mainImage && !mainImage.croppedBlob ? mainImage.url : null, // Keep existing URL if not changed
-        additional_images: [], // Will handle additional images logic more carefully if needed
+        main_image: mainImage ? (mainImage.croppedBlob ? null : mainImage.url) : null,
+        additional_images: additionalImages.length > 0
+          ? additionalImages.filter(img => !img.croppedBlob).map(img => img.url)
+          : null,
         category_id: category,
         created_year: createdYear,
         created_month: createdMonth || null,
@@ -218,10 +232,13 @@ const ArtworkForm = () => {
         has_coa: hasCOA,
         price: parseFloat(price) || null,
         currency: 'MMK',
-        is_for_sale: isForSale,
-        show_price: showPrice,
+        show_price: status === 'available' ? showPrice : false,
         show_additional_details: showAdditionalDetails
       };
+
+      console.log('📤 Submitting artwork data:', artworkData);
+      console.log('🖼️ Additional images state:', additionalImages);
+      console.log('🖼️ Filtered additional images:', artworkData.additional_images);
 
       let artworkId;
       let response;
@@ -683,33 +700,13 @@ const ArtworkForm = () => {
         <section className={`py-8 border-b ${borderColor}`}>
           <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Pricing</h2>
           
-          {/* For Sale Toggle */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <span className={`text-sm font-medium ${textColor}`}>For Sale</span>
-              <p className={`text-xs ${subtextColor}`}>
-                {isForSale ? 'Available for purchase' : 'Not for sale'}
+          {status !== 'available' && (
+            <div className={`mb-4 p-3 rounded-md ${isDark ? 'bg-yellow-900/20 text-yellow-400' : 'bg-yellow-50 text-yellow-700'}`}>
+              <p className="text-sm">
+                ⚠️ Price editing is disabled when status is "{status}". Change status to "Available" to edit pricing.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setIsForSale(!isForSale);
-                if (isForSale) setShowPrice(false); // Auto-hide price if not for sale
-              }}
-              className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                isForSale
-                  ? isDark ? 'bg-white' : 'bg-[#151416]'
-                  : isDark ? 'bg-[#262626]' : 'bg-gray-200'
-              }`}
-            >
-              <span
-                className={`${isForSale ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  isDark && isForSale ? '!bg-black' : ''
-                }`}
-              />
-            </button>
-          </div>
+          )}
 
           <div className="flex gap-2">
             <Input
@@ -720,16 +717,18 @@ const ArtworkForm = () => {
               onChange={(e) => setPrice(e.target.value)}
               placeholder="e.g., 200000"
               required
+              disabled={status !== 'available'}
             />
             <div className="flex flex-col justify-end">
-              <div className={`px-4 py-3 rounded-md border-2 ${selectBorder} ${inputBg} ${textColor} font-sans text-sm font-medium h-[50px] flex items-center`}>
+              <div className={`px-4 py-3 rounded-md border-2 ${selectBorder} ${inputBg} ${textColor} font-sans text-sm font-medium h-[50px] flex items-center ${status !== 'available' ? 'opacity-50' : ''
+                }`}>
                 MMK
               </div>
             </div>
           </div>
 
-          {/* Show Price Toggle - Only if For Sale */}
-          {isForSale && (
+          {/* Show Price Toggle - Only if Available */}
+          {status === 'available' && (
             <div className="flex items-center justify-between mt-4">
               <div>
                 <span className={`text-sm font-medium ${textColor}`}>Display Price on Client</span>
