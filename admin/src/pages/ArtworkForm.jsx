@@ -203,6 +203,12 @@ const ArtworkForm = () => {
       return;
     }
 
+    // Prevent deleting main image if additional images exist
+    if (isEditMode && !mainImage && additionalImages.length > 0) {
+      alert('Main image is needed when additional images exist! Please remove all additional images first or keep the main image.');
+      return;
+    }
+
     if (!category) {
       alert('Category is required');
       return;
