@@ -38,7 +38,7 @@ const ArtworkForm = () => {
   const [hasCOA, setHasCOA] = useState(false);
   const [price, setPrice] = useState('');
   const [showPrice, setShowPrice] = useState(true);
-  const [showAdditionalDetails, setShowAdditionalDetails] = useState(true);
+  const [showAdditionalDetails, setShowAdditionalDetails] = useState(false);
 
   // Data from API
   const [units, setUnits] = useState([]);
@@ -110,7 +110,7 @@ const ArtworkForm = () => {
       setHasCOA(artwork.has_coa || false);
       setPrice(artwork.price || '');
       setShowPrice(artwork.show_price ?? true);
-      setShowAdditionalDetails(artwork.show_additional_details ?? true);
+      setShowAdditionalDetails(artwork.show_additional_details ?? false);
 
       // Handle images - set URLs for preview in edit mode
       if (artwork.main_image) {
@@ -546,6 +546,63 @@ const ArtworkForm = () => {
           </div>
         </section>
 
+        {/* Pricing Section */}
+        <section className={`py-8 border-b ${borderColor}`}>
+          <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Pricing</h2>
+
+          {status !== 'available' && (
+            <div className={`mb-4 p-3 rounded-md ${isDark ? 'bg-yellow-900/20 text-yellow-400' : 'bg-yellow-50 text-yellow-700'}`}>
+              <p className="text-sm">
+                ⚠️ Price editing is disabled when status is "{status}". Change status to "Available" to edit pricing.
+              </p>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Input
+              containerClassName="flex-1"
+              label="Price *"
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="e.g., 200000"
+              required
+              disabled={status !== 'available'}
+            />
+            <div className="flex flex-col justify-end">
+              <div className={`px-4 py-3 rounded-md border-2 ${selectBorder} ${inputBg} ${textColor} font-sans text-sm font-medium h-[50px] flex items-center ${status !== 'available' ? 'opacity-50' : ''
+                }`}>
+                MMK
+              </div>
+            </div>
+          </div>
+
+          {/* Show Price Toggle - Only if Available */}
+          {status === 'available' && (
+            <div className="flex items-center justify-between mt-4">
+              <div>
+                <span className={`text-sm font-medium ${textColor}`}>Display Price on Client</span>
+                <p className={`text-xs ${subtextColor}`}>
+                  {showPrice ? 'Price visible to public' : 'Price hidden (Contact for price)'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPrice(!showPrice)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${showPrice
+                  ? isDark ? 'bg-white' : 'bg-[#151416]'
+                  : isDark ? 'bg-[#262626]' : 'bg-gray-200'
+                  }`}
+              >
+                <span
+                  className={`${showPrice ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isDark && showPrice ? '!bg-black' : ''
+                    }`}
+                />
+              </button>
+            </div>
+          )}
+        </section>
+
         {/* Status & Availability Section */}
         <section className={`py-8 border-b ${borderColor}`}>
           <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Status & Availability</h2>
@@ -702,64 +759,7 @@ const ArtworkForm = () => {
           </div>
         </section>
 
-        {/* Pricing Section */}
-        <section className={`py-8 border-b ${borderColor}`}>
-          <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Pricing</h2>
-          
-          {status !== 'available' && (
-            <div className={`mb-4 p-3 rounded-md ${isDark ? 'bg-yellow-900/20 text-yellow-400' : 'bg-yellow-50 text-yellow-700'}`}>
-              <p className="text-sm">
-                ⚠️ Price editing is disabled when status is "{status}". Change status to "Available" to edit pricing.
-              </p>
-            </div>
-          )}
 
-          <div className="flex gap-2">
-            <Input
-              containerClassName="flex-1"
-              label="Price *"
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="e.g., 200000"
-              required
-              disabled={status !== 'available'}
-            />
-            <div className="flex flex-col justify-end">
-              <div className={`px-4 py-3 rounded-md border-2 ${selectBorder} ${inputBg} ${textColor} font-sans text-sm font-medium h-[50px] flex items-center ${status !== 'available' ? 'opacity-50' : ''
-                }`}>
-                MMK
-              </div>
-            </div>
-          </div>
-
-          {/* Show Price Toggle - Only if Available */}
-          {status === 'available' && (
-            <div className="flex items-center justify-between mt-4">
-              <div>
-                <span className={`text-sm font-medium ${textColor}`}>Display Price on Client</span>
-                <p className={`text-xs ${subtextColor}`}>
-                  {showPrice ? 'Price visible to public' : 'Price hidden (Contact for price)'}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowPrice(!showPrice)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  showPrice
-                    ? isDark ? 'bg-white' : 'bg-[#151416]'
-                    : isDark ? 'bg-[#262626]' : 'bg-gray-200'
-                }`}
-              >
-                <span
-                  className={`${showPrice ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    isDark && showPrice ? '!bg-black' : ''
-                  }`}
-                />
-              </button>
-            </div>
-          )}
-        </section>
 
         {/* Form Actions */}
         <div className="flex gap-4 pt-4 pb-8">

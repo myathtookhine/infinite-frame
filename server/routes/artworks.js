@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const multer = require('multer');
+const sharp = require('sharp');
 const { createClient } = require('@supabase/supabase-js');
 
 // Initialize Supabase client for storage
@@ -254,7 +255,7 @@ router.post('/', async (req, res) => {
       price || null,
       currency || 'MMK',
       show_price !== undefined ? show_price : true,
-      show_additional_details !== undefined ? show_additional_details : true
+      show_additional_details !== undefined ? show_additional_details : false
     ];
 
     const artworkResult = await pool.query(artworkQuery, artworkValues);
@@ -480,20 +481,34 @@ router.post('/upload-images', upload.array('images', 10), async (req, res) => {
     let mainImageUrl = null;
     let additionalImageUrls = [];
 
-    // 1. Upload to Supabase Storage
+    // 1. Convert and Upload to Supabase Storage
     for (let i = 0; i < req.files.length; i++) {
       const file = req.files[i];
-      const fileExt = file.originalname.split('.').pop();
       // Use originalname to check if it's main (set by frontend as 'main.jpg')
       const isMain = file.originalname.toLowerCase().includes('main');
       
       const fileName = isMain ? `main-${Date.now()}` : `additional-${Date.now()}-${i}`;
-      const filePath = `${req.user.id}/${artwork_id}/${fileName}.${fileExt}`;
+      const filePath = `${req.user.id}/${artwork_id}/${fileName}.webp`; // Always .webp
 
+      // Convert to WebP using sharp
+      let webpBuffer;
+      try {
+        webpBuffer = await sharp(file.buffer)
+          .webp({ 
+            quality: 85, // High quality
+            effort: 4    // Balance between compression and speed
+          })
+          .toBuffer();
+      } catch (conversionError) {
+        console.error('Sharp conversion error:', conversionError);
+        throw new Error('Failed to convert image to WebP');
+      }
+
+      // Upload to Supabase
       const { data, error } = await supabase.storage
         .from('artworks')
-        .upload(filePath, file.buffer, {
-          contentType: file.mimetype,
+        .upload(filePath, webpBuffer, {
+          contentType: 'image/webp',
           upsert: true
         });
 
