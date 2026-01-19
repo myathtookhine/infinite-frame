@@ -515,7 +515,10 @@ router.post('/upload-images', upload.array('images', 10), async (req, res) => {
     const currentArtwork = currentResult.rows[0];
     
     let dbMainImage = currentArtwork.main_image;
-    let dbAdditionalImages = currentArtwork.additional_images || [];
+    // Ensure additional_images is always an array (handle NULL)
+    let dbAdditionalImages = Array.isArray(currentArtwork.additional_images) 
+      ? currentArtwork.additional_images 
+      : [];
 
     if (mainImageUrl) {
       dbMainImage = mainImageUrl;
@@ -533,7 +536,7 @@ router.post('/upload-images', upload.array('images', 10), async (req, res) => {
       RETURNING *
     `;
 
-    await pool.query(updateQuery, [dbMainImage, JSON.stringify(dbAdditionalImages), artwork_id]);
+    await pool.query(updateQuery, [dbMainImage, dbAdditionalImages.length > 0 ? dbAdditionalImages : null, artwork_id]);
 
     res.json({ 
       urls: uploadedUrls,

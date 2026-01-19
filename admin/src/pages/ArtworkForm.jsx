@@ -175,7 +175,10 @@ const ArtworkForm = () => {
       return res.data.urls;
     } catch (err) {
       console.error('Image upload failed:', err);
-      throw new Error('Failed to upload images');
+      console.error('Error details:', err.response?.data);
+      console.error('Status:', err.response?.status);
+      const errorMsg = err.response?.data?.message || err.message;
+      throw new Error(`Failed to upload images: ${errorMsg}`);
     }
   };
 
