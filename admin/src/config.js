@@ -21,6 +21,9 @@ export const ENDPOINTS = {
   CATEGORIES: `${API_BASE_URL}/categories`,
   // Units
   UNITS: `${API_BASE_URL}/units`,
+  // Artworks
+  ARTWORKS: `${API_BASE_URL}/artworks`,
+  ARTWORK_UPLOAD: `${API_BASE_URL}/artworks/upload-images`,
   // Config (Master Data)
   CONFIG: (table) => `${API_BASE_URL}/config/${table}`,
   CONFIG_DELETE: (table, id) => `${API_BASE_URL}/config/${table}/${id}`,

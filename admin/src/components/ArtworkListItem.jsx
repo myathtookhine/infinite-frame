@@ -1,7 +1,14 @@
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../context/ThemeContext';
 import Button from './ui/Button';
-import { formatPrice, getCategoryName } from '../data/mockArtworks';
+import ImageNotFound from '../assets/Image-not-found.png';
+
+// Format price helper
+const formatPrice = (price, currency = 'MMK') => {
+  if (!price) return 'Price not set';
+  const formatted = new Intl.NumberFormat('en-US').format(price);
+  return `${currency} ${formatted}`;
+};
 
 const ArtworkListItem = ({ artwork, onEdit, onDelete }) => {
   const { isDark } = useTheme();
@@ -10,7 +17,7 @@ const ArtworkListItem = ({ artwork, onEdit, onDelete }) => {
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-600';
   const borderColor = isDark ? 'border-gray-700' : 'border-gray-400';
 
-  const mainImage = artwork.mainImage;
+  const mainImage = artwork.main_image;
 
   // Status badge colors
   const getStatusColor = (status) => {
@@ -33,7 +40,7 @@ const ArtworkListItem = ({ artwork, onEdit, onDelete }) => {
       {/* Artwork Image Thumbnail */}
       <div className="flex-shrink-0">
         <img
-          src={mainImage?.url || 'https://via.placeholder.com/80x80/CCCCCC/FFFFFF?text=No+Image'}
+          src={mainImage || ImageNotFound}
           alt={artwork.name}
           className="w-20 h-20 object-cover rounded-md"
         />
@@ -55,7 +62,7 @@ const ArtworkListItem = ({ artwork, onEdit, onDelete }) => {
         {artwork.width && artwork.height && (
           <p className={`text-xs ${subtextColor} mt-1`}>
             {artwork.width} × {artwork.height}
-            {artwork.depth && ` × ${artwork.depth}`} {artwork.unitSymbol}
+            {artwork.depth && ` × ${artwork.depth}`} {artwork.unit_symbol}
           </p>
         )}
       </div>

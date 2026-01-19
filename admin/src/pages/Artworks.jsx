@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import ArtworkListItem from '../components/ArtworkListItem';
-import { mockArtworks, mockCategories, getCategoryName } from '../data/mockArtworks';
+import axios from 'axios';
+import { ENDPOINTS } from '../config';
 
 const Artworks = () => {
   const { isDark } = useTheme();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [artworks, setArtworks] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
@@ -20,10 +26,39 @@ const Artworks = () => {
   const selectBg = isDark ? 'bg-[#141414]' : 'bg-white';
   const selectBorder = isDark ? 'border-[#262626]' : 'border-gray-300';
 
-  // Filter artworks
-  const filteredArtworks = mockArtworks.filter(artwork => {
+  // Fetch artworks and categories on mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch artworks and categories in parallel
+      const [artworksRes, categoriesRes] = await Promise.all([
+        axios.get(ENDPOINTS.ARTWORKS, {
+          headers: { 'x-admin-id': user.id }
+        }),
+        axios.get(ENDPOINTS.CATEGORIES, {
+          headers: { 'x-admin-id': user.id }
+        })
+      ]);
+
+      setArtworks(artworksRes.data);
+      setCategories(categoriesRes.data);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      alert('Failed to load artworks');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter artworks (client-side for search, server-side for category would be better)
+  const filteredArtworks = artworks.filter(artwork => {
     const matchesSearch = artwork.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !selectedCategory || artwork.category === selectedCategory;
+    const matchesCategory = !selectedCategory || artwork.category_id === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -31,17 +66,34 @@ const Artworks = () => {
     navigate(`/artworks/${id}`);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this artwork?')) {
-      console.log('Delete artwork:', id);
-      // In real implementation, call API to delete
-      alert('Delete functionality will be implemented with backend API');
+      try {
+        await axios.delete(`${ENDPOINTS.ARTWORKS}/${id}`, {
+          headers: { 'x-admin-id': user.id }
+        });
+
+        // Remove from local state
+        setArtworks(artworks.filter(a => a.id !== id));
+        alert('Artwork deleted successfully');
+      } catch (err) {
+        console.error('Error deleting artwork:', err);
+        alert('Failed to delete artwork');
+      }
     }
   };
 
   const handleAddArtwork = () => {
     navigate('/artworks/new');
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className={subtextColor}>Loading artworks...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -78,7 +130,7 @@ const Artworks = () => {
             } transition-all`}
           >
             <option value="">All Categories</option>
-            {mockCategories.map((category) => (
+            {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
               </option>

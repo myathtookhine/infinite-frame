@@ -11,9 +11,13 @@ const supabase = createClient(
 );
 
 // Configure multer for memory storage
+// Configure multer for memory storage
 const upload = multer({ 
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { 
+    fileSize: 10 * 1024 * 1024, // 10MB limit (matches frontend 8MB + buffer)
+    files: 10 // Max 10 files
+  },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (allowedTypes.includes(file.mimetype)) {
@@ -463,14 +467,19 @@ router.post('/upload-images', upload.array('images', 10), async (req, res) => {
 
   try {
     const uploadedUrls = [];
+    let mainImageUrl = null;
+    let additionalImageUrls = [];
 
+    // 1. Upload to Supabase Storage
     for (let i = 0; i < req.files.length; i++) {
       const file = req.files[i];
       const fileExt = file.originalname.split('.').pop();
-      const fileName = i === 0 ? 'main' : `image-${i}`;
+      // Use originalname to check if it's main (set by frontend as 'main.jpg')
+      const isMain = file.originalname.toLowerCase().includes('main');
+      
+      const fileName = isMain ? `main-${Date.now()}` : `additional-${Date.now()}-${i}`;
       const filePath = `${req.user.id}/${artwork_id}/${fileName}.${fileExt}`;
 
-      // Upload to Supabase Storage
       const { data, error } = await supabase.storage
         .from('artworks')
         .upload(filePath, file.buffer, {
@@ -478,20 +487,59 @@ router.post('/upload-images', upload.array('images', 10), async (req, res) => {
           upsert: true
         });
 
-      if (error) {
-        console.error('Supabase upload error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('artworks')
         .getPublicUrl(filePath);
 
       uploadedUrls.push(publicUrl);
+
+      if (isMain) {
+        mainImageUrl = publicUrl;
+      } else {
+        additionalImageUrls.push(publicUrl);
+      }
     }
 
-    res.json({ urls: uploadedUrls });
+    // 2. Update Database
+    // Fetch current additional images first to append to them, or just replace? 
+    // For now, let's append if there are existing ones, or just set.
+    // Given the simple flow, user probably expects new images to be added.
+    
+    // However, if we are doing a fresh upload for a new artwork, it's simple.
+    // If editing, we might want to preserve old ones.
+    
+    // Let's get current state
+    const currentResult = await pool.query("SELECT main_image, additional_images FROM artworks WHERE id = $1", [artwork_id]);
+    const currentArtwork = currentResult.rows[0];
+    
+    let dbMainImage = currentArtwork.main_image;
+    let dbAdditionalImages = currentArtwork.additional_images || [];
+
+    if (mainImageUrl) {
+      dbMainImage = mainImageUrl;
+    }
+    
+    if (additionalImageUrls.length > 0) {
+      // Append new additional images
+      dbAdditionalImages = [...dbAdditionalImages, ...additionalImageUrls];
+    }
+
+    const updateQuery = `
+      UPDATE artworks 
+      SET main_image = $1, additional_images = $2, updated_at = NOW()
+      WHERE id = $3
+      RETURNING *
+    `;
+
+    await pool.query(updateQuery, [dbMainImage, JSON.stringify(dbAdditionalImages), artwork_id]);
+
+    res.json({ 
+      urls: uploadedUrls,
+      mainImage: dbMainImage,
+      additionalImages: dbAdditionalImages
+    });
   } catch (err) {
     console.error('Error uploading images:', err);
     res.status(500).json({ message: "Failed to upload images" });
