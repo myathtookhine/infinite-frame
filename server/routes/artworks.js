@@ -389,24 +389,63 @@ router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
-    // Delete artwork (cascade will handle artwork_attributes)
-    const result = await pool.query(
-      "DELETE FROM artworks WHERE id = $1 AND admin_id = $2 RETURNING id, main_image, additional_images",
+    // Begin transaction
+    await pool.query('BEGIN');
+
+    // First, get the artwork to delete (check ownership and get image URLs)
+    const artworkResult = await pool.query(
+      "SELECT id, admin_id, main_image, additional_images FROM artworks WHERE id = $1 AND admin_id = $2",
       [id, req.user.id]
     );
 
-    if (result.rows.length === 0) {
+    if (artworkResult.rows.length === 0) {
+      await pool.query('ROLLBACK');
       return res.status(404).json({ message: "Artwork not found or unauthorized" });
     }
 
-    // TODO: Delete images from Supabase Storage
-    // const deletedArtwork = result.rows[0];
-    // Delete main_image and additional_images from storage
+    const artwork = artworkResult.rows[0];
 
-    res.json({ message: "Artwork deleted successfully" });
+    // Delete artwork_attributes first (manual cascade)
+    await pool.query("DELETE FROM artwork_attributes WHERE artwork_id = $1", [id]);
+
+    // Delete the artwork
+    await pool.query("DELETE FROM artworks WHERE id = $1", [id]);
+
+    // Commit transaction
+    await pool.query('COMMIT');
+
+    // Delete images from Supabase Storage (after successful DB deletion)
+    try {
+      const deletePromises = [];
+      const folderPath = `${req.user.id}/${id}`;
+
+      // Delete entire folder for this artwork
+      const { data: files, error: listError } = await supabase.storage
+        .from('artworks')
+        .list(folderPath);
+
+      if (!listError && files && files.length > 0) {
+        const filePaths = files.map(file => `${folderPath}/${file.name}`);
+        
+        const { error: deleteError } = await supabase.storage
+          .from('artworks')
+          .remove(filePaths);
+
+        if (deleteError) {
+          console.error('Error deleting storage files:', deleteError);
+          // Don't fail the request if storage deletion fails
+        }
+      }
+    } catch (storageErr) {
+      console.error('Storage cleanup error:', storageErr);
+      // Continue - artwork already deleted from DB
+    }
+
+    res.json({ message: "Artwork deleted successfully", id: artwork.id });
   } catch (err) {
+    await pool.query('ROLLBACK');
     console.error('Error deleting artwork:', err.message);
-    res.status(500).send("Server Error");
+    res.status(500).json({ message: "Server Error", error: err.message });
   }
 });
 
