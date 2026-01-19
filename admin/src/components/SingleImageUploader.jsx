@@ -41,6 +41,8 @@ const SingleImageUploader = ({ image, onImageChange, label = "Main Image" }) => 
     if (files.length > 0) {
       validateAndProcessFile(files[0]);
     }
+    // Reset input value so same file can be selected again
+    e.target.value = '';
   };
 
   const validateAndProcessFile = (file) => {

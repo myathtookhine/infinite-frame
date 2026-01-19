@@ -43,8 +43,12 @@ const ArtworkForm = () => {
   // Data from API
   const [units, setUnits] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [attributeTypes, setAttributeTypes] = useState([]); // [{type: 'Style'}, ...]
+  const [attributesByType, setAttributesByType] = useState({}); // {'Style': [{id, name}, ...]}
+  const [selectedAttributes, setSelectedAttributes] = useState([]); // [uuid, uuid, ...]
   const [loadingUnits, setLoadingUnits] = useState(true);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingAttributes, setLoadingAttributes] = useState(true);
   const [loadingArtwork, setLoadingArtwork] = useState(isEditMode);
 
   const textColor = isDark ? 'text-white' : 'text-[#151416]';
@@ -56,6 +60,7 @@ const ArtworkForm = () => {
   // Fetch data on mount
   useEffect(() => {
     fetchUnitsAndCategories();
+    fetchAttributesData();
     if (isEditMode) {
       fetchArtwork();
     }
@@ -81,6 +86,30 @@ const ArtworkForm = () => {
     } finally {
       setLoadingUnits(false);
       setLoadingCategories(false);
+    }
+  };
+
+  const fetchAttributesData = async () => {
+    try {
+      const typesRes = await axios.get(ENDPOINTS.ATTRIBUTE_TYPES, {
+        headers: { 'x-admin-id': user.id }
+      });
+
+      setAttributeTypes(typesRes.data);
+
+      // Fetch attributes for each type
+      const attributesData = {};
+      for (let typeObj of typesRes.data) {
+        const attrRes = await axios.get(`${ENDPOINTS.ATTRIBUTES}/${typeObj.type}`, {
+          headers: { 'x-admin-id': user.id }
+        });
+        attributesData[typeObj.type] = attrRes.data.filter(attr => attr.is_active);
+      }
+      setAttributesByType(attributesData);
+    } catch (err) {
+      console.error('Error fetching attributes:', err);
+    } finally {
+      setLoadingAttributes(false);
     }
   };
 
@@ -128,6 +157,11 @@ const ArtworkForm = () => {
           croppedBlob: null
         }));
         setAdditionalImages(existingAdditionalImages);
+      }
+
+      // Load selected attributes
+      if (artwork.attribute_ids && artwork.attribute_ids.length > 0) {
+        setSelectedAttributes(artwork.attribute_ids);
       }
     } catch (err) {
       console.error('Error fetching artwork:', err);
@@ -239,7 +273,8 @@ const ArtworkForm = () => {
         price: parseFloat(price) || null,
         currency: 'MMK',
         show_price: status === 'available' ? showPrice : false,
-        show_additional_details: showAdditionalDetails
+        show_additional_details: showAdditionalDetails,
+        attribute_ids: selectedAttributes
       };
 
       console.log('📤 Submitting artwork data:', artworkData);
@@ -342,6 +377,94 @@ const ArtworkForm = () => {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Category Section  */}
+        <section className={`py-8 border-b ${borderColor}`}>
+          <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Category</h2>
+          <p className={`text-sm ${subtextColor} mb-4`}>
+            Please select a category to add the artwork to!
+          </p>
+          {/* Category */}
+          <div className="mt-4">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+              className={`w-full px-4 py-3 rounded-md border-2 ${selectBorder} ${inputBg} ${textColor} font-sans text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 ${isDark ? 'focus:ring-white' : 'focus:ring-black'} transition-all`}
+            >
+              <option value="">Select a category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </section>
+
+
+        {/* Attribute Groups and Items Section */}
+        <section className={`py-8 border-b ${borderColor}`}>
+          <h2 className={`text-xl font-sans font-bold ${textColor} mb-1`}>
+            Attribute Tags (Optional)
+          </h2>
+          <p className={`text-sm ${subtextColor} mb-4`}>
+            Select attributes to tag artwork for filtering on client and admin sides
+          </p>
+
+          {loadingAttributes ? (
+            <p className={`text-sm ${subtextColor}`}>Loading attributes...</p>
+          ) : attributeTypes.length === 0 ? (
+            <p className={`text-sm ${subtextColor}`}>
+              No attributes available. Create attributes in Settings → Config Manager.
+            </p>
+          ) : (
+            <div className="space-y-6">
+              {attributeTypes.map((typeObj) => {
+                const items = attributesByType[typeObj.type] || [];
+                if (items.length === 0) return null;
+
+                return (
+                  <div key={typeObj.type}>
+                    <h3 className={`text-sm font-semibold ${textColor} mb-2`}>
+                      {typeObj.type}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {items.map((attr) => {
+                        const isSelected = selectedAttributes.includes(attr.id);
+                        return (
+                          <button
+                            key={attr.id}
+                            type="button"
+                            onClick={() => {
+                              if (isSelected) {
+                                setSelectedAttributes(prev =>
+                                  prev.filter(attrId => attrId !== attr.id)
+                                );
+                              } else {
+                                setSelectedAttributes(prev => [...prev, attr.id]);
+                              }
+                            }}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${isSelected
+                                ? isDark
+                                  ? 'bg-white text-black'
+                                  : 'bg-black text-white'
+                                : isDark
+                                  ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                              }`}
+                          >
+                            {attr.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
         {/* Image Upload Section */}
         <section className={`py-8 border-b ${borderColor}`}>
           <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Artwork Images</h2>
@@ -409,26 +532,6 @@ const ArtworkForm = () => {
             <p className={`text-xs mt-1 ${subtextColor}`}>
               {description.length}/2000 characters
             </p>
-          </div>
-
-          {/* Category */}
-          <div className="mt-4">
-            <label className={`block text-sm font-sans font-medium mb-2 ${textColor} opacity-70`}>
-              Category *
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
-              className={`w-full px-4 py-3 rounded-md border-2 ${selectBorder} ${inputBg} ${textColor} font-sans text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 ${isDark ? 'focus:ring-white' : 'focus:ring-black'} transition-all`}
-            >
-              <option value="">Select a category</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
           </div>
         </section>
 

@@ -17,6 +17,7 @@ export const ENDPOINTS = {
   },
   // Attributes
   ATTRIBUTES: `${API_BASE_URL}/attributes`,
+  ATTRIBUTE_TYPES: `${API_BASE_URL}/attributes/types`,
   // Categories
   CATEGORIES: `${API_BASE_URL}/categories`,
   // Units

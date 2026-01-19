@@ -37,6 +37,8 @@ const MultipleImageUploader = ({ images, onImagesChange, label = "Additional Ima
   const handleChange = (e) => {
     const files = Array.from(e.target.files);
     validateAndProcessFiles(files);
+    // Reset input value so same files can be selected again
+    e.target.value = '';
   };
 
   const validateAndProcessFiles = (files) => {
