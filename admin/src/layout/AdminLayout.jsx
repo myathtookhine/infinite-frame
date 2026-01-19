@@ -13,7 +13,8 @@ import {
   SwatchIcon,
   UserGroupIcon,
   ClockIcon,
-  ArchiveBoxIcon
+  ArchiveBoxIcon,
+  ScaleIcon
 } from "@heroicons/react/24/outline";
 
 const SidebarLink = ({ to, children, icon: Icon, onClick, isDark }) => {
@@ -175,6 +176,17 @@ const AdminLayout = ({ children }) => {
             >
               Artwork Attributes
             </SidebarLink>
+
+            {user?.role === 'super_admin' && (
+              <SidebarLink
+                to="/units"
+                icon={ScaleIcon}
+                onClick={closeSidebar}
+                isDark={isDark}
+              >
+                Units
+              </SidebarLink>
+            )}
 
             {user?.role === 'super_admin' && (
               <>

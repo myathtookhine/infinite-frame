@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Categories from './pages/Categories';
 import ArtworkAttributes from './pages/ArtworkAttributes';
+import Units from './pages/Units';
 import ManageAdmins from './pages/ManageAdmins';
 import ActivityLogs from './pages/ActivityLogs';
 import AdminLayout from './layout/AdminLayout';
@@ -65,7 +66,18 @@ function App() {
               }
             />
 
-            {/* Super Admin Route */}
+            {/* Super Admin Routes */}
+            <Route
+              path="/units"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <Units />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path="/manage-admins"
               element={

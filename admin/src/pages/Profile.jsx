@@ -5,7 +5,6 @@ import { useTheme } from "../context/ThemeContext";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import InputTextarea from "../components/ui/InputTextarea";
-import ContentCard from "../components/ui/ContentCard";
 import {
   UserIcon,
   LockClosedIcon,
@@ -218,7 +217,8 @@ const Profile = () => {
       </div>
 
       {/* Username Update Form */}
-      <ContentCard title="Update Username">
+      <section className={`py-8 border-b ${isDark ? 'border-gray-700' : 'border-gray-400'}`}>
+        <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Update Username</h2>
         <form onSubmit={handleUsernameUpdate} className="space-y-4">
           {/* Username Error/Success Messages */}
           {usernameError && (
@@ -252,23 +252,23 @@ const Profile = () => {
             </div>
           </div>
         </form>
-      </ContentCard>
+      </section>
 
       {/* Gallery Banner Upload */}
-      <ContentCard
-        title="Gallery Banner"
-        subtitle="Upload a banner image for your public gallery (1200x630px minimum)"
-      >
+      <section className={`py-8 border-b ${isDark ? 'border-gray-700' : 'border-gray-400'}`}>
+        <h2 className={`text-xl font-sans font-bold ${textColor} mb-1`}>Gallery Banner</h2>
+        <p className={`text-sm font-sans ${subtextColor} mb-4`}>Upload a banner image for your public gallery (1200x630px minimum)</p>
         <BannerUpload
           userId={user?.id}
           initialBannerUrl={bannerUrl}
           initialEnabled={bannerEnabled}
           onUpdate={handleBannerUpdate}
         />
-      </ContentCard>
+      </section>
 
       {/* Gallery Information Form */}
-      <ContentCard title="Gallery Information">
+      <section className={`py-8 border-b ${isDark ? 'border-gray-700' : 'border-gray-400'}`}>
+        <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Gallery Information</h2>
         <form onSubmit={handleGalleryInfoUpdate} className="space-y-4">
 
           <Input
@@ -324,7 +324,8 @@ const Profile = () => {
             placeholder="Describe your gallery..."
             maxLength={2000}
             rows={4}
-            height="200px"
+            minHeight="250px"
+            height="350px"
           />
           <p className={`text-xs mt-1 ${subtextColor}`}>
             {description.length}/2000 characters
@@ -420,10 +421,11 @@ const Profile = () => {
             Update Gallery Info
           </Button>
         </form>
-      </ContentCard>
+      </section>
 
       {/* Change Password Form */}
-      <ContentCard title="Change Password">
+      <section className={`py-8 border-b ${isDark ? 'border-gray-700' : 'border-gray-400'}`}>
+        <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Change Password</h2>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           {/* Password Error/Success Messages */}
           {passwordError && (
@@ -478,13 +480,12 @@ const Profile = () => {
             Update Password
           </Button>
         </form>
-      </ContentCard>
+      </section>
 
       {/* Sign Out Section */}
-      <ContentCard
-        title="Sign Out"
-        subtitle="Sign out from your admin account"
-      >
+      <section className="py-8">
+        <h2 className={`text-xl font-sans font-bold ${textColor} mb-1`}>Sign Out</h2>
+        <p className={`text-sm font-sans ${subtextColor} mb-4`}>Sign out from your admin account</p>
         <Button
           onClick={handleSignOut}
           variant="secondary"
@@ -494,7 +495,7 @@ const Profile = () => {
           <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
           Sign Out Now
         </Button>
-      </ContentCard>
+      </section>
 
       {/* Toast Notification */}
       <Toast

@@ -19,6 +19,8 @@ export const ENDPOINTS = {
   ATTRIBUTES: `${API_BASE_URL}/attributes`,
   // Categories
   CATEGORIES: `${API_BASE_URL}/categories`,
+  // Units
+  UNITS: `${API_BASE_URL}/units`,
   // Config (Master Data)
   CONFIG: (table) => `${API_BASE_URL}/config/${table}`,
   CONFIG_DELETE: (table, id) => `${API_BASE_URL}/config/${table}/${id}`,

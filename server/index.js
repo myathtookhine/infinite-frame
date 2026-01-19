@@ -25,6 +25,7 @@ app.use('/api/public', require('./routes/publicGallery'));
 app.use('/api', authRoutes); 
 app.use('/api/attributes', require('./routes/attributes'));
 app.use('/api/categories', require('./routes/categories'));
+app.use('/api/units', require('./routes/units'));
 app.use('/api/config', require('./routes/config')); // Master Data (Categories, etc.)
 app.use('/api/admin-management', require('./routes/adminManagement')); // Super Admin Utils
 app.use('/api/banner', require('./routes/banner')); // Banner Upload
