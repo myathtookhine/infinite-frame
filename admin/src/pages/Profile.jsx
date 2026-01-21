@@ -217,7 +217,7 @@ const Profile = () => {
       </div>
 
       {/* Username Update Form */}
-      <section className={`py-8 border-b ${isDark ? 'border-gray-700' : 'border-gray-400'}`}>
+      <section className={`py-8 border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
         <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Update Username</h2>
         <form onSubmit={handleUsernameUpdate} className="space-y-4">
           {/* Username Error/Success Messages */}
@@ -255,7 +255,7 @@ const Profile = () => {
       </section>
 
       {/* Gallery Banner Upload */}
-      <section className={`py-8 border-b ${isDark ? 'border-gray-700' : 'border-gray-400'}`}>
+      <section className={`py-8 border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
         <h2 className={`text-xl font-sans font-bold ${textColor} mb-1`}>Gallery Banner</h2>
         <p className={`text-sm font-sans ${subtextColor} mb-4`}>Upload a banner image for your public gallery (1200x630px minimum)</p>
         <BannerUpload
@@ -267,7 +267,7 @@ const Profile = () => {
       </section>
 
       {/* Gallery Information Form */}
-      <section className={`py-8 border-b ${isDark ? 'border-gray-700' : 'border-gray-400'}`}>
+      <section className={`py-8 border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
         <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Gallery Information</h2>
         <form onSubmit={handleGalleryInfoUpdate} className="space-y-4">
 
@@ -424,7 +424,7 @@ const Profile = () => {
       </section>
 
       {/* Change Password Form */}
-      <section className={`py-8 border-b ${isDark ? 'border-gray-700' : 'border-gray-400'}`}>
+      <section className={`py-8 border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
         <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Change Password</h2>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           {/* Password Error/Success Messages */}

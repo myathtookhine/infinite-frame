@@ -87,14 +87,6 @@ const Artworks = () => {
     navigate('/artworks/new');
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className={subtextColor}>Loading artworks...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-7xl mx-auto">
       {/* Page Header */}
@@ -117,6 +109,7 @@ const Artworks = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             icon={MagnifyingGlassIcon}
+            disabled={loading}
           />
         </div>
 
@@ -125,9 +118,10 @@ const Artworks = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
+            disabled={loading}
             className={`w-full px-4 py-3 rounded-md border-2 ${selectBorder} ${selectBg} ${textColor} font-sans text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 ${
               isDark ? 'focus:ring-white' : 'focus:ring-black'
-            } transition-all`}
+              } transition-all disabled:opacity-50`}
           >
             <option value="">All Categories</option>
             {categories.map((category) => (
@@ -149,8 +143,13 @@ const Artworks = () => {
       </div>
 
       {/* Artworks List */}
-      <div className={`rounded-xl border-2 ${borderColor} ${cardBg}`}>
-        {filteredArtworks.length === 0 ? (
+      <div>
+        {loading ? (
+          <div className={`rounded-xl border-2 ${borderColor} ${cardBg} p-12 text-center`}>
+            <div className={`w-8 h-8 border-2 ${isDark ? 'border-white/20 border-t-white' : 'border-black/10 border-t-black'} rounded-full animate-spin mx-auto mb-4`}></div>
+            <p className={subtextColor}>Loading artworks...</p>
+          </div>
+        ) : filteredArtworks.length === 0 ? (
           <div className="p-12 text-center">
             <p className={subtextColor}>
               {searchQuery || selectedCategory
@@ -159,7 +158,7 @@ const Artworks = () => {
             </p>
           </div>
         ) : (
-          <div className="px-4 sm:px-6">
+              <div>
             {filteredArtworks.map((artwork) => (
               <ArtworkListItem
                 key={artwork.id}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PhotoIcon, XMarkIcon, EyeIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import ImageCropperModal from './ImageCropperModal';
 
 const MultipleImageUploader = ({ images, onImagesChange, label = "Additional Images" }) => {
@@ -9,6 +9,13 @@ const MultipleImageUploader = ({ images, onImagesChange, label = "Additional Ima
   const [cropperOpen, setCropperOpen] = useState(false);
   const [tempImages, setTempImages] = useState([]);
   const [currentCropIndex, setCurrentCropIndex] = useState(0);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [zoom, setZoom] = useState(100);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [scrollPos, setScrollPos] = useState({ x: 0, y: 0 });
+  const [hasDragged, setHasDragged] = useState(false);
 
   const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-600';
@@ -194,17 +201,31 @@ const MultipleImageUploader = ({ images, onImagesChange, label = "Additional Ima
                 />
               </div>
 
-              {/* Delete Button */}
-              <button
-                type="button"
-                onClick={() => removeImage(image.id)}
-                className={`absolute top-2 right-2 p-1.5 rounded-md ${
-                  isDark ? 'bg-black/70 hover:bg-black/90' : 'bg-white/70 hover:bg-white/90'
-                } backdrop-blur-sm transition-all`}
-                title="Remove image"
-              >
-                <XMarkIcon className={`h-4 w-4 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
-              </button>
+              {/* Action Buttons */}
+              <div className="absolute top-2 right-2 flex gap-2">
+                {/* Preview Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreviewImage(image.url);
+                    setPreviewOpen(true);
+                  }}
+                  className="p-3 rounded transition-all backdrop-blur-sm cursor-pointer"
+                  title="Preview image"
+                >
+                  <EyeIcon className="h-4 w-4 text-white" />
+                </button>
+
+                {/* Delete Button */}
+                <button
+                  type="button"
+                  onClick={() => removeImage(image.id)}
+                  className="p-3 rounded transition-all backdrop-blur-sm cursor-pointer"
+                  title="Remove image"
+                >
+                  <XMarkIcon className="h-4 w-4 text-white" />
+                </button>
+              </div>
 
               {/* Image Number */}
               <div className="absolute bottom-2 left-2">
@@ -232,6 +253,124 @@ const MultipleImageUploader = ({ images, onImagesChange, label = "Additional Ima
         imageSrc={tempImages[currentCropIndex]?.url}
         onCropComplete={handleCropComplete}
       />
+
+      {/* Preview Modal */}
+      {previewOpen && previewImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+            onClick={() => {
+              if (!hasDragged) {
+                setPreviewOpen(false);
+                setPreviewImage(null);
+                setZoom(100);
+                setScrollPos({ x: 0, y: 0 });
+              }
+              setHasDragged(false);
+            }}
+          />
+          <div
+            className="relative max-w-6xl max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              cursor: zoom > 100 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
+            }}
+            onMouseDown={(e) => {
+              if (zoom > 100) {
+                setIsDragging(true);
+                setHasDragged(false);
+                setDragStart({ x: e.clientX - scrollPos.x, y: e.clientY - scrollPos.y });
+              }
+            }}
+            onMouseMove={(e) => {
+              if (isDragging && zoom > 100) {
+                e.preventDefault();
+                setHasDragged(true);
+                const newX = e.clientX - dragStart.x;
+                const newY = e.clientY - dragStart.y;
+                setScrollPos({ x: newX, y: newY });
+              }
+            }}
+            onMouseUp={() => setIsDragging(false)}
+            onMouseLeave={() => setIsDragging(false)}
+          >
+            <img
+              src={previewImage}
+              alt="Preview"
+              style={{
+                transform: `scale(${zoom / 100}) translate(${scrollPos.x}px, ${scrollPos.y}px)`,
+                transition: isDragging ? 'none' : 'transform 0.2s',
+                transformOrigin: 'center center',
+                userSelect: 'none',
+                pointerEvents: zoom > 100 ? 'none' : 'auto'
+              }}
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+              draggable={false}
+            />
+
+            {/* Zoom Controls */}
+            <div className="absolute top-4 left-4 flex gap-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoom(Math.max(50, zoom - 25));
+                }}
+                className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
+                title="Zoom out"
+                disabled={zoom <= 50}
+              >
+                <MagnifyingGlassMinusIcon className="h-5 w-5 text-white" />
+              </button>
+              <div className="px-3 py-2 rounded-md backdrop-blur-sm bg-black/50 text-white text-sm font-medium">
+                {zoom}%
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoom(Math.min(200, zoom + 25));
+                }}
+                className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
+                title="Zoom in"
+                disabled={zoom >= 200}
+              >
+                <MagnifyingGlassPlusIcon className="h-5 w-5 text-white" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoom(100);
+                  setScrollPos({ x: 0, y: 0 });
+                }}
+                className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
+                title="Reset zoom"
+              >
+                <ArrowPathIcon className="h-5 w-5 text-white" />
+              </button>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreviewOpen(false);
+                setPreviewImage(null);
+                setZoom(100);
+                setScrollPos({ x: 0, y: 0 });
+              }}
+              className={`absolute top-4 right-4 p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all`}
+              title="Close preview"
+            >
+              <XMarkIcon className="h-6 w-6 text-white" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
