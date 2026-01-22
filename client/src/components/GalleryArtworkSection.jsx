@@ -26,8 +26,8 @@ const GalleryArtworkSection = ({ categories = [], artworks = [] }) => {
       }
     });
 
-    // Filter out categories with no artworks
-    return Object.values(grouped).filter(cat => cat.items.length > 0);
+      // Return all categories sorted by name (grouped object values)
+      return Object.values(grouped);
   }, [categories, artworks]);
 
   // Set initial active category
@@ -85,15 +85,21 @@ const GalleryArtworkSection = ({ categories = [], artworks = [] }) => {
               <h3 className="text-2xl font-bold uppercase tracking-tight opacity-80">{activeGroup.name}</h3>
             </div>
 
-            <Masonry
-              breakpointCols={masonryBreakpoints}
-              className="flex -ml-8 w-auto"
-              columnClassName="pl-8 bg-clip-padding"
-            >
-              {activeGroup.items.map((art, index) => (
-                <ArtworkCard key={art.id} artwork={art} index={index} />
-              ))}
-            </Masonry>
+                      {activeGroup.items.length > 0 ? (
+                          <Masonry
+                              breakpointCols={masonryBreakpoints}
+                              className="flex -ml-8 w-auto"
+                              columnClassName="pl-8 bg-clip-padding"
+                          >
+                              {activeGroup.items.map((art, index) => (
+                                  <ArtworkCard key={art.id} artwork={art} index={index} />
+                              ))}
+                          </Masonry>
+                      ) : (
+                          <div className="text-center py-20 opacity-50 font-light">
+                              No artworks found in this category.
+                          </div>
+                      )}
           </motion.div>
         )}
       </AnimatePresence>

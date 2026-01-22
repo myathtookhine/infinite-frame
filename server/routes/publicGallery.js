@@ -39,10 +39,10 @@ router.get('/gallery/:slug', async (req, res) => {
 
     // Fetch Categories
     const categoriesResult = await pool.query(
-      `SELECT id, name 
+      `SELECT id, name, sort_order 
        FROM categories 
        WHERE admin_id = $1 AND is_active = true 
-       ORDER BY name ASC`,
+       ORDER BY sort_order ASC, name ASC`,
       [gallery.id]
     );
 

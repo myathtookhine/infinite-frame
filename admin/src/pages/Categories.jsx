@@ -24,6 +24,7 @@ const Categories = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryName, setCategoryName] = useState('');
+  const [sortOrder, setSortOrder] = useState(0);
   const [error, setError] = useState('');
   
   // Super Admin: Can Edit but Not Delete
@@ -66,6 +67,7 @@ const Categories = () => {
     setError('');
     setEditingCategory(null);
     setCategoryName('');
+    setSortOrder(0);
     setIsModalOpen(true);
   };
 
@@ -73,6 +75,7 @@ const Categories = () => {
     setError('');
     setEditingCategory(category);
     setCategoryName(category.name);
+    setSortOrder(category.sort_order || 0);
     setIsModalOpen(true);
   };
 
@@ -82,17 +85,22 @@ const Categories = () => {
 
     setLoading(true);
     const config = { headers: { 'x-admin-id': user.id } };
+    const payload = {
+      name: categoryName,
+      sort_order: parseInt(sortOrder) || 0
+    };
 
     try {
       if (editingCategory) {
-        const response = await axios.put(`${ENDPOINTS.CATEGORIES}/${editingCategory.id}`, { name: categoryName }, config);
+        const response = await axios.put(`${ENDPOINTS.CATEGORIES}/${editingCategory.id}`, payload, config);
         setCategories(categories.map(cat => cat.id === editingCategory.id ? response.data : cat));
       } else {
-        const response = await axios.post(ENDPOINTS.CATEGORIES, { name: categoryName }, config);
-        setCategories([...categories, response.data]);
+        const response = await axios.post(ENDPOINTS.CATEGORIES, payload, config);
+        setCategories([...categories, response.data].sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name)));
       }
       setIsModalOpen(false);
       setCategoryName('');
+      setSortOrder(0);
       setEditingCategory(null);
     } catch (err) {
       console.error('Error saving category:', err);
@@ -255,6 +263,16 @@ const Categories = () => {
                 onChange={(e) => setCategoryName(e.target.value)}
                 placeholder="e.g. Painting, Sculpture, Photography"
               />
+
+              <Input
+                label="Sort Order"
+                type="number"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                placeholder="0"
+                helperText="Lower numbers appear first (e.g. 1, 2, 3)"
+              />
+
               {error && <p className="text-red-500 text-xs">{error}</p>}
               {editingCategory && (
                 <div className="space-y-4 mt-4">
