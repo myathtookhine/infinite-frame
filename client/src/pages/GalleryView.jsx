@@ -8,6 +8,9 @@ import {
   MapPinIcon
 } from '@heroicons/react/24/outline';
 
+import GalleryArtworkSection from '../components/GalleryArtworkSection';
+
+
 const GalleryView = () => {
   const { slug } = useParams();
   const [gallery, setGallery] = useState(null);
@@ -166,16 +169,24 @@ const GalleryView = () => {
         
         {/* Description */}
         {gallery.description && (
-          <section className="reveal text-left mb-20 mx-auto">
+          <section className="reveal text-left mb-20 mx-auto border-b pb-24">
             <p className="text-md md:text-xl font-light leading-relaxed opacity-70 text-center">
               {decodeHtml(gallery.description)}
             </p>
           </section>
         )}
 
+        {/* Gallery Categories tabs and Gallery Artwork grid  */}
+        {gallery.categories && gallery.artworks && (
+          <GalleryArtworkSection
+            categories={gallery.categories}
+            artworks={gallery.artworks}
+          />
+        )}
+
         {/* Contact Information */}
         {(gallery.address || gallery.email || (gallery.phone_numbers && gallery.phone_numbers.length > 0)) && (
-          <section className="reveal mb-32 border-t border-theme pt-32">
+          <section className="reveal mb-32 border-t border-theme pt-32 mt-18">
             <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight mb-16 text-center">Contact</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-4xl mx-auto">

@@ -37,19 +37,35 @@ router.get('/gallery/:slug', async (req, res) => {
 
     const gallery = result.rows[0];
 
+    // Fetch Categories
+    const categoriesResult = await pool.query(
+      `SELECT id, name 
+       FROM categories 
+       WHERE admin_id = $1 AND is_active = true 
+       ORDER BY name ASC`,
+      [gallery.id]
+    );
+
+    // Fetch Artworks with Unit details
+    // Note: Fetching active artworks.
+    const artworksResult = await pool.query(
+      `SELECT a.id, a.name as title, a.description, a.main_image, a.width, a.height, a.price, a.currency, 
+              a.category_id, a.status, a.is_for_sale,
+              u.name as unit_name, u.symbol as unit_symbol
+       FROM artworks a
+       LEFT JOIN units u ON a.unit_id = u.id
+       WHERE a.admin_id = $1 AND a.is_active = true
+       ORDER BY a.created_at DESC`,
+      [gallery.id]
+    );
+
     res.json({
       success: true,
       data: {
-        id: gallery.id,
-        username: gallery.username,
-        gallery_name: gallery.gallery_name,
-        description: gallery.description,
-        address: gallery.address,
-        phone_numbers: gallery.phone_numbers,
-        email: gallery.email,
-        social_links: gallery.social_links,
+        ...gallery,
         banner_image_url: gallery.banner_enabled ? gallery.banner_image_url : null,
-        banner_enabled: gallery.banner_enabled
+        categories: categoriesResult.rows,
+        artworks: artworksResult.rows
       }
     });
 
