@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Masonry from 'react-masonry-css';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowRightCircle } from 'lucide-react';
 
 const GalleryArtworkSection = ({ categories = [], artworks = [] }) => {
   const [activeCategory, setActiveCategory] = useState(null);
@@ -55,21 +55,40 @@ const GalleryArtworkSection = ({ categories = [], artworks = [] }) => {
           
       {/* Category Tabs */}
       <h2 className="text-3xl md:text-5xl font-bold uppercase tracking-tight mb-8 text-center">Categories</h2>
-      <div className="flex flex-wrap justify-center gap-4 mb-12">
-        {categoriesWithArtworks.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setActiveCategory(cat.id)}
-            className={`px-6 py-6 text-sm uppercase tracking-wider transition-all duration-300 border-b-4 cursor-pointer ${
-              activeCategory === cat.id
-                ? 'border-theme text-theme font-bold'
-                : 'border-transparent text-theme/60 hover:text-theme hover:border-theme/30'
-            }`}
-          >
-            {cat.name}
-          </button>
-        ))}
+
+      <div className="relative">
+        <div className="flex flex-nowrap md:flex-wrap justify-start md:justify-center gap-4 mb-12 overflow-x-auto pb-4 md:pb-0 scrollbar-hide px-0 md:px-0 snap-x">
+          {categoriesWithArtworks.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`whitespace-nowrap flex-shrink-0 snap-center px-6 py-4 min-w-[120px] text-center text-sm uppercase tracking-wider transition-all duration-300 border-b-4 cursor-pointer bg-white dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 ${activeCategory === cat.id
+                ? 'border-theme text-theme font-bold bg-black/10 dark:bg-white/15'
+                : 'border-transparent text-theme/60'
+                }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Mobile scroll indicator */}
+        {/* {categoriesWithArtworks.length > 2 && (
+          <div className="absolute right-0 top-0 bottom-4 md:hidden z-10 flex items-center pr-1 pointer-events-none bg-gradient-to-l from-white via-white/80 to-transparent dark:from-black dark:via-black/80 w-12 justify-end">
+            <ArrowRightCircle className="w-6 h-6 text-theme opacity-80 animate-pulse" />
+          </div>
+        )} */}
       </div>
+
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+      `}</style>
 
       {/* Artworks Grid */}
       <AnimatePresence mode="wait">
