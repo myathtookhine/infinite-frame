@@ -78,4 +78,56 @@ router.get('/gallery/:slug', async (req, res) => {
   }
 });
 
+// GET /api/public/artworks/:id
+// Fetches a single artwork details for public view
+router.get('/artworks/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const query = `
+      SELECT a.*, 
+             c.name as category_name,
+             u.name as unit_name, u.symbol as unit_symbol,
+             adm.username as artist_username,
+             adm.gallery_name,
+             (
+               SELECT json_agg(json_build_object(
+                 'id', attr.id,
+                 'type', attr.type,
+                 'name', attr.name
+               ))
+               FROM artwork_attributes aa
+               JOIN attributes attr ON aa.attribute_id = attr.id
+               WHERE aa.artwork_id = a.id
+             ) as attributes
+      FROM artworks a
+      LEFT JOIN categories c ON a.category_id = c.id
+      LEFT JOIN units u ON a.unit_id = u.id
+      JOIN admins adm ON a.admin_id = adm.id
+      WHERE a.id = $1 AND a.is_active = true
+    `;
+
+    const result = await pool.query(query, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Artwork not found or not active' 
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Error fetching artwork details:', err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error' 
+    });
+  }
+});
+
 module.exports = router;
+

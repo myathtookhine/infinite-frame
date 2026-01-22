@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, PencilIcon, DocumentCheckIcon, Square2StackIcon } from '@heroicons/react/24/outline';
 import ThemeToggle from '../components/ThemeToggle';
 
 const ArtworkDetail = () => {
@@ -95,7 +95,7 @@ const ArtworkDetail = () => {
           <div className="text-center max-w-2xl">
             <h1 className="text-6xl md:text-8xl font-bold mb-4">404</h1>
             <h2 className="text-2xl font-bold uppercase tracking-tight mb-8">{error || 'Artwork Not Found'}</h2>
-            <button
+            <button 
               onClick={() => navigate(-1)}
               className="px-8 py-3 border-2 border-theme uppercase font-bold tracking-wider hover:bg-theme-inverse hover:text-theme-inverse transition-colors"
             >
@@ -108,13 +108,13 @@ const ArtworkDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-theme text-theme flex flex-col">
+    <div className="min-h-screen bg-theme text-theme flex flex-col gallery-view">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-theme border-b border-theme">
         <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24 h-20 flex items-center justify-between">
             <button 
               onClick={() => navigate(-1)}
-              className="group flex items-center gap-2 text-sm font-bold uppercase tracking-wider hover:opacity-70 transition-opacity"
+            className="group flex items-center gap-2 text-sm font-bold uppercase cursor-pointer tracking-wider hover:opacity-70 transition-opacity"
             >
               <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
               Back
@@ -132,8 +132,8 @@ const ArtworkDetail = () => {
           <div className="space-y-6">
             <div className="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative group">
               <img
-                src={activeImage}
-                alt={artwork.title}
+                src={activeImage} 
+                alt={artwork.name}
                 className="w-full h-auto object-contain max-h-[80vh] mx-auto"
               />
             </div>
@@ -165,102 +165,160 @@ const ArtworkDetail = () => {
           {/* Right Column: Information */}
           <div className="flex flex-col h-full">
             <div className="mb-8 border-b border-theme/20 pb-8">
-              <div className="flex flex-wrap items-start justify-between gap-4 mb-2">
-                <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-tight leading-none">
-                  {artwork.title}
+              <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+                <h1 className="text-2xl md:text-4xl lg:text-4xl font-bold uppercase tracking-tighter leading-[0.9]">
+                  {artwork.name}
                 </h1>
                 {/* Status Badges */}
                 {artwork.status === 'sold' && (
-                  <span className="px-3 py-1 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 text-xs font-bold uppercase tracking-wider rounded-full border border-red-500">
+                  <span className="px-3 py-1 bg-white-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 text-xs font-bold uppercase tracking-wider rounded-full border border-red-500 transform translate-y-2">
                     Sold
                   </span>
                 )}
                 {artwork.status === 'reserved' && (
-                  <span className="px-3 py-1 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 text-xs font-bold uppercase tracking-wider rounded-full border border-orange-500">
+                  <span className="px-3 py-1 bg-white-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 text-xs font-bold uppercase tracking-wider rounded-full border border-orange-500 transform translate-y-2">
                     Reserved
                   </span>
                 )}
               </div>
 
-              {artwork.artist_name && (
-                <h2 className="text-xl opacity-70 font-light mb-1">
-                  {artwork.artist_name}
-                </h2>
-              )}
-              {artwork.year && (
-                <p className="text-sm opacity-50 font-mono">
-                  {artwork.year}
-                </p>
+              {artwork.created_year && (
+                <>
+                  <div>
+                    <span className="block opacity-50 text-xs uppercase tracking-wider mb-2">Year of work</span>
+                    <span className="text-lg font-light">
+                      {artwork.created_year}
+                    </span>
+                  </div>
+                </>
               )}
             </div>
 
-            <div className="space-y-8 flex-1">
+            <div className="space-y-10 flex-1">
               {/* Price */}
               <div>
                 {artwork.show_price !== false && artwork.is_for_sale && artwork.price ? (
-                  <div className="text-2xl md:text-3xl font-light">
-                    {Number(artwork.price).toLocaleString()}
-                    <span className="text-base ml-2 opacity-60">{artwork.currency || 'MMK'}</span>
+                  <div className="text-3xl md:text-4xl font-light tracking-tight">
+                    {Number(artwork.price).toLocaleString()} 
+                    <span className="text-lg ml-2 opacity-60 font-normal">{artwork.currency || 'MMK'}</span>
                   </div>
                 ) : (
-                  <div className="text-xl uppercase tracking-wider font-light opacity-70">
-                    Price on Request
+                    <div className="text-2xl uppercase tracking-wider font-light opacity-70">
+                      Price Unavailable
                   </div>
                 )}
               </div>
 
-              {/* Dimensions & Quick Stats */}
-              <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-sm">
+              {/* Dimensions & Framed/unframed*/}
+              <div className="grid grid-cols-2 gap-12 text-sm">
+                {/* Dimensions */}
                 {artwork.width && artwork.height && (
                   <div>
-                    <span className="block opacity-50 text-xs uppercase tracking-wider mb-1">Dimensions</span>
-                    <span className="font-medium">
+                    <span className="block opacity-50 text-xs uppercase tracking-wider mb-2">Dimensions</span>
+                    <span className="text-lg font-light">
                       {artwork.width} × {artwork.height} {artwork.depth ? `× ${artwork.depth}` : ''} {artwork.unit_name || 'cm'}
                     </span>
                   </div>
                 )}
 
-                {artwork.medium && (
-                  <div>
-                    <span className="block opacity-50 text-xs uppercase tracking-wider mb-1">Medium</span>
-                    <span className="font-medium capitalize">{artwork.medium}</span>
-                  </div>
-                )}
+                {/* Frame Status */}
+                <div>
+                  <span className="block opacity-50 text-xs uppercase tracking-wider mb-2">Frame</span>
+                  <span className="text-lg font-light">
+                    {artwork.is_framed ? 'Framed' : 'Not Included Frame'}
+                  </span>
+                </div>
               </div>
+
+              {/* Tags (Attributes) Grouped by Type */}
+              {artwork.attributes && artwork.attributes.length > 0 && (
+                <div className="pt-2 space-y-6">
+                  {Object.entries(artwork.attributes.reduce((acc, attr) => {
+                    const type = attr.type || 'Other';
+                    if (!acc[type]) acc[type] = [];
+                    acc[type].push(attr);
+                    return acc;
+                  }, {})).sort(([a], [b]) => {
+                    // specific order preferences if needed, else alphabetical
+                    const order = ['Medium', 'Style', 'Technique', 'Subject'];
+                    const indexA = order.indexOf(a);
+                    const indexB = order.indexOf(b);
+                    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                    if (indexA !== -1) return -1;
+                    if (indexB !== -1) return 1;
+                    return a.localeCompare(b);
+                  }).map(([type, attrs]) => (
+                    <div key={type}>
+                      <span className="block opacity-50 text-xs uppercase tracking-wider mb-3">{type}</span>
+                      <div className="flex flex-wrap gap-2">
+                        {attrs.map((attr, idx) => (
+                          <span key={idx} className="px-4 py-1.5 border border-theme/20 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-theme hover:text-theme-inverse transition-colors cursor-default">
+                            {attr.name || attr}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Additional Info Display  */}
+
+              {/* Additional Details (Edition & Authenticity) */}
+              {artwork.show_additional_details && (
+                <div className="grid grid-cols-2 gap-12 text-sm">
+                  {(artwork.has_signature || artwork.has_coa) && (
+                    <div>
+                      <span className="block opacity-50 text-xs uppercase tracking-wider mb-2">Authenticity</span>
+                      <div className="flex flex-col gap-2">
+                        {artwork.has_signature && (
+                          <div className="flex items-center gap-2">
+                            <PencilIcon className="w-4 h-4 opacity-70" />
+                            <span className="text-sm font-light">Signed by Artist</span>
+                          </div>
+                        )}
+                        {artwork.has_coa && (
+                          <div className="flex items-center gap-2">
+                            <DocumentCheckIcon className="w-4 h-4 opacity-70" />
+                            <span className="text-sm font-light">COA Included</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {artwork.edition_info && (
+                    <div>
+                      <span className="block opacity-50 text-xs uppercase tracking-wider mb-2">Edition</span>
+                      <div className="flex items-center gap-2">
+                        <Square2StackIcon className="w-4 h-4 opacity-70" />
+                        <span className="text-sm font-light">{artwork.edition_info}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Description */}
               {artwork.description && (
                 <div className="prose dark:prose-invert max-w-none">
-                  <h3 className="text-sm font-bold uppercase tracking-wider mb-2 opacity-50">About the work</h3>
-                  <p className="font-light leading-relaxed opacity-80 whitespace-pre-line">
+                  <h3 className="text-xs font-bold uppercase tracking-wider mb-4 opacity-50">About the work</h3>
+                  <p className="text-lg font-light leading-relaxed opacity-80 whitespace-pre-line">
                     {decodeHtml(artwork.description)}
                   </p>
-                </div>
-              )}
-
-              {/* Additional Details / Attributes */}
-              {artwork.attributes && artwork.attributes.length > 0 && (
-                <div className="pt-8 border-t border-theme/10">
-                  <div className="flex flex-wrap gap-2">
-                    {artwork.attributes.map((attr, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-theme/5 rounded-full text-xs uppercase tracking-wider opacity-70">
-                        {attr.name || attr}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               )}
 
             </div>
 
             {/* Action Button */}
-            <div className="mt-12 pt-8 border-t border-theme/20">
+            {/* <div className="mt-12 pt-8 border-t border-theme/20">
               <button
                 className="w-full py-4 bg-theme-inverse text-theme-inverse border border-theme hover:bg-theme hover:text-theme transition-all duration-300 font-bold uppercase tracking-widest text-sm"
                 onClick={() => {
                   // Handle inquiry - either mailto or scroll to contact
-                  const subject = `Inquiry: ${artwork.title}`;
-                  const body = `I am interested in the artwork "${artwork.title}". Please send me more information.`;
+                  const subject = `Inquiry: ${artwork.name}`;
+                  const body = `I am interested in the artwork "${artwork.name}". Please send me more information.`;
                   window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 }}
               >
@@ -269,7 +327,7 @@ const ArtworkDetail = () => {
               <p className="text-center text-xs opacity-40 mt-4">
                 Clicking will open your default email client
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </main>

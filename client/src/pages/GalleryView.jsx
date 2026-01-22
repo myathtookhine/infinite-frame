@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import ThemeToggle from '../components/ThemeToggle';
+import { useGallery } from '../context/GalleryContext';
 import {
   EnvelopeIcon,
   PhoneIcon,
@@ -13,18 +14,49 @@ import GalleryArtworkSection from '../components/GalleryArtworkSection';
 
 const GalleryView = () => {
   const { slug } = useParams();
-  const [gallery, setGallery] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { cacheGallery, saveScrollPosition, getCachedGallery } = useGallery();
+
+  // Try to load from cache first
+  const cached = getCachedGallery(slug);
+
+  const [gallery, setGallery] = useState(cached?.data || null);
+  const [loading, setLoading] = useState(!cached?.data);
   const [error, setError] = useState(null);
   const observerRef = useRef(null);
 
+  // Save scroll position on unmount or slug change
   useEffect(() => {
-    // Scroll to top when page loads
-    window.scrollTo(0, 0);
+    return () => {
+      saveScrollPosition(slug, window.scrollY);
+    };
+  }, [slug, saveScrollPosition]);
+
+  useEffect(() => {
+    // Check if we need to fetch (stale-while-revalidate pattern)
+    // We try to use cache for immediate render, but always fetch fresh data in background
+
+    const currentCached = getCachedGallery(slug);
+
+    // Immediate state sync and scroll restore if cached
+    if (currentCached?.data) {
+      if (!gallery || gallery.id !== currentCached.data.id) {
+        setGallery(currentCached.data);
+      }
+
+      // Restore scroll immediately
+      setTimeout(() => {
+        window.scrollTo(0, currentCached.scrollPosition || 0);
+      }, 0);
+    } else {
+      // No cache: Scroll top and show loader
+      window.scrollTo(0, 0);
+      if (!gallery) setLoading(true);
+    }
 
     const fetchGallery = async () => {
       try {
-        setLoading(true);
+        // Only show loading if we have absolutely nothing
+        if (!gallery && !currentCached?.data) setLoading(true);
         setError(null);
         
         const getBaseUrl = () => {
@@ -46,16 +78,27 @@ const GalleryView = () => {
         const response = await axios.get(endpoint);
         
         if (response.data.success) {
-          setGallery(response.data.data);
+          const newData = response.data.data;
+
+          // Check if data actually changed to avoid unnecessary re-renders
+          const currentDataStr = JSON.stringify(currentCached?.data || {});
+          const newDataStr = JSON.stringify(newData);
+
+          if (currentDataStr !== newDataStr) {
+            setGallery(newData);
+            cacheGallery(slug, newData);
+          }
         } else {
-          setError('Gallery not found');
+          if (!currentCached?.data) setError('Gallery not found');
         }
       } catch (err) {
         console.error('Error fetching gallery:', err);
-        if (err.response?.status === 404) {
-          setError('Gallery not found');
-        } else {
-          setError('Failed to load gallery. Please try again later.');
+        if (!currentCached?.data) {
+          if (err.response?.status === 404) {
+            setError('Gallery not found');
+          } else {
+            setError('Failed to load gallery. Please try again later.');
+             }
         }
       } finally {
         setLoading(false);
@@ -65,7 +108,7 @@ const GalleryView = () => {
     if (slug) {
       fetchGallery();
     }
-  }, [slug]);
+  }, [slug]); // Depend mainly on slug
 
   useEffect(() => {
     if (!loading && !error && gallery) {
