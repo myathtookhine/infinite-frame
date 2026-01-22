@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useAdminCache } from '../context/AdminCacheContext';
 import axios from 'axios';
 import { ENDPOINTS } from '../config';
 import ArtistSelector from '../components/ArtistSelector';
@@ -18,6 +19,7 @@ import Button from '../components/ui/Button';
 const Categories = () => {
   const { isDark } = useTheme();
   const { user } = useAuth();
+  const { getCachedData, setCachedData } = useAdminCache();
   const [selectedArtist, setSelectedArtist] = useState('');
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,16 @@ const Categories = () => {
   const cardBg = isDark ? 'bg-[#141414]' : 'bg-white';
 
   const fetchCategories = async () => {
-    setLoading(true);
+    const cacheKey = `categories_${selectedArtist || (isSuperAdmin ? 'all' : 'owner')}`;
+    const cached = getCachedData(cacheKey);
+
+    if (cached) {
+      setCategories(cached.data);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
     const config = {
       headers: { 'x-admin-id': user.id },
       params: {
@@ -48,10 +59,17 @@ const Categories = () => {
 
     try {
       const response = await axios.get(ENDPOINTS.CATEGORIES, config);
-      setCategories(response.data);
+
+      const currentDataStr = JSON.stringify(cached?.data || []);
+      const newDataStr = JSON.stringify(response.data);
+
+      if (currentDataStr !== newDataStr) {
+        setCategories(response.data);
+        setCachedData(cacheKey, response.data);
+      }
     } catch (err) {
       console.error('Error fetching categories:', err);
-      setCategories([]);
+      if (!cached) setCategories([]);
     } finally {
       setLoading(false);
     }
@@ -90,13 +108,19 @@ const Categories = () => {
       sort_order: parseInt(sortOrder) || 0
     };
 
+    const cacheKey = `categories_${selectedArtist || (isSuperAdmin ? 'all' : 'owner')}`;
+
     try {
       if (editingCategory) {
         const response = await axios.put(`${ENDPOINTS.CATEGORIES}/${editingCategory.id}`, payload, config);
-        setCategories(categories.map(cat => cat.id === editingCategory.id ? response.data : cat));
+        const newCats = categories.map(cat => cat.id === editingCategory.id ? response.data : cat);
+        setCategories(newCats);
+        setCachedData(cacheKey, newCats);
       } else {
         const response = await axios.post(ENDPOINTS.CATEGORIES, payload, config);
-        setCategories([...categories, response.data].sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name)));
+        const newCats = [...categories, response.data].sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
+        setCategories(newCats);
+        setCachedData(cacheKey, newCats);
       }
       setIsModalOpen(false);
       setCategoryName('');
@@ -115,10 +139,13 @@ const Categories = () => {
 
     setLoading(true);
     const config = { headers: { 'x-admin-id': user.id } };
+    const cacheKey = `categories_${selectedArtist || (isSuperAdmin ? 'all' : 'owner')}`;
 
     try {
       await axios.delete(`${ENDPOINTS.CATEGORIES}/${id}`, config);
-      setCategories(categories.filter(cat => cat.id !== id));
+      const newCats = categories.filter(cat => cat.id !== id);
+      setCategories(newCats);
+      setCachedData(cacheKey, newCats);
     } catch (err) {
       console.error('Error deleting category:', err);
       alert(err.response?.data?.message || 'Failed to delete category');
@@ -130,13 +157,16 @@ const Categories = () => {
   const handleToggleStatus = async (category) => {
     const config = { headers: { 'x-admin-id': user.id } };
     const newStatus = !category.is_active;
+    const cacheKey = `categories_${selectedArtist || (isSuperAdmin ? 'all' : 'owner')}`;
 
     try {
       const response = await axios.put(`${ENDPOINTS.CATEGORIES}/${category.id}`, {
         is_active: newStatus
       }, config);
 
-      setCategories(categories.map(cat => cat.id === category.id ? { ...cat, is_active: response.data.is_active } : cat));
+      const newCats = categories.map(cat => cat.id === category.id ? { ...cat, is_active: response.data.is_active } : cat);
+      setCategories(newCats);
+      setCachedData(cacheKey, newCats);
     } catch (err) {
       console.error("Failed to toggle status", err);
       alert("Failed to update status");

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useAdminCache } from '../context/AdminCacheContext';
 import ConfigManager from '../components/ConfigManager';
 import ArtistSelector from '../components/ArtistSelector';
 import { 
@@ -22,6 +23,7 @@ const ArtworkAttributes = () => {
   const [selectedArtist, setSelectedArtist] = useState(''); // For Super Admin
   const { isDark } = useTheme();
   const { user } = useAuth();
+  const { getCachedData, setCachedData } = useAdminCache();
 
   const borderColor = isDark ? 'border-[#262626]' : 'border-gray-200';
   const textColor = isDark ? 'text-white' : 'text-[#151416]';
@@ -39,7 +41,19 @@ const ArtworkAttributes = () => {
   const [createError, setCreateError] = useState('');
 
   const fetchTypes = async () => {
-    setLoading(true);
+    const cacheKey = `attributes_${selectedArtist || (isSuperAdmin ? 'all' : 'owner')}`;
+    const cached = getCachedData(cacheKey);
+
+    if (cached) {
+      setTypes(cached.data);
+      if (cached.data.length > 0 && !activeTab) {
+        setActiveTab(cached.data[0].type);
+      }
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
     const config = { 
       headers: { 'x-admin-id': user.id },
       params: {
@@ -51,23 +65,29 @@ const ArtworkAttributes = () => {
       const response = await axios.get(`${ENDPOINTS.ATTRIBUTES}/types`, config);
       const fetchedTypes = response.data.filter(t => t.type !== 'Category');
       
-      setTypes(fetchedTypes);
-      
-      if (fetchedTypes.length > 0) {
-        // If activeTab is not in the new list, switch to first. 
-        // Or if simple switch, just reset to first.
-        const currentTabExists = fetchedTypes.find(t => t.type === activeTab);
-        if (!currentTabExists) {
-            setActiveTab(fetchedTypes[0].type);
-        }
-      } else {
-        setActiveTab('');
+      const currentDataStr = JSON.stringify(cached?.data || []);
+      const newDataStr = JSON.stringify(fetchedTypes);
+
+      if (currentDataStr !== newDataStr) {
+        setTypes(fetchedTypes);
+        setCachedData(cacheKey, fetchedTypes);
+
+        if (fetchedTypes.length > 0) {
+            const currentTabExists = fetchedTypes.find(t => t.type === activeTab);
+            if (!currentTabExists) {
+              setActiveTab(fetchedTypes[0].type);
+            }
+          } else {
+            setActiveTab('');
+          }
       }
       return fetchedTypes;
     } catch (err) {
       console.error('Error fetching types:', err);
-      setTypes([]);
-      setActiveTab('');
+      if (!cached) {
+        setTypes([]);
+        setActiveTab('');
+      }
       return [];
     } finally {
       setLoading(false);
@@ -88,6 +108,7 @@ const ArtworkAttributes = () => {
     }
 
     const config = { headers: { 'x-admin-id': user.id } };
+    const cacheKey = `attributes_${selectedArtist || (isSuperAdmin ? 'all' : 'owner')}`;
 
     try {
       await axios.post(ENDPOINTS.ATTRIBUTES, { 
@@ -98,7 +119,10 @@ const ArtworkAttributes = () => {
       // Refresh
       const response = await axios.get(`${ENDPOINTS.ATTRIBUTES}/types`, config);
       const fetchedTypes = response.data.filter(t => t.type !== 'Category');
+
       setTypes(fetchedTypes);
+      setCachedData(cacheKey, fetchedTypes);
+
       setActiveTab(newTypeName);
       
       setIsNewTypeModalOpen(false);

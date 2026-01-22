@@ -186,6 +186,26 @@ router.delete('/:id', async (req, res) => {
     console.error(err.message);
     // Postgres Foreign Key Violation Code: 23503
     if (err.code === '23503') {
+        try {
+          // Find which artworks are using this attribute
+          const linkedArtworks = await pool.query(`
+              SELECT a.name 
+              FROM artworks a
+              JOIN artwork_attributes aa ON a.id = aa.artwork_id
+              WHERE aa.attribute_id = $1
+              LIMIT 5
+          `, [id]);
+          
+          if (linkedArtworks.rows.length > 0) {
+             const names = linkedArtworks.rows.map(r => r.name).join(', ');
+             const more = linkedArtworks.rows.length === 5 ? '...' : '';
+             return res.status(400).json({ 
+                 message: `Cannot delete: This item is linked to existing artworks: ${names}${more}` 
+             });
+          }
+        } catch (innerErr) {
+             console.error("Error checking linked artworks", innerErr);
+        }
         return res.status(400).json({ message: "Cannot delete: This item is linked to existing artworks." });
     }
     res.status(500).send("Server Error");

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useAdminCache } from '../context/AdminCacheContext';
 import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -13,6 +14,7 @@ import { ENDPOINTS } from '../config';
 const Artworks = () => {
   const { isDark } = useTheme();
   const { user } = useAuth();
+  const { getCachedData, setCachedData } = useAdminCache();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -33,9 +35,22 @@ const Artworks = () => {
   }, []);
 
   const fetchData = async () => {
-    try {
-      setLoading(true);
+    const worksKey = `artworks_${user.id}`;
+    const catsKey = `categories_list_${user.id}`;
 
+    const cachedWorks = getCachedData(worksKey);
+    const cachedCats = getCachedData(catsKey);
+
+    if (cachedWorks) setArtworks(cachedWorks.data);
+    if (cachedCats) setCategories(cachedCats.data);
+
+    if (!cachedWorks || !cachedCats) {
+      setLoading(true);
+    } else {
+      setLoading(false);
+    }
+
+    try {
       // Fetch artworks and categories in parallel
       const [artworksRes, categoriesRes] = await Promise.all([
         axios.get(ENDPOINTS.ARTWORKS, {
@@ -47,12 +62,21 @@ const Artworks = () => {
         // Removed attribute types fetching
       ]);
 
-      setArtworks(artworksRes.data);
-      setCategories(categoriesRes.data);
-      // setAttributeTypes(attributeTypesRes.data);
+      // Check for changes
+      const worksChanged = JSON.stringify(cachedWorks?.data || []) !== JSON.stringify(artworksRes.data);
+      const catsChanged = JSON.stringify(cachedCats?.data || []) !== JSON.stringify(categoriesRes.data);
+
+      if (worksChanged) {
+        setArtworks(artworksRes.data);
+        setCachedData(worksKey, artworksRes.data);
+      }
+      if (catsChanged) {
+        setCategories(categoriesRes.data);
+        setCachedData(catsKey, categoriesRes.data);
+      }
     } catch (err) {
       console.error('Error fetching data:', err);
-      alert('Failed to load artworks');
+      if (!cachedWorks) alert('Failed to load artworks');
     } finally {
       setLoading(false);
     }
@@ -76,13 +100,17 @@ const Artworks = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this artwork?')) {
+      const worksKey = `artworks_${user.id}`;
       try {
         await axios.delete(`${ENDPOINTS.ARTWORKS}/${id}`, {
           headers: { 'x-admin-id': user.id }
         });
 
-        // Remove from local state
-        setArtworks(artworks.filter(a => a.id !== id));
+        // Remove from local state and update cache
+        const newWorks = artworks.filter(a => a.id !== id);
+        setArtworks(newWorks);
+        setCachedData(worksKey, newWorks);
+
         alert('Artwork deleted successfully');
       } catch (err) {
         console.error('Error deleting artwork:', err);
