@@ -30,8 +30,13 @@ const ArtworkDetail = () => {
         };
 
         const baseUrl = getBaseUrl();
-        // Assuming the endpoint for fetching a single artwork
-        const endpoint = `${baseUrl}/api/public/artworks/${id}`;
+        // Handle double /api issue if VITE_API_URL includes /api
+        let endpoint = '';
+        if (baseUrl.endsWith('/api')) {
+          endpoint = `${baseUrl}/public/artworks/${id}`;
+        } else {
+          endpoint = `${baseUrl}/api/public/artworks/${id}`;
+        }
 
         const response = await axios.get(endpoint);
 
