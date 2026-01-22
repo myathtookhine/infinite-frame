@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { PhotoIcon, XMarkIcon, EyeIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import ImageCropperModal from './ImageCropperModal';
@@ -17,10 +17,27 @@ const MultipleImageUploader = ({ images, onImagesChange, label = "Additional Ima
   const [scrollPos, setScrollPos] = useState({ x: 0, y: 0 });
   const [hasDragged, setHasDragged] = useState(false);
 
+  // Touch gesture states
+  const [lastTapTime, setLastTapTime] = useState(0);
+  const [initialPinchDistance, setInitialPinchDistance] = useState(null);
+  const [baseZoom, setBaseZoom] = useState(100);
+
   const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-600';
   const borderColor = isDark ? 'border-[#262626]' : 'border-gray-300';
   const hoverBg = isDark ? 'hover:bg-white/5' : 'hover:bg-black/5';
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (previewOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [previewOpen]);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -210,20 +227,20 @@ const MultipleImageUploader = ({ images, onImagesChange, label = "Additional Ima
                     setPreviewImage(image.url);
                     setPreviewOpen(true);
                   }}
-                  className="p-3 rounded transition-all backdrop-blur-sm cursor-pointer"
+                  className="p-2 rounded-md bg-white/80 backdrop-blur-md transition-all cursor-pointer"
                   title="Preview image"
                 >
-                  <EyeIcon className="h-4 w-4 text-white" />
+                  <EyeIcon className="h-4 w-4 text-neutral-900" />
                 </button>
 
                 {/* Delete Button */}
                 <button
                   type="button"
                   onClick={() => removeImage(image.id)}
-                  className="p-3 rounded transition-all backdrop-blur-sm cursor-pointer"
+                  className="p-2 rounded-md bg-white/80 backdrop-blur-md transition-all cursor-pointer"
                   title="Remove image"
                 >
-                  <XMarkIcon className="h-4 w-4 text-white" />
+                  <XMarkIcon className="h-4 w-4 text-neutral-900" />
                 </button>
               </div>
 
@@ -258,7 +275,7 @@ const MultipleImageUploader = ({ images, onImagesChange, label = "Additional Ima
       {previewOpen && previewImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+            className="absolute inset-0 bg-black backdrop-blur-sm"
             onClick={() => {
               if (!hasDragged) {
                 setPreviewOpen(false);
@@ -275,7 +292,8 @@ const MultipleImageUploader = ({ images, onImagesChange, label = "Additional Ima
             style={{
               cursor: zoom > 100 ? (isDragging ? 'grabbing' : 'grab') : 'default',
               scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
+              msOverflowStyle: 'none',
+              animation: 'modalZoomIn 0.8s ease-out'
             }}
             onMouseDown={(e) => {
               if (zoom > 100) {
@@ -295,6 +313,66 @@ const MultipleImageUploader = ({ images, onImagesChange, label = "Additional Ima
             }}
             onMouseUp={() => setIsDragging(false)}
             onMouseLeave={() => setIsDragging(false)}
+            onTouchStart={(e) => {
+              const touches = e.touches;
+
+              if (touches.length === 2) {
+                // Pinch zoom start
+                const distance = Math.sqrt(
+                  Math.pow(touches[1].clientX - touches[0].clientX, 2) +
+                  Math.pow(touches[1].clientY - touches[0].clientY, 2)
+                );
+                setInitialPinchDistance(distance);
+                setBaseZoom(zoom);
+              } else if (touches.length === 1) {
+                // Check for double tap
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTapTime;
+
+                if (tapLength < 300 && tapLength > 0) {
+                  // Double tap detected
+                  setZoom(zoom === 200 ? 100 : 200);
+                  setScrollPos({ x: 0, y: 0 });
+                }
+                setLastTapTime(currentTime);
+
+                // Single finger pan start (when zoomed)
+                if (zoom > 100) {
+                  setIsDragging(true);
+                  setHasDragged(false);
+                  setDragStart({
+                    x: touches[0].clientX - scrollPos.x,
+                    y: touches[0].clientY - scrollPos.y
+                  });
+                }
+              }
+            }}
+            onTouchMove={(e) => {
+              const touches = e.touches;
+
+              if (touches.length === 2 && initialPinchDistance) {
+                // Pinch zoom
+                e.preventDefault();
+                const distance = Math.sqrt(
+                  Math.pow(touches[1].clientX - touches[0].clientX, 2) +
+                  Math.pow(touches[1].clientY - touches[0].clientY, 2)
+                );
+                const scale = distance / initialPinchDistance;
+                const newZoom = Math.min(200, Math.max(50, baseZoom * scale));
+                setZoom(newZoom);
+              } else if (touches.length === 1 && isDragging && zoom > 100) {
+                // Single finger pan
+                e.preventDefault();
+                setHasDragged(true);
+                const newX = touches[0].clientX - dragStart.x;
+                const newY = touches[0].clientY - dragStart.y;
+                setScrollPos({ x: newX, y: newY });
+              }
+            }}
+            onTouchEnd={() => {
+              setIsDragging(false);
+              setInitialPinchDistance(null);
+            }}
           >
             <img
               src={previewImage}
@@ -363,10 +441,10 @@ const MultipleImageUploader = ({ images, onImagesChange, label = "Additional Ima
                 setZoom(100);
                 setScrollPos({ x: 0, y: 0 });
               }}
-              className={`absolute top-4 right-4 p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all`}
+              className={`absolute top-4 right-4 p-2 rounded-md bg-white/80 backdrop-blur-md transition-all cursor-pointer`}
               title="Close preview"
             >
-              <XMarkIcon className="h-6 w-6 text-white" />
+              <XMarkIcon className="h-6 w-6 text-neutral-900" />
             </button>
           </div>
         </div>

@@ -8,6 +8,7 @@ import Input from '../components/ui/Input';
 import InputTextarea from '../components/ui/InputTextarea';
 import SingleImageUploader from '../components/SingleImageUploader';
 import MultipleImageUploader from '../components/MultipleImageUploader';
+import Toast from '../components/ui/Toast';
 import axios from 'axios';
 import { ENDPOINTS } from '../config';
 
@@ -50,6 +51,11 @@ const ArtworkForm = () => {
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [loadingAttributes, setLoadingAttributes] = useState(true);
   const [loadingArtwork, setLoadingArtwork] = useState(isEditMode);
+
+  // Toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('neutral');
 
   const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-600';
@@ -263,6 +269,11 @@ const ArtworkForm = () => {
     }
 
     try {
+      // Show toast notification
+      setToastMessage(isEditMode ? 'Saving the artwork...' : 'Adding the artwork...');
+      setToastType('info');
+      setToastVisible(true);
+
       // 1. Create/Update Artwork Data (without images initially)
       const artworkData = {
         name: isUntitled ? 'Untitled' : name,
@@ -352,10 +363,12 @@ const ArtworkForm = () => {
         }
       }
 
+      setToastVisible(false);
       alert(`Artwork ${isEditMode ? 'updated' : 'created'} successfully!`);
       navigate('/artworks');
     } catch (err) {
       console.error('Error saving artwork:', err);
+      setToastVisible(false);
       alert(`Failed to ${isEditMode ? 'update' : 'create'} artwork: ` + (err.response?.data?.message || err.message));
     }
   };
@@ -880,11 +893,20 @@ const ArtworkForm = () => {
                 type="submit"
                 className="flex-1"
               >
-                {isEditMode ? 'Update Artwork' : 'Add Artwork'}
+                {isEditMode ? 'Save' : 'Add New'}
               </Button>
             </div>
           </form>
       )}
+
+      {/* Toast Notification */}
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        isVisible={toastVisible}
+        onClose={() => setToastVisible(false)}
+        duration={0}
+      />
     </div>
   );
 };

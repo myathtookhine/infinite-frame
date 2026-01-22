@@ -138,7 +138,7 @@ const Categories = () => {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Page Header with Add Button */}
-      <div className="mb-4 lg:mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+      <div className="mb-4 lg:mb-10 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>Categories</h1>
           <p className={`${subtextColor} font-sans`}>

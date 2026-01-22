@@ -13,6 +13,7 @@ import {
 
 import { ENDPOINTS } from '../config';
 import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
 
 const ArtworkAttributes = () => {
   const [types, setTypes] = useState([]);
@@ -112,7 +113,7 @@ const ArtworkAttributes = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="mb-10 flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
           <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>Artwork Attributes</h1>
           <p className={`${subtextColor} font-sans`}>
@@ -123,17 +124,13 @@ const ArtworkAttributes = () => {
         </div>
         
         {!isReadOnly && (
-          <button
+          <Button
             onClick={() => setIsNewTypeModalOpen(true)}
-            className={`flex items-center gap-2 px-5 py-3 rounded-lg font-sans font-bold text-sm cursor-pointer transition-all ${
-              isDark 
-                ? 'bg-white text-black hover:bg-gray-200' 
-              : 'bg-[#151416] text-white hover:bg-[#2a2a2c]'
-            }`}
+            className="w-full md:w-auto flex items-center justify-center gap-2"
           >
             <FolderPlusIcon className="h-5 w-5" />
             <span>New Attribute Group</span>
-          </button>
+          </Button>
         )}
       </div>
 

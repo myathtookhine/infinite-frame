@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
 import ArtworkListItem from '../components/ArtworkListItem';
 import axios from 'axios';
 import { ENDPOINTS } from '../config';
@@ -15,16 +16,16 @@ const Artworks = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  // const [selectedAttributeType, setSelectedAttributeType] = useState('');
   const [artworks, setArtworks] = useState([]);
   const [categories, setCategories] = useState([]);
+  // const [attributeTypes, setAttributeTypes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
   const borderColor = isDark ? 'border-[#262626]' : 'border-gray-200';
   const cardBg = isDark ? 'bg-[#141414]' : 'bg-white';
-  const selectBg = isDark ? 'bg-[#141414]' : 'bg-white';
-  const selectBorder = isDark ? 'border-[#262626]' : 'border-gray-300';
 
   // Fetch artworks and categories on mount
   useEffect(() => {
@@ -43,10 +44,12 @@ const Artworks = () => {
         axios.get(ENDPOINTS.CATEGORIES, {
           headers: { 'x-admin-id': user.id }
         })
+        // Removed attribute types fetching
       ]);
 
       setArtworks(artworksRes.data);
       setCategories(categoriesRes.data);
+      // setAttributeTypes(attributeTypesRes.data);
     } catch (err) {
       console.error('Error fetching data:', err);
       alert('Failed to load artworks');
@@ -59,6 +62,11 @@ const Artworks = () => {
   const filteredArtworks = artworks.filter(artwork => {
     const matchesSearch = artwork.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = !selectedCategory || artwork.category_id === selectedCategory;
+
+    // Removed attribute type filtering
+    // const matchesAttributeType = !selectedAttributeType ||
+    //   (artwork.attributes && artwork.attributes.some(attr => attr.type === selectedAttributeType));
+
     return matchesSearch && matchesCategory;
   });
 
@@ -90,13 +98,24 @@ const Artworks = () => {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Page Header */}
-      <div className="mb-4 lg:mb-10">
-        <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>
-          Artworks
-        </h1>
-        <p className={`${subtextColor} font-sans`}>
-          Manage your artwork inventory
-        </p>
+      <div className="mb-4 lg:mb-10 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div>
+          <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>
+            Artworks
+          </h1>
+          <p className={`${subtextColor} font-sans`}>
+            Manage your artwork inventory
+          </p>
+        </div>
+
+        {/* Add Artwork Button */}
+        <Button
+          onClick={handleAddArtwork}
+          className="w-full md:w-auto flex items-center justify-center gap-2"
+        >
+          <PlusIcon className="h-4 w-4" />
+          <span className="whitespace-nowrap">Add Artwork</span>
+        </Button>
       </div>
 
       {/* Search and Filter Bar */}
@@ -114,32 +133,17 @@ const Artworks = () => {
         </div>
 
         {/* Category Filter */}
-        <div className="w-full md:w-64">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            disabled={loading}
-            className={`w-full px-4 py-3 rounded-md border-2 ${selectBorder} ${selectBg} ${textColor} font-sans text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-              isDark ? 'focus:ring-white' : 'focus:ring-black'
-              } transition-all disabled:opacity-50`}
-          >
-            <option value="">All Categories</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Add Artwork Button */}
-        <Button
-          onClick={handleAddArtwork}
-          className="w-full md:w-auto flex items-center justify-center gap-2"
-        >
-          <PlusIcon className="h-4 w-4" />
-          <span className="whitespace-nowrap">Add Artwork</span>
-        </Button>
+        <Select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          disabled={loading}
+          placeholder="All Categories"
+          options={categories.map(category => ({
+            value: category.id,
+            label: category.name
+          }))}
+          className="w-full md:w-64"
+        />
       </div>
 
       {/* Artworks List */}
@@ -152,7 +156,7 @@ const Artworks = () => {
         ) : filteredArtworks.length === 0 ? (
           <div className="p-12 text-center">
             <p className={subtextColor}>
-              {searchQuery || selectedCategory
+                {searchQuery || selectedCategory
                 ? 'No artworks match your search criteria.'
                 : 'No artworks found. Create one to get started.'}
             </p>
