@@ -28,6 +28,23 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Middleware to check User Role & ID (Matches logic in artworks.js)
+const getUserContext = async (req, res, next) => {
+  const adminId = req.headers['x-admin-id'];
+  if (!adminId) return res.status(401).json({ message: "Unauthorized: No Admin ID" });
+
+  try {
+    const userResult = await pool.query("SELECT id, role FROM admins WHERE id = $1", [adminId]);
+    if (userResult.rows.length === 0) return res.status(401).json({ message: "User not found" });
+    
+    req.user = userResult.rows[0];
+    next();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 // =====================================================
 // HELPER: Send OTP Email
 // =====================================================
@@ -315,6 +332,55 @@ router.post('/login', loginLimiter, validateLogin, async (req, res) => {
     res.status(500).json({ 
       message: "Server error. Please try again later." 
     });
+  }
+});
+
+// =====================================================
+// 3.5 GET ME (with Stats)
+// =====================================================
+// =====================================================
+// 3.5 GET ME (with Stats)
+// =====================================================
+router.get('/me', getUserContext, async (req, res) => {
+
+  try {
+    // 1. Get Basic User Info & Page Views
+    const userResult = await pool.query(
+      "SELECT id, username, email, role, page_views FROM admins WHERE id = $1",
+      [req.user.id]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const user = userResult.rows[0];
+    let artworkCount = 0;
+
+    // 2. Get Artwork Count based on Role
+    if (user.role === 'super_admin') {
+      // Super Admin: Count ALL artworks
+      const countResult = await pool.query("SELECT COUNT(*) FROM artworks");
+      artworkCount = parseInt(countResult.rows[0].count);
+    } else {
+      // Regular Admin: Count OWN artworks
+      const countResult = await pool.query(
+        "SELECT COUNT(*) FROM artworks WHERE admin_id = $1",
+        [user.id]
+      );
+      artworkCount = parseInt(countResult.rows[0].count);
+    }
+
+    res.json({
+      user: {
+        ...user,
+        artwork_count: artworkCount
+      }
+    });
+
+  } catch (err) {
+    console.error('Error fetching user details:', err);
+    res.status(500).json({ message: "Server Error" });
   }
 });
 

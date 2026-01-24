@@ -11,7 +11,23 @@ const LandingPage = () => {
   useEffect(() => {
     // Scroll to top when page loads
     window.scrollTo(0, 0);
+
+    // Track Visit (Super Admin Analytics)
+    const trackVisit = async () => {
+      try {
+        await fetch('https://infinite-frame-server.onrender.com/api/public/visit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (err) {
+        console.error('Failed to track visit:', err);
+      }
+    };
+    trackVisit();
   }, []);
+
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver((entries) => {

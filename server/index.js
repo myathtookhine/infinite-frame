@@ -20,6 +20,7 @@ app.get('/', (req, res) => {
 
 // Public routes (no authentication)
 app.use('/api/public', require('./routes/publicGallery'));
+app.use('/api/public', require('./routes/public')); // New general public routesFor tracking
 
 // Protected routes
 app.use('/api', authRoutes); 

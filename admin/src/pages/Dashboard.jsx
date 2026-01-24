@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import axios from 'axios';
 import {
   UsersIcon,
   PhotoIcon,
@@ -51,7 +53,35 @@ const mockData = {
 
 const Dashboard = () => {
   const { isDark } = useTheme();
+  const { user } = useAuth();
   const [timeFilter, setTimeFilter] = useState('week');
+  const [statsData, setStatsData] = useState({
+    visitors: 0,
+    artworks: 0
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user?.id) return;
+      try {
+        const response = await axios.get('https://infinite-frame-server.onrender.com/api/auth/me', {
+          headers: {
+            'x-admin-id': user.id
+          }
+        });
+        if (response.data.user) {
+          setStatsData({
+            visitors: response.data.user.page_views || 0,
+            artworks: response.data.user.artwork_count || 0
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      }
+    };
+
+    fetchStats();
+  }, [user]);
 
   const textColor = isDark ? "text-white" : "text-[#151416]";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
@@ -60,11 +90,7 @@ const Dashboard = () => {
   const accentColor = isDark ? "#ffffff" : "#000000";
   const gridColor = isDark ? "#262626" : "#f0f0f0";
 
-  const stats = [
-    { label: 'Visitors', value: '4,281', icon: UsersIcon },
-    { label: 'Artworks', value: '156', icon: PhotoIcon },
-    { label: 'Exhibitions', value: '12', icon: CalendarDaysIcon },
-  ];
+  /* Removed static stats array in favor of direct render */
 
   const chartLabelColor = isDark ? "#9CA3AF" : "#4B5563";
 
@@ -79,24 +105,47 @@ const Dashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.map((stat, idx) => (
-          <div
-            key={idx}
-            className={`border-2 ${cardBorder} ${cardBg} p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group`}
-          >
+        <div className={`border-2 ${cardBorder} ${cardBg} p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group`}>
             <div className="flex items-center justify-between mb-4">
               <div className={`p-2.5 rounded-xl ${isDark ? 'bg-white/5' : 'bg-black/5'} group-hover:scale-110 transition-transform duration-300`}>
-                <stat.icon className={`h-6 w-6 ${textColor}`} />
+              <UsersIcon className={`h-6 w-6 ${textColor}`} />
               </div>
             </div>
             <div className={`font-sans text-sm ${subtextColor} font-bold uppercase tracking-widest mb-1`}>
-              {stat.label}
-            </div>
-            <div className={`font-sans text-4xl font-black ${textColor}`}>
-              {stat.value}
+            Visitors
+          </div>
+          <div className={`font-sans text-4xl font-black ${textColor}`}>
+            {statsData.visitors}
+          </div>
+        </div>
+
+        <div className={`border-2 ${cardBorder} ${cardBg} p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className={`p-2.5 rounded-xl ${isDark ? 'bg-white/5' : 'bg-black/5'} group-hover:scale-110 transition-transform duration-300`}>
+              <PhotoIcon className={`h-6 w-6 ${textColor}`} />
             </div>
           </div>
-        ))}
+          <div className={`font-sans text-sm ${subtextColor} font-bold uppercase tracking-widest mb-1`}>
+            Artworks
+            </div>
+            <div className={`font-sans text-4xl font-black ${textColor}`}>
+            {statsData.artworks}
+            </div>
+        </div>
+
+        <div className={`border-2 ${cardBorder} ${cardBg} p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group opacity-60`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className={`p-2.5 rounded-xl ${isDark ? 'bg-white/5' : 'bg-black/5'} group-hover:scale-110 transition-transform duration-300`}>
+              <CalendarDaysIcon className={`h-6 w-6 ${textColor}`} />
+            </div>
+          </div>
+          <div className={`font-sans text-sm ${subtextColor} font-bold uppercase tracking-widest mb-1`}>
+            Exhibitions
+          </div>
+          <div className={`font-sans text-md font-bold ${textColor}`}>
+            Coming soon feature...
+          </div>
+        </div>
       </div>
 
       {/* Graph Section */}
