@@ -344,9 +344,9 @@ router.post('/login', loginLimiter, validateLogin, async (req, res) => {
 router.get('/me', getUserContext, async (req, res) => {
 
   try {
-    // 1. Get Basic User Info & Page Views
+    // 1. Get Basic User Info (Removed page_views column fetch)
     const userResult = await pool.query(
-      "SELECT id, username, email, role, page_views FROM admins WHERE id = $1",
+      "SELECT id, username, email, role FROM admins WHERE id = $1",
       [req.user.id]
     );
 
@@ -371,9 +371,17 @@ router.get('/me', getUserContext, async (req, res) => {
       artworkCount = parseInt(countResult.rows[0].count);
     }
 
+    // 3. Get Visitor Count from visit_logs (Real-time sync with chart)
+    const visitorResult = await pool.query(
+      "SELECT COUNT(*) FROM visit_logs WHERE admin_id = $1",
+      [user.id]
+    );
+    const visitorCount = parseInt(visitorResult.rows[0].count);
+
     res.json({
       user: {
         ...user,
+        page_views: visitorCount, // Overwrite with log count
         artwork_count: artworkCount
       }
     });

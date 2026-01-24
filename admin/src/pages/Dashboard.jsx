@@ -16,36 +16,67 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  AreaChart,
-  Area
+  BarChart,
+  Bar
 } from 'recharts';
 
 const Dashboard = () => {
   const { isDark } = useTheme();
   const { user } = useAuth();
-  const [timeFilter, setTimeFilter] = useState('week');
+  const [timeFilter, setTimeFilter] = useState('today'); // Default to Today as requested
   const [statsData, setStatsData] = useState({
     visitors: 0,
     artworks: 0
   });
 
-  const [chartData, setChartData] = useState([]);
+
   const [currentDateInfo, setCurrentDateInfo] = useState('');
 
+  // Helper to get skeleton data for smooth UI and Axis visibility
+  const getEmptyChartData = (period) => {
+    if (period === 'today') {
+      return Array.from({ length: 24 }, (_, i) => {
+        const hour = i % 12 === 0 ? 12 : i % 12;
+        const ampm = i < 12 ? 'AM' : 'PM';
+        return { name: `${hour} ${ampm}`, views: 0 };
+      });
+    } else if (period === 'week') {
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      return days.map(d => ({ name: d, views: 0 }));
+    } else if (period === 'month') {
+      return Array.from({ length: 4 }, (_, i) => ({ name: `Week ${i + 1}`, views: 0 }));
+    } else if (period === 'year') {
+      return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        .map(m => ({ name: m, views: 0 }));
+    }
+    return [];
+  };
+
+  const [chartData, setChartData] = useState(getEmptyChartData('today'));
 
   // Fetch Chart Data
   useEffect(() => {
     if (!user?.id) return;
 
+    // Set skeleton immediately on filter change
+    setChartData(getEmptyChartData(timeFilter));
+
     const fetchChartData = async () => {
       try {
-        const token = localStorage.getItem('token'); // or from context if available
-        const response = await axios.get(`${ENDPOINTS.ANALYTICS || 'http://localhost:5000/api/analytics'}/activity?period=${timeFilter}`, {
+        const token = localStorage.getItem('adminToken');
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const response = await axios.get(`${ENDPOINTS.ANALYTICS || 'http://localhost:5000/api/analytics'}/activity?period=${timeFilter}&timezone=${encodeURIComponent(userTimezone)}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        setChartData(response.data);
+        console.log("Analytics API Response:", response.data);
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setChartData(response.data);
+        } else {
+          // Keep skeleton or set empty? API returns 0s for missing slots so it should be full.
+          console.warn("Analytics returned empty/malformed data");
+        }
       } catch (err) {
         console.error("Failed to fetch chart data", err);
       }
@@ -101,6 +132,23 @@ const Dashboard = () => {
   /* Removed static stats array in favor of direct render */
 
   const chartLabelColor = isDark ? "#9CA3AF" : "#4B5563";
+
+  // Calculate ticks for Y-Axis (Increment by 10)
+  const maxViews = Math.max(...chartData.map(d => d.views || 0), 0);
+  const tickStep = 10;
+  // Determine max value for axis (at least 10, and multiple of 10)
+  const yAxisMax = Math.max(Math.ceil(maxViews / tickStep) * tickStep, 10);
+
+  const customTicks = [];
+  // Safety: Only generate strict 10-step ticks if reasonable count (e.g. up to 200)
+  // Otherwise revert to standard auto behavior (or larger steps) to avoid clutter
+  if (yAxisMax <= 200) {
+    for (let i = 0; i <= yAxisMax; i += tickStep) {
+      customTicks.push(i);
+    }
+  }
+  // If > 200, we leave customTicks empty and let Recharts handle it (or could implement dynamic steps)
+
 
   return (
     <main className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
@@ -182,25 +230,22 @@ const Dashboard = () => {
 
         <div className="h-[350px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={accentColor} stopOpacity={0.1} />
-                  <stop offset="95%" stopColor={accentColor} stopOpacity={0} />
-                </linearGradient>
-              </defs>
+            <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
               <XAxis
                 dataKey="name"
-                axisLine={false}
-                tickLine={false}
+                axisLine={true}
+                tickLine={true}
                 tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
                 dy={10}
               />
               <YAxis
-                axisLine={false}
-                tickLine={false}
+                axisLine={true}
+                tickLine={true}
                 tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
+                ticks={customTicks.length > 0 ? customTicks : undefined}
+                domain={[0, 'auto']}
+                allowDecimals={false}
               />
               <Tooltip
                 contentStyle={{
@@ -211,18 +256,16 @@ const Dashboard = () => {
                 }}
                 labelStyle={{ color: isDark ? '#fff' : '#000', fontWeight: 'bold', marginBottom: '4px' }}
                 itemStyle={{ color: isDark ? '#fff' : '#000' }}
-                cursor={{ stroke: gridColor, strokeWidth: 2 }}
+                cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
               />
-              <Area
-                type="monotone"
+              <Bar
                 dataKey="views"
-                stroke={accentColor}
-                strokeWidth={3}
-                fillOpacity={1}
-                fill="url(#colorViews)"
+                radius={[4, 4, 0, 0]}
+                fill={accentColor}
                 animationDuration={1500}
+                barSize={30}
               />
-            </AreaChart>
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
