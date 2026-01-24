@@ -70,7 +70,7 @@ const Dashboard = () => {
             'Authorization': `Bearer ${token}`
           }
         });
-        console.log("Analytics API Response:", response.data);
+        // console.log("Analytics API Response:", response.data);
         if (Array.isArray(response.data) && response.data.length > 0) {
           setChartData(response.data);
         } else {
@@ -168,7 +168,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className={`font-sans text-sm ${subtextColor} font-bold uppercase tracking-widest mb-1`}>
-            Visitors
+            Total Page Visits
           </div>
           <div className={`font-sans text-4xl font-black ${textColor}`}>
             {statsData.visitors}
@@ -182,7 +182,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className={`font-sans text-sm ${subtextColor} font-bold uppercase tracking-widest mb-1`}>
-            Artworks
+            Total Artworks
             </div>
             <div className={`font-sans text-4xl font-black ${textColor}`}>
             {statsData.artworks}
@@ -228,45 +228,47 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="h-[350px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
-              <XAxis
-                dataKey="name"
-                axisLine={true}
-                tickLine={true}
-                tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
-                dy={10}
-              />
-              <YAxis
-                axisLine={true}
-                tickLine={true}
-                tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
-                ticks={customTicks.length > 0 ? customTicks : undefined}
-                domain={[0, 'auto']}
-                allowDecimals={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: isDark ? '#1a1a1a' : '#fff',
-                  border: `2px solid ${isDark ? '#262626' : '#f0f0f0'}`,
-                  borderRadius: '12px',
-                  padding: '10px'
-                }}
-                labelStyle={{ color: isDark ? '#fff' : '#000', fontWeight: 'bold', marginBottom: '4px' }}
-                itemStyle={{ color: isDark ? '#fff' : '#000' }}
-                cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
-              />
-              <Bar
-                dataKey="views"
-                radius={[4, 4, 0, 0]}
-                fill={accentColor}
-                animationDuration={1500}
-                barSize={30}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="w-full min-w-0" style={{ height: 350, position: 'relative', marginLeft: -36 }}>
+          {chartData.length > 0 && (
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                <XAxis
+                  dataKey="name"
+                  axisLine={true}
+                  tickLine={true}
+                  tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
+                  dy={10}
+                />
+                <YAxis
+                  axisLine={true}
+                  tickLine={true}
+                  tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
+                  ticks={customTicks.length > 0 ? customTicks : undefined}
+                  domain={[0, 'auto']}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: isDark ? '#1a1a1a' : '#fff',
+                    border: `2px solid ${isDark ? '#262626' : '#f0f0f0'}`,
+                    borderRadius: '12px',
+                    padding: '10px'
+                  }}
+                  labelStyle={{ color: isDark ? '#fff' : '#000', fontWeight: 'bold', marginBottom: '4px' }}
+                  itemStyle={{ color: isDark ? '#fff' : '#000' }}
+                  cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
+                />
+                <Bar
+                  dataKey="views"
+                  radius={[4, 4, 0, 0]}
+                  fill={accentColor}
+                  animationDuration={1500}
+                  barSize={30}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
     </main>
