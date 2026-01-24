@@ -23,6 +23,12 @@ router.post('/visit', async (req, res) => {
       [superAdminId]
     );
 
+    // Log Visit Time
+    await pool.query(
+      "INSERT INTO visit_logs (admin_id) VALUES ($1)",
+      [superAdminId]
+    );
+
     res.json({ success: true });
   } catch (err) {
     console.error('Error tracking visit:', err.message);
@@ -44,6 +50,14 @@ router.post('/gallery/:slug/visit', async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "Gallery not found" });
     }
+
+    const adminId = result.rows[0].id;
+
+    // Log Visit Time
+    await pool.query(
+      "INSERT INTO visit_logs (admin_id) VALUES ($1)",
+      [adminId]
+    );
 
     res.json({ success: true });
   } catch (err) {

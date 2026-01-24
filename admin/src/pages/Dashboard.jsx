@@ -20,38 +20,6 @@ import {
   Area
 } from 'recharts';
 
-const mockData = {
-  week: [
-    { name: 'Mon', views: 120 },
-    { name: 'Tue', views: 300 },
-    { name: 'Wed', views: 200 },
-    { name: 'Thu', views: 450 },
-    { name: 'Fri', views: 400 },
-    { name: 'Sat', views: 700 },
-    { name: 'Sun', views: 500 },
-  ],
-  month: [
-    { name: 'Week 1', views: 1200 },
-    { name: 'Week 2', views: 1800 },
-    { name: 'Week 3', views: 1400 },
-    { name: 'Week 4', views: 2200 },
-  ],
-  year: [
-    { name: 'Jan', views: 5000 },
-    { name: 'Feb', views: 6500 },
-    { name: 'Mar', views: 5800 },
-    { name: 'Apr', views: 8000 },
-    { name: 'May', views: 7200 },
-    { name: 'Jun', views: 9000 },
-    { name: 'Jul', views: 8500 },
-    { name: 'Aug', views: 10000 },
-    { name: 'Sep', views: 9200 },
-    { name: 'Oct', views: 11000 },
-    { name: 'Nov', views: 10500 },
-    { name: 'Dec', views: 13000 },
-  ],
-};
-
 const Dashboard = () => {
   const { isDark } = useTheme();
   const { user } = useAuth();
@@ -60,6 +28,44 @@ const Dashboard = () => {
     visitors: 0,
     artworks: 0
   });
+
+  const [chartData, setChartData] = useState([]);
+  const [currentDateInfo, setCurrentDateInfo] = useState('');
+
+
+  // Fetch Chart Data
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const fetchChartData = async () => {
+      try {
+        const token = localStorage.getItem('token'); // or from context if available
+        const response = await axios.get(`${ENDPOINTS.ANALYTICS || 'http://localhost:5000/api/analytics'}/activity?period=${timeFilter}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        setChartData(response.data);
+      } catch (err) {
+        console.error("Failed to fetch chart data", err);
+      }
+    };
+
+    // Set Date Info
+    const now = new Date();
+    if (timeFilter === 'today') {
+      setCurrentDateInfo(now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
+    } else if (timeFilter === 'week') {
+      setCurrentDateInfo(`Last 7 Days`);
+    } else if (timeFilter === 'month') {
+      setCurrentDateInfo(now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+    } else if (timeFilter === 'year') {
+      setCurrentDateInfo(now.getFullYear().toString());
+    }
+
+    fetchChartData();
+  }, [timeFilter, user]);
+
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -155,11 +161,11 @@ const Dashboard = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h3 className={`text-xl font-bold ${textColor}`}>Visitor Activity</h3>
-            <p className={`text-sm ${subtextColor}`}>Total views over selected period</p>
+            <p className={`text-sm ${subtextColor}`}>Total views over selected period • <span className="font-semibold text-theme-accent">{currentDateInfo}</span></p>
           </div>
 
           <div className={`flex p-1 rounded-lg ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
-            {['week', 'month', 'year'].map((filter) => (
+            {['today', 'week', 'month', 'year'].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setTimeFilter(filter)}
@@ -176,7 +182,7 @@ const Dashboard = () => {
 
         <div className="h-[350px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={mockData[timeFilter]}>
+            <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={accentColor} stopOpacity={0.1} />
