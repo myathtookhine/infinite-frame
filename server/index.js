@@ -10,6 +10,7 @@ const app = express();
 // Allowed Origins
 const allowedOrigins = [
   'http://localhost:5173',           // Local Development
+  'http://localhost:5174',
   'http://localhost:3000',           // Alternative Local
   'https://infiniteframe.online',    // Production Client
   'https://www.infiniteframe.online',
