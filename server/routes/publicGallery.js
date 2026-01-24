@@ -179,7 +179,8 @@ router.get('/gallery/:slug/artwork/:identifier', async (req, res) => {
 
     // Note: decoding identifier might be handled by Express, but good to ensure.
     // However, ILIKE handles case insensitivity.
-    const result = await pool.query(query, [adminId, decodeURIComponent(identifier)]);
+    const decodedIdentifier = decodeURIComponent(identifier).trim();
+    const result = await pool.query(query, [adminId, decodedIdentifier]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({

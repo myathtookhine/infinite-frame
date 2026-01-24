@@ -146,7 +146,7 @@ const ArtworkCard = ({ artwork, index, gallerySlug }) => {
       transition={{ duration: 0.3, delay: index * 0.05 }}
       className="mb-12 group block"
     >
-      <Link to={`/${gallerySlug}/artwork/${encodeURIComponent(artwork.name || artwork.title || 'untitled')}`} className="block">
+      <Link to={`/${gallerySlug}/artwork/${artwork.id}`} className="block">
         <div className="relative overflow-hidden mb-4">
           <motion.img
             whileHover={{ scale: 1.05 }}
