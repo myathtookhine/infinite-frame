@@ -271,6 +271,7 @@ const GalleryView = () => {
           <GalleryArtworkSection
             categories={gallery.categories}
             artworks={gallery.artworks}
+            gallerySlug={slug}
           />
         )}
 

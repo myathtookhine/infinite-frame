@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Masonry from 'react-masonry-css';
 import { ArrowRight, ArrowRightCircle } from 'lucide-react';
 
-const GalleryArtworkSection = ({ categories = [], artworks = [] }) => {
+const GalleryArtworkSection = ({ categories = [], artworks = [], gallerySlug }) => {
   const [activeCategory, setActiveCategory] = useState(null);
 
   // Group artworks by category and filter out empty categories
@@ -105,13 +105,13 @@ const GalleryArtworkSection = ({ categories = [], artworks = [] }) => {
             </div>
 
                       {activeGroup.items.length > 0 ? (
-                          <Masonry
+              <Masonry
                               breakpointCols={masonryBreakpoints}
                               className="flex -ml-8 w-auto"
                               columnClassName="pl-8 bg-clip-padding"
                           >
                               {activeGroup.items.map((art, index) => (
-                                  <ArtworkCard key={art.id} artwork={art} index={index} />
+                                <ArtworkCard key={art.id} artwork={art} index={index} gallerySlug={gallerySlug} />
                               ))}
                           </Masonry>
                       ) : (
@@ -138,7 +138,7 @@ const GalleryArtworkSection = ({ categories = [], artworks = [] }) => {
   );
 };
 
-const ArtworkCard = ({ artwork, index }) => {
+const ArtworkCard = ({ artwork, index, gallerySlug }) => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -146,7 +146,7 @@ const ArtworkCard = ({ artwork, index }) => {
       transition={{ duration: 0.3, delay: index * 0.05 }}
       className="mb-12 group block"
     >
-        <Link to={`/artwork/${artwork.id}`} className="block">
+      <Link to={`/${gallerySlug}/artwork/${encodeURIComponent(artwork.name || artwork.title || 'untitled')}`} className="block">
         <div className="relative overflow-hidden mb-4">
           <motion.img
             whileHover={{ scale: 1.05 }}

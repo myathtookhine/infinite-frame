@@ -9,7 +9,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/artwork/:id" element={<ArtworkDetail />} />
+        <Route path="/:gallerySlug/artwork/:artworkIdentifier" element={<ArtworkDetail />} />
         <Route path="/:slug" element={<GalleryView />} />
       </Routes>
     </BrowserRouter>

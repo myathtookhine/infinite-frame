@@ -5,7 +5,7 @@ import { ArrowLeftIcon, PencilIcon, DocumentCheckIcon, Square2StackIcon, EyeIcon
 import ThemeToggle from '../components/ThemeToggle';
 
 const ArtworkDetail = () => {
-  const { id } = useParams();
+  const { gallerySlug, artworkIdentifier } = useParams();
   const navigate = useNavigate();
   const [artwork, setArtwork] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -58,9 +58,9 @@ const ArtworkDetail = () => {
         // Handle double /api issue if VITE_API_URL includes /api
         let endpoint = '';
         if (baseUrl.endsWith('/api')) {
-          endpoint = `${baseUrl}/public/artworks/${id}`;
+          endpoint = `${baseUrl}/public/gallery/${gallerySlug}/artwork/${artworkIdentifier}`;
         } else {
-          endpoint = `${baseUrl}/api/public/artworks/${id}`;
+          endpoint = `${baseUrl}/api/public/gallery/${gallerySlug}/artwork/${artworkIdentifier}`;
         }
 
         const response = await axios.get(endpoint);
@@ -83,10 +83,10 @@ const ArtworkDetail = () => {
       }
     };
 
-    if (id) {
+    if (artworkIdentifier) {
       fetchArtwork();
     }
-  }, [id]);
+  }, [artworkIdentifier]);
 
   const decodeHtml = (html) => {
     if (!html) return "";
@@ -143,7 +143,7 @@ const ArtworkDetail = () => {
       <nav className="fixed top-0 w-full z-50 bg-theme border-b border-theme">
         <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24 h-20 flex items-center justify-between">
             <button 
-              onClick={() => navigate(-1)}
+            onClick={() => gallerySlug ? navigate(`/${gallerySlug}`) : navigate(-1)}
             className="group flex items-center gap-2 text-sm font-bold uppercase cursor-pointer tracking-wider hover:opacity-70 transition-opacity"
             >
               <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -168,7 +168,7 @@ const ArtworkDetail = () => {
               />
 
               {/* Preview Button Overlay */}
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute top-4 right-4 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
                 <button
                   type="button"
                   onClick={() => setPreviewOpen(true)}
