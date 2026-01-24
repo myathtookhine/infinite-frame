@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeftIcon, PencilIcon, DocumentCheckIcon, Square2StackIcon, EyeIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, ArrowPathIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import ThemeToggle from '../components/ThemeToggle';
 
@@ -389,153 +390,163 @@ const ArtworkDetail = () => {
         </div>
       </main>
       {/* Preview Modal */}
-      {previewOpen && activeImage && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-        >
-          <div
-            className="absolute inset-0 bg-black backdrop-blur-sm"
-            onClick={(e) => {
-              if (!hasDragged) {
-                setPreviewOpen(false);
-                setZoom(100);
-                setScrollPos({ x: 0, y: 0 });
-              }
-              setHasDragged(false);
-            }}
-          />
-          <div
-            className="relative max-w-6xl max-h-[90vh] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              cursor: zoom > 100 ? (isDragging ? 'grabbing' : 'grab') : 'default',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              animation: 'modalZoomIn 0.8s ease-out'
-            }}
-            onMouseDown={(e) => {
-              if (zoom > 100) {
-                setIsDragging(true);
+      {/* Preview Modal */}
+      <AnimatePresence>
+        {previewOpen && activeImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.85 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          >
+            <div
+              className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+              onClick={(e) => {
+                if (!hasDragged) {
+                  setPreviewOpen(false);
+                  setZoom(100);
+                  setScrollPos({ x: 0, y: 0 });
+                }
                 setHasDragged(false);
-                setDragStart({ x: e.clientX - scrollPos.x, y: e.clientY - scrollPos.y });
-              }
-            }}
-            onMouseMove={(e) => {
-              if (isDragging && zoom > 100) {
-                e.preventDefault();
-                setHasDragged(true);
-                const newX = e.clientX - dragStart.x;
-                const newY = e.clientY - dragStart.y;
-                setScrollPos({ x: newX, y: newY });
-              }
-            }}
-            onMouseUp={() => setIsDragging(false)}
-            onMouseLeave={() => setIsDragging(false)}
-            onTouchStart={(e) => {
-              const touches = e.touches;
-
-              if (touches.length === 1) {
-                // Single finger pan start (when zoomed)
+              }}
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="relative max-w-6xl max-h-[90vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                cursor: zoom > 100 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}
+              onMouseDown={(e) => {
                 if (zoom > 100) {
                   setIsDragging(true);
                   setHasDragged(false);
-                  setDragStart({
-                    x: touches[0].clientX - scrollPos.x,
-                    y: touches[0].clientY - scrollPos.y
-                  });
+                  setDragStart({ x: e.clientX - scrollPos.x, y: e.clientY - scrollPos.y });
                 }
-              }
-            }}
-            onTouchMove={(e) => {
-              const touches = e.touches;
-
-              if (touches.length === 1 && isDragging && zoom > 100) {
-                // Single finger pan
-                e.preventDefault();
-                setHasDragged(true);
-                const newX = touches[0].clientX - dragStart.x;
-                const newY = touches[0].clientY - dragStart.y;
-                setScrollPos({ x: newX, y: newY });
-              }
-            }}
-            onTouchEnd={() => {
-              setIsDragging(false);
-            }}
-          >
-            <img
-              src={activeImage}
-              alt="Preview"
-              style={{
-                transform: `scale(${zoom / 100}) translate(${scrollPos.x}px, ${scrollPos.y}px)`,
-                transition: isDragging ? 'none' : 'transform 0.2s',
-                transformOrigin: 'center center',
-                userSelect: 'none',
-                pointerEvents: zoom > 100 ? 'none' : 'auto'
               }}
-              className="max-w-full max-h-[90vh] object-contain rounded-lg"
-              onClick={(e) => e.stopPropagation()}
-              draggable={false}
-            />
+              onMouseMove={(e) => {
+                if (isDragging && zoom > 100) {
+                  e.preventDefault();
+                  setHasDragged(true);
+                  const newX = e.clientX - dragStart.x;
+                  const newY = e.clientY - dragStart.y;
+                  setScrollPos({ x: newX, y: newY });
+                }
+              }}
+              onMouseUp={() => setIsDragging(false)}
+              onMouseLeave={() => setIsDragging(false)}
+              onTouchStart={(e) => {
+                const touches = e.touches;
 
-            {/* Zoom Controls */}
-            <div className="absolute top-4 left-4 flex gap-2">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setZoom(Math.max(50, zoom - 25));
+                if (touches.length === 1) {
+                  // Single finger pan start (when zoomed)
+                  if (zoom > 100) {
+                    setIsDragging(true);
+                    setHasDragged(false);
+                    setDragStart({
+                      x: touches[0].clientX - scrollPos.x,
+                      y: touches[0].clientY - scrollPos.y
+                    });
+                  }
+                }
+              }}
+              onTouchMove={(e) => {
+                const touches = e.touches;
+
+                if (touches.length === 1 && isDragging && zoom > 100) {
+                  // Single finger pan
+                  e.preventDefault();
+                  setHasDragged(true);
+                  const newX = touches[0].clientX - dragStart.x;
+                  const newY = touches[0].clientY - dragStart.y;
+                  setScrollPos({ x: newX, y: newY });
+                }
+              }}
+              onTouchEnd={() => {
+                setIsDragging(false);
+              }}
+            >
+              <img
+                src={activeImage}
+                alt="Preview"
+                style={{
+                  transform: `scale(${zoom / 100}) translate(${scrollPos.x}px, ${scrollPos.y}px)`,
+                  transition: isDragging ? 'none' : 'transform 0.2s',
+                  transformOrigin: 'center center',
+                  userSelect: 'none',
+                  pointerEvents: zoom > 100 ? 'none' : 'auto'
                 }}
-                className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
-                title="Zoom out"
-                disabled={zoom <= 50}
-              >
-                <MagnifyingGlassMinusIcon className="h-5 w-5 text-white" />
-              </button>
-              <div className="px-3 py-2 rounded-md backdrop-blur-sm bg-black/50 text-white text-sm font-medium">
-                {zoom}%
+                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+                draggable={false}
+              />
+
+              {/* Zoom Controls */}
+              <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex gap-2 md:absolute md:bottom-4 md:right-4 md:left-auto md:translate-x-0 z-50">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setZoom(Math.max(50, zoom - 25));
+                  }}
+                  className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
+                  title="Zoom out"
+                  disabled={zoom <= 50}
+                >
+                  <MagnifyingGlassMinusIcon className="h-5 w-5 text-white" />
+                </button>
+                <div className="px-3 py-2 rounded-md backdrop-blur-sm bg-black/50 text-white text-sm font-medium">
+                  {zoom}%
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setZoom(Math.min(200, zoom + 25));
+                  }}
+                  className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
+                  title="Zoom in"
+                  disabled={zoom >= 200}
+                >
+                  <MagnifyingGlassPlusIcon className="h-5 w-5 text-white" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setZoom(100);
+                    setScrollPos({ x: 0, y: 0 });
+                  }}
+                  className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
+                  title="Reset zoom"
+                >
+                  <ArrowPathIcon className="h-5 w-5 text-white" />
+                </button>
               </div>
+
+              {/* Close Button */}
               <button
-                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setZoom(Math.min(200, zoom + 25));
-                }}
-                className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
-                title="Zoom in"
-                disabled={zoom >= 200}
-              >
-                <MagnifyingGlassPlusIcon className="h-5 w-5 text-white" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
+                  setPreviewOpen(false);
                   setZoom(100);
                   setScrollPos({ x: 0, y: 0 });
                 }}
-                className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
-                title="Reset zoom"
+                className={`absolute top-4 right-4 p-2 rounded-md bg-white/80 backdrop-blur-md transition-all cursor-pointer hover:bg-white`}
+                title="Close preview"
               >
-                <ArrowPathIcon className="h-5 w-5 text-white" />
+                <XMarkIcon className="h-6 w-6 text-neutral-900" />
               </button>
-            </div>
-
-            {/* Close Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setPreviewOpen(false);
-                setZoom(100);
-                setScrollPos({ x: 0, y: 0 });
-              }}
-              className={`absolute top-4 right-4 p-2 rounded-md bg-white/80 backdrop-blur-md transition-all cursor-pointer hover:bg-white`}
-              title="Close preview"
-            >
-              <XMarkIcon className="h-6 w-6 text-neutral-900" />
-            </button>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
