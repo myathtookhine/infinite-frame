@@ -6,7 +6,9 @@ import { useGallery } from '../context/GalleryContext';
 import {
   EnvelopeIcon,
   PhoneIcon,
-  MapPinIcon
+  MapPinIcon,
+  ArrowUpIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 
 import GalleryArtworkSection from '../components/GalleryArtworkSection';
@@ -22,7 +24,41 @@ const GalleryView = () => {
   const [gallery, setGallery] = useState(cached?.data || null);
   const [loading, setLoading] = useState(!cached?.data);
   const [error, setError] = useState(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const observerRef = useRef(null);
+
+  // Scroll to Top Logic
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 500) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  const scrollToContent = () => {
+    const content = document.getElementById('gallery-content');
+    if (content) {
+      const navHeight = 80; // Approximate nav height
+      const targetPosition = content.getBoundingClientRect().top + window.scrollY - navHeight;
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Save scroll position on unmount or slug change
   useEffect(() => {
@@ -186,12 +222,11 @@ const GalleryView = () => {
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-8 md:px-8 lg:px-8 py-28 lg:py-32">
-
+      <div className="max-w-6xl mx-auto px-0 md:px-8 lg:px-8 pt-20 pb-0 md:pt-28 lg:pt-32 lg:pb-0 relative group">
         {/* Banner */}
         {gallery.banner_enabled && gallery.banner_image_url && (
-          <div className="reveal mb-8 sm:mb-8">
-            <div className="overflow-hidden rounded-lg">
+          <div className="reveal mb-8 sm:mb-8 relative">
+            <div className="overflow-hidden md:rounded-lg">
               <img
                 src={gallery.banner_image_url}
                 alt={`${decodeHtml(gallery.gallery_name) || gallery.username} banner`}
@@ -199,9 +234,21 @@ const GalleryView = () => {
                 style={{ aspectRatio: '1200/630' }}
               />
             </div>
+            {/* Learn More / Scroll Down Button */}
+            <div className="hidden lg:block absolute bottom-32 left-1/2 transform -translate-x-1/2 z-10">
+              <button
+                onClick={scrollToContent}
+                className="flex flex-row items-center gap-2 text-white/80 hover:text-white transition-colors animate-bounce cursor-pointer bg-black/20 backdrop-blur-sm p-2 px-8 rounded-full hover:bg-black/40"
+              >
+                <span className="text-[10px] uppercase font-bold tracking-widest hidden sm:block">Learn More</span>
+                <ChevronDownIcon className="w-6 h-6" />
+              </button>
+            </div>
           </div>
         )}
+      </div>
 
+      <div id="gallery-content" className="max-w-6xl mx-auto px-8 md:px-8 lg:px-8 pb-24">
         {/* Header */}
         <header className="reveal text-center pt-0 sm:pt-16">
           <h1 className="text-3xl md:text-7xl lg:text-8xl font-bold capitalize tracking-tighter leading-tight mb-4 sm:mb-4">
@@ -229,7 +276,7 @@ const GalleryView = () => {
 
         {/* Contact Information */}
         {(gallery.address || gallery.email || (gallery.phone_numbers && gallery.phone_numbers.length > 0)) && (
-          <section className="reveal mb-32 border-t border-theme pt-32 mt-18">
+          <section className="reveal mb-36 border-t border-theme pt-32 mt-18">
             <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight mb-16 text-center">Contact</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-4xl mx-auto">
@@ -255,6 +302,7 @@ const GalleryView = () => {
                 </div>
               )}
 
+
               {gallery.phone_numbers && gallery.phone_numbers.length > 0 && (
                 <div className="border-l-4 border-theme pl-6">
                   <div className="flex items-center gap-3 mb-4">
@@ -276,7 +324,7 @@ const GalleryView = () => {
 
         {/* Social Links */}
         {gallery.social_links && Object.keys(gallery.social_links).length > 0 && (
-          <section className="reveal text-center mb-32 border-t border-theme pt-32">
+          <section className="reveal text-center mb-28 border-t border-theme pt-32">
             <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight mb-16">Connect</h2>
             <div className="flex flex-wrap gap-4 justify-center">
               {Object.entries(gallery.social_links).map(([platform, url]) => (
@@ -293,11 +341,18 @@ const GalleryView = () => {
             </div>
           </section>
         )}
-
-        <footer className="text-center pt-16 border-t border-theme">
-          <p className="text-sm uppercase tracking-wider opacity-50">@{gallery.username}</p>
-        </footer>
       </div>
+
+
+      {/* Scroll to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-8 right-8 z-40 p-3 rounded-full bg-theme-inverse text-theme-inverse shadow-lg transition-all duration-300 transform border border-theme hover:scale-110 ${showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'
+          }`}
+        title="Scroll to top"
+      >
+        <ArrowUpIcon className="w-6 h-6" />
+      </button>
     </div>
   );
 };

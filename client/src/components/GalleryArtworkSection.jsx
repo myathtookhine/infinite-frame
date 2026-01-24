@@ -54,7 +54,7 @@ const GalleryArtworkSection = ({ categories = [], artworks = [] }) => {
       <div className="w-full rounded-lg">
           
       {/* Category Tabs */}
-      <h2 className="text-3xl md:text-5xl font-bold uppercase tracking-tight mb-8 text-center">Categories</h2>
+      <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight mb-8 text-center">Categories</h2>
 
       <div className="relative">
         <div className="flex flex-nowrap md:flex-wrap justify-start md:justify-center gap-4 mb-12 overflow-x-auto pb-4 md:pb-0 scrollbar-hide px-0 md:px-0 snap-x">
@@ -62,9 +62,9 @@ const GalleryArtworkSection = ({ categories = [], artworks = [] }) => {
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`whitespace-nowrap flex-shrink-0 snap-center px-6 py-4 min-w-[120px] text-center text-sm uppercase tracking-wider transition-all duration-300 border-b-4 cursor-pointer bg-white dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 ${activeCategory === cat.id
-                ? 'border-theme text-theme font-bold bg-black/10 dark:bg-white/15'
-                : 'border-transparent text-theme/60'
+              className={`whitespace-nowrap flex-shrink-0 snap-center px-6 py-4 min-w-[120px] text-center text-sm uppercase tracking-wider transition-all duration-300 border-b-4 cursor-pointer ${activeCategory === cat.id
+                ? 'border-black dark:border-white text-white dark:text-black font-bold bg-black dark:bg-white'
+                : 'border-transparent text-gray-500 dark:text-gray-400 bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10'
                 }`}
             >
               {cat.name}
@@ -147,13 +147,13 @@ const ArtworkCard = ({ artwork, index }) => {
       className="mb-12 group block"
     >
         <Link to={`/artwork/${artwork.id}`} className="block">
-        <div className="relative overflow-hidden mb-4 bg-gray-100 dark:bg-gray-800">
+        <div className="relative overflow-hidden mb-4">
           <motion.img
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.4 }}
             src={artwork.main_image}
             alt={artwork.title}
-            className="w-full h-auto object-cover block"
+            className="w-full h-auto object-cover block rounded"
           />
           {/* Overlay for small detail hint (optional) */}
            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
@@ -164,16 +164,6 @@ const ArtworkCard = ({ artwork, index }) => {
             <h4 className="font-bold text-lg leading-tight group-hover:text-theme/80 transition-colors">
               {artwork.title}
             </h4>
-            {artwork.status === 'sold' && (
-              <span className="text-xs font-bold uppercase text-red-500 border border-red-500 px-2 py-0.5 rounded-full">
-                Sold
-              </span>
-            )}
-             {artwork.status === 'reserved' && (
-              <span className="text-xs font-bold uppercase text-orange-500 border border-orange-500 px-2 py-0.5 rounded-full">
-                Reserved
-              </span>
-            )}
           </div>
           
           {artwork.description && (
@@ -182,18 +172,32 @@ const ArtworkCard = ({ artwork, index }) => {
             </p>
           )}
 
-          <div className="pt-2 flex justify-between items-end border-t border-theme/10 mt-3 group-hover:border-theme/30 transition-colors">
+          <div className="flex justify-between items-end">
              <div className="text-xs uppercase tracking-wider opacity-50 font-mono">
               {Number(artwork.width)} x {Number(artwork.height)} {artwork.unit_name}
             </div>
             
-            <div className="text-right">
-              {artwork.show_price !== false && artwork.is_for_sale && artwork.price ? (
-                 <span className="font-semibold">
-                    {Number(artwork.price).toLocaleString()} <span className="text-xs font-normal opacity-70">{artwork.currency}</span>
-                 </span>
-              ) : (
-                <span className="text-xs uppercase italic opacity-50">Inquire</span>
+            <div className="text-right flex flex-col items-end gap-1">
+              {/* Status Badge */}
+              {artwork.status === 'available' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold uppercase tracking-wider text-green-900 dark:text-green-400">
+                  Available
+                </span>
+              )}
+              {artwork.status === 'reserved' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold uppercase tracking-wider text-orange-900 dark:text-orange-400">
+                  Reserved
+                </span>
+              )}
+              {artwork.status === 'sold' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold uppercase tracking-wider text-red-900 dark:text-red-400">
+                  Sold
+                </span>
+              )}
+              {artwork.status === 'private collection' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold uppercase tracking-wider text-gray-900 dark:text-gray-400">
+                  Private Collection
+                </span>
               )}
             </div>
           </div>

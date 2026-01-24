@@ -193,9 +193,9 @@ const ArtworkAttributes = () => {
               <button
                 key={`${item.type}-${idx}`}
                 onClick={() => setActiveTab(item.type)}
-                className={`flex flex-col items-start justify-center gap-1 px-4 py-3 md:px-5 md:py-4 rounded-xl font-sans text-[10px] md:text-sm font-bold transition-all duration-300 whitespace-nowrap min-w-[70px] md:min-w-0 cursor-pointer border ${
+                 className={`flex flex-col items-start justify-center gap-1 px-4 py-3 md:px-5 md:py-4 rounded-md font-sans text-[10px] md:text-sm font-bold transition-all duration-300 whitespace-nowrap min-w-[70px] md:min-w-0 cursor-pointer border ${
                   activeTab === item.type
-                  ? (isDark ? 'bg-white text-black' : 'bg-[#151416] text-white')
+                   ? (isDark ? 'bg-white text-black' : 'bg-gray-900 text-white')
                     : (isDark ? 'text-gray-400 hover:bg-white/5' : 'text-gray-600 hover:bg-black/5')
                 }`}
               >

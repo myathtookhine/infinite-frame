@@ -149,11 +149,6 @@ const LandingPage = () => {
           <div className="text-sm font-semibold uppercase tracking-wider">
             {t('nav.brand')}
           </div>
-          {/* <div className="flex gap-12 text-sm uppercase tracking-wider opacity-70">
-            <a href="#" className="hover:opacity-100">{t('footer.privacy')}</a>
-            <a href="#" className="hover:opacity-100">{t('footer.terms')}</a>
-            <a href="#" className="hover:opacity-100">{t('footer.contact')}</a>
-          </div> */}
           <p className="text-sm opacity-50">&copy; 2026</p>
         </div>
       </footer>

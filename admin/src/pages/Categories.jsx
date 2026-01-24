@@ -227,9 +227,16 @@ const Categories = () => {
             >
               <div className="min-w-0 flex-1 flex items-center gap-3">
                 <ArchiveBoxIcon className={`h-5 w-5 flex-shrink-0 ${textColor}`} />
-                <span className={`text-sm sm:text-base font-sans font-semibold ${textColor} block truncate ${!category.is_active ? 'opacity-50 line-through decoration-2' : ''}`}>
-                  {category.name}
-                </span>
+                <div>
+                  <p>
+                    <span className={`text-sm sm:text-base font-sans font-semibold ${textColor} block truncate ${!category.is_active ? 'opacity-50 line-through decoration-2' : ''}`}>
+                      {category.name}
+                    </span>
+                  </p>
+                  <p><span className={`text-xs ${subtextColor} block mt-0.5`}>
+                    Sorting Order : {category.sort_order}
+                  </span></p>
+                </div>
                 {!category.is_active && <span className="text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">Disabled</span>}
                 {category.owner_name && <span className={`text-xs ${subtextColor}`}>by {category.owner_name}</span>}
               </div>

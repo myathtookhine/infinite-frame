@@ -170,11 +170,11 @@ const SingleImageUploader = ({ image, onImageChange, label = "Main Image" }) => 
       ) : (
         /* Image Preview */
         <div className={`relative rounded-lg overflow-hidden border-2 ${borderColor}`}>
-          <div className="aspect-video">
+            <div className="aspect-video flex items-center justify-center py-8">
             <img
               src={image.url}
               alt="Main preview"
-              className="w-full h-full object-cover"
+                className="w-auto h-full object-fit"
             />
           </div>
 

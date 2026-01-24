@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeftIcon, PencilIcon, DocumentCheckIcon, Square2StackIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, PencilIcon, DocumentCheckIcon, Square2StackIcon, EyeIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, ArrowPathIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import ThemeToggle from '../components/ThemeToggle';
 
 const ArtworkDetail = () => {
@@ -11,6 +11,31 @@ const ArtworkDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeImage, setActiveImage] = useState(null);
+
+  // Preview Modal State
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [zoom, setZoom] = useState(100);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [scrollPos, setScrollPos] = useState({ x: 0, y: 0 });
+  const [hasDragged, setHasDragged] = useState(false);
+
+  // Touch gesture states
+  const [lastTapTime, setLastTapTime] = useState(0);
+  const [initialPinchDistance, setInitialPinchDistance] = useState(null);
+  const [baseZoom, setBaseZoom] = useState(100);
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (previewOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [previewOpen]);
 
   useEffect(() => {
     // Scroll to top when page loads
@@ -130,8 +155,8 @@ const ArtworkDetail = () => {
         </div>
       </nav>
 
-      <main className="flex-1 pt-32 pb-24 px-8 md:px-16 lg:px-24 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24">
+      <main className="flex-1 pt-32 pb-24 px-8 md:px-16 lg:px-24 max-w-4xl mx-auto w-full">
+        <div className="flex flex-col gap-12">
 
           {/* Left Column: Images */}
           <div className="space-y-6">
@@ -139,8 +164,20 @@ const ArtworkDetail = () => {
               <img
                 src={activeImage} 
                 alt={artwork.name}
-                className="w-full h-auto object-contain max-h-[80vh] mx-auto"
+                className="w-full h-full object-fit mx-auto"
               />
+
+              {/* Preview Button Overlay */}
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <button
+                  type="button"
+                  onClick={() => setPreviewOpen(true)}
+                  className="p-2 rounded-md bg-white/80 backdrop-blur-md transition-all cursor-pointer hover:bg-white shadow-sm"
+                  title="Preview image"
+                >
+                  <EyeIcon className="h-5 w-5 text-neutral-900" />
+                </button>
+              </div>
             </div>
 
             {/* Additional Images Thumbnails */}
@@ -174,29 +211,44 @@ const ArtworkDetail = () => {
                 <h1 className="text-2xl md:text-4xl lg:text-4xl font-bold uppercase tracking-tighter leading-[0.9]">
                   {artwork.name}
                 </h1>
-                {/* Status Badges */}
-                {artwork.status === 'sold' && (
-                  <span className="px-3 py-1 bg-white-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 text-xs font-bold uppercase tracking-wider rounded-full border border-red-500 transform translate-y-2">
-                    Sold
-                  </span>
-                )}
-                {artwork.status === 'reserved' && (
-                  <span className="px-3 py-1 bg-white-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 text-xs font-bold uppercase tracking-wider rounded-full border border-orange-500 transform translate-y-2">
-                    Reserved
-                  </span>
-                )}
               </div>
 
-              {artwork.created_year && (
-                <>
+              <div className="flex items-start gap-12 mt-6">
+                {artwork.created_year && (
                   <div>
                     <span className="block opacity-50 text-xs uppercase tracking-wider mb-2">Year of work</span>
                     <span className="text-lg font-light">
                       {artwork.created_year}
                     </span>
                   </div>
-                </>
-              )}
+                )}
+
+                <div>
+                  <span className="block opacity-50 text-xs uppercase tracking-wider mb-2">Status</span>
+                  <div className="flex items-center">
+                    {artwork.status === 'available' && (
+                      <span className="inline-flex items-center rounded-full text-[14px] font-bold uppercase tracking-wider text-green-900 dark:text-green-400">
+                        Available to collect
+                      </span>
+                    )}
+                    {artwork.status === 'reserved' && (
+                      <span className="inline-flex items-center rounded-full text-[14px] font-bold uppercase tracking-wider text-orange-900 dark:text-orange-400">
+                        Reserved
+                      </span>
+                    )}
+                    {artwork.status === 'sold' && (
+                      <span className="inline-flex items-center rounded-full text-[14px] font-bold uppercase tracking-wider text-red-900 dark:text-red-400">
+                        Sold
+                      </span>
+                    )}
+                    {artwork.status === 'private collection' && (
+                      <span className="inline-flex items-center rounded-full text-[14px] font-bold uppercase tracking-wider text-gray-900 dark:text-gray-400">
+                        Private Collection
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-10 flex-1">
@@ -336,6 +388,184 @@ const ArtworkDetail = () => {
           </div>
         </div>
       </main>
+      {/* Preview Modal */}
+      {previewOpen && activeImage && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+        >
+          <div
+            className="absolute inset-0 bg-black backdrop-blur-sm"
+            onClick={(e) => {
+              if (!hasDragged) {
+                setPreviewOpen(false);
+                setZoom(100);
+                setScrollPos({ x: 0, y: 0 });
+              }
+              setHasDragged(false);
+            }}
+          />
+          <div
+            className="relative max-w-6xl max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              cursor: zoom > 100 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              animation: 'modalZoomIn 0.8s ease-out'
+            }}
+            onMouseDown={(e) => {
+              if (zoom > 100) {
+                setIsDragging(true);
+                setHasDragged(false);
+                setDragStart({ x: e.clientX - scrollPos.x, y: e.clientY - scrollPos.y });
+              }
+            }}
+            onMouseMove={(e) => {
+              if (isDragging && zoom > 100) {
+                e.preventDefault();
+                setHasDragged(true);
+                const newX = e.clientX - dragStart.x;
+                const newY = e.clientY - dragStart.y;
+                setScrollPos({ x: newX, y: newY });
+              }
+            }}
+            onMouseUp={() => setIsDragging(false)}
+            onMouseLeave={() => setIsDragging(false)}
+            onTouchStart={(e) => {
+              const touches = e.touches;
+
+              if (touches.length === 2) {
+                // Pinch zoom start
+                const distance = Math.sqrt(
+                  Math.pow(touches[1].clientX - touches[0].clientX, 2) +
+                  Math.pow(touches[1].clientY - touches[0].clientY, 2)
+                );
+                setInitialPinchDistance(distance);
+                setBaseZoom(zoom);
+              } else if (touches.length === 1) {
+                // Check for double tap
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTapTime;
+
+                if (tapLength < 300 && tapLength > 0) {
+                  // Double tap detected
+                  setZoom(zoom === 200 ? 100 : 200);
+                  setScrollPos({ x: 0, y: 0 });
+                }
+                setLastTapTime(currentTime);
+
+                // Single finger pan start (when zoomed)
+                if (zoom > 100) {
+                  setIsDragging(true);
+                  setHasDragged(false);
+                  setDragStart({
+                    x: touches[0].clientX - scrollPos.x,
+                    y: touches[0].clientY - scrollPos.y
+                  });
+                }
+              }
+            }}
+            onTouchMove={(e) => {
+              const touches = e.touches;
+
+              if (touches.length === 2 && initialPinchDistance) {
+                // Pinch zoom
+                e.preventDefault();
+                const distance = Math.sqrt(
+                  Math.pow(touches[1].clientX - touches[0].clientX, 2) +
+                  Math.pow(touches[1].clientY - touches[0].clientY, 2)
+                );
+                const scale = distance / initialPinchDistance;
+                const newZoom = Math.min(200, Math.max(50, baseZoom * scale));
+                setZoom(newZoom);
+              } else if (touches.length === 1 && isDragging && zoom > 100) {
+                // Single finger pan
+                e.preventDefault();
+                setHasDragged(true);
+                const newX = touches[0].clientX - dragStart.x;
+                const newY = touches[0].clientY - dragStart.y;
+                setScrollPos({ x: newX, y: newY });
+              }
+            }}
+            onTouchEnd={() => {
+              setIsDragging(false);
+              setInitialPinchDistance(null);
+            }}
+          >
+            <img
+              src={activeImage}
+              alt="Preview"
+              style={{
+                transform: `scale(${zoom / 100}) translate(${scrollPos.x}px, ${scrollPos.y}px)`,
+                transition: isDragging ? 'none' : 'transform 0.2s',
+                transformOrigin: 'center center',
+                userSelect: 'none',
+                pointerEvents: zoom > 100 ? 'none' : 'auto'
+              }}
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+              draggable={false}
+            />
+
+            {/* Zoom Controls */}
+            <div className="absolute top-4 left-4 flex gap-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoom(Math.max(50, zoom - 25));
+                }}
+                className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
+                title="Zoom out"
+                disabled={zoom <= 50}
+              >
+                <MagnifyingGlassMinusIcon className="h-5 w-5 text-white" />
+              </button>
+              <div className="px-3 py-2 rounded-md backdrop-blur-sm bg-black/50 text-white text-sm font-medium">
+                {zoom}%
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoom(Math.min(200, zoom + 25));
+                }}
+                className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
+                title="Zoom in"
+                disabled={zoom >= 200}
+              >
+                <MagnifyingGlassPlusIcon className="h-5 w-5 text-white" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoom(100);
+                  setScrollPos({ x: 0, y: 0 });
+                }}
+                className="p-2 rounded-md cursor-pointer backdrop-blur-sm transition-all bg-black/50 hover:bg-black/70"
+                title="Reset zoom"
+              >
+                <ArrowPathIcon className="h-5 w-5 text-white" />
+              </button>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreviewOpen(false);
+                setZoom(100);
+                setScrollPos({ x: 0, y: 0 });
+              }}
+              className={`absolute top-4 right-4 p-2 rounded-md bg-white/80 backdrop-blur-md transition-all cursor-pointer hover:bg-white`}
+              title="Close preview"
+            >
+              <XMarkIcon className="h-6 w-6 text-neutral-900" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
