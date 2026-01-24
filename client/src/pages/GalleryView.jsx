@@ -146,6 +146,37 @@ const GalleryView = () => {
     }
   }, [slug]); // Depend mainly on slug
 
+  // Track Visit (Separate from data fetching)
+  useEffect(() => {
+    if (!slug) return;
+
+    const trackVisit = async () => {
+      // Session Check: Avoid double counting on refresh
+      const sessionKey = `visited_gallery_${slug}`;
+      if (sessionStorage.getItem(sessionKey)) {
+        return; // Already visited in this session
+      }
+
+      try {
+        const getBaseUrl = () => {
+          let envUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+          if (envUrl.endsWith('/api')) return envUrl; // If explicitly has /api
+          return `${envUrl}/api`;
+        };
+
+        await axios.post(`${getBaseUrl()}/public/gallery/${slug}/visit`);
+
+        // Mark as visited
+        sessionStorage.setItem(sessionKey, 'true');
+      } catch (err) {
+        console.error('Failed to track visit:', err);
+      }
+    };
+
+    trackVisit();
+  }, [slug]);
+
+
   useEffect(() => {
     if (!loading && !error && gallery) {
       observerRef.current = new IntersectionObserver((entries) => {

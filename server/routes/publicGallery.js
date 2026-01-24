@@ -37,12 +37,6 @@ router.get('/gallery/:slug', async (req, res) => {
 
     const gallery = result.rows[0];
 
-    // Increment page_views for the admin (Gallery View)
-    await pool.query(
-      "UPDATE admins SET page_views = page_views + 1 WHERE id = $1",
-      [gallery.id]
-    );
-
     // Fetch Categories
     const categoriesResult = await pool.query(
       `SELECT id, name, sort_order 

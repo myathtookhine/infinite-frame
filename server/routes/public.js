@@ -30,4 +30,26 @@ router.post('/visit', async (req, res) => {
   }
 });
 
+// POST /api/public/gallery/:slug/visit
+// Increments page views for specific Gallery Admin
+router.post('/gallery/:slug/visit', async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const result = await pool.query(
+      "UPDATE admins SET page_views = page_views + 1 WHERE slug = $1 RETURNING id",
+      [slug]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Gallery not found" });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error tracking gallery visit:', err.message);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
 module.exports = router;
