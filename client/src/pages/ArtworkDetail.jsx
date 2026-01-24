@@ -434,26 +434,7 @@ const ArtworkDetail = () => {
             onTouchStart={(e) => {
               const touches = e.touches;
 
-              if (touches.length === 2) {
-                // Pinch zoom start
-                const distance = Math.sqrt(
-                  Math.pow(touches[1].clientX - touches[0].clientX, 2) +
-                  Math.pow(touches[1].clientY - touches[0].clientY, 2)
-                );
-                setInitialPinchDistance(distance);
-                setBaseZoom(zoom);
-              } else if (touches.length === 1) {
-                // Check for double tap
-                const currentTime = new Date().getTime();
-                const tapLength = currentTime - lastTapTime;
-
-                if (tapLength < 300 && tapLength > 0) {
-                  // Double tap detected
-                  setZoom(zoom === 200 ? 100 : 200);
-                  setScrollPos({ x: 0, y: 0 });
-                }
-                setLastTapTime(currentTime);
-
+              if (touches.length === 1) {
                 // Single finger pan start (when zoomed)
                 if (zoom > 100) {
                   setIsDragging(true);
@@ -468,17 +449,7 @@ const ArtworkDetail = () => {
             onTouchMove={(e) => {
               const touches = e.touches;
 
-              if (touches.length === 2 && initialPinchDistance) {
-                // Pinch zoom
-                e.preventDefault();
-                const distance = Math.sqrt(
-                  Math.pow(touches[1].clientX - touches[0].clientX, 2) +
-                  Math.pow(touches[1].clientY - touches[0].clientY, 2)
-                );
-                const scale = distance / initialPinchDistance;
-                const newZoom = Math.min(200, Math.max(50, baseZoom * scale));
-                setZoom(newZoom);
-              } else if (touches.length === 1 && isDragging && zoom > 100) {
+              if (touches.length === 1 && isDragging && zoom > 100) {
                 // Single finger pan
                 e.preventDefault();
                 setHasDragged(true);
@@ -489,7 +460,6 @@ const ArtworkDetail = () => {
             }}
             onTouchEnd={() => {
               setIsDragging(false);
-              setInitialPinchDistance(null);
             }}
           >
             <img

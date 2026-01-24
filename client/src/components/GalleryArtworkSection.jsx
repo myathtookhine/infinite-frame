@@ -64,7 +64,7 @@ const GalleryArtworkSection = ({ categories = [], artworks = [], gallerySlug }) 
               onClick={() => setActiveCategory(cat.id)}
               className={`whitespace-nowrap flex-shrink-0 snap-center px-6 py-4 min-w-[120px] text-center text-sm uppercase tracking-wider transition-all duration-300 border-b-4 cursor-pointer ${activeCategory === cat.id
                 ? 'border-black dark:border-white text-white dark:text-black font-bold bg-black dark:bg-white'
-                : 'border-transparent text-gray-500 dark:text-gray-400 bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10'
+                : 'border-black dark:border-white text-gray-500 dark:text-gray-400 bg-white dark:bg-white/2 hover:bg-gray-100 dark:hover:bg-white/20'
                 }`}
             >
               {cat.name}
