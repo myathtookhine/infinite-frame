@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import axios from 'axios';
+import { ENDPOINTS } from '../config';
 import {
   UsersIcon,
   PhotoIcon,
@@ -64,7 +65,8 @@ const Dashboard = () => {
     const fetchStats = async () => {
       if (!user?.id) return;
       try {
-        const response = await axios.get('https://infinite-frame-server.onrender.com/api/auth/me', {
+        const response = await axios.get(ENDPOINTS.AUTH.ME, {
+
           headers: {
             'x-admin-id': user.id
           }

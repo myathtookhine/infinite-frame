@@ -15,7 +15,8 @@ const LandingPage = () => {
     // Track Visit (Super Admin Analytics)
     const trackVisit = async () => {
       try {
-        await fetch('https://infinite-frame-server.onrender.com/api/public/visit', {
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://infinite-frame-server.onrender.com/api';
+        await fetch(`${apiUrl}/public/visit`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

@@ -7,9 +7,31 @@ const authRoutes = require('./routes/auth');
 const app = express();
 
 // Middlewares
+// Allowed Origins
+const allowedOrigins = [
+  'http://localhost:5173',           // Local Development
+  'http://localhost:3000',           // Alternative Local
+  'https://infiniteframe.online',    // Production Client
+  'https://www.infiniteframe.online',
+  'https://admin.infiniteframe.online', // Production Admin
+  'https://infinite-frame.vercel.app'   // Vercel Deployments (if any)
+];
+
 app.use(cors({
-  origin: true, // Allow all origins for dev simplicity or specific list
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-id']
 }));
 app.use(express.json());
 

@@ -14,6 +14,7 @@ export const ENDPOINTS = {
     UPDATE_PROFILE: `${API_BASE_URL}/update-profile`,
     UPDATE_GALLERY_INFO: `${API_BASE_URL}/update-gallery-info`,
     CHANGE_PASSWORD: `${API_BASE_URL}/change-password`,
+    ME: `${API_BASE_URL}/me`,
   },
   // Attributes
   ATTRIBUTES: `${API_BASE_URL}/attributes`,
