@@ -3,6 +3,7 @@ import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageToggle from '../components/LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
+import Logo from '../assets/if.svg';
 
 const LandingPage = () => {
   const observerRef = useRef(null);
@@ -52,8 +53,8 @@ const LandingPage = () => {
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-theme border-b border-theme">
         <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24 h-20 flex items-center justify-between">
-          <div className="text-sm font-semibold uppercase tracking-wider">
-            {t('nav.brand')}
+          <div className="h-10 w-auto">
+            <img src={Logo} alt={t('nav.brand')} className="h-full w-auto object-contain" />
           </div>
           <div className="flex items-center gap-4">
             <LanguageToggle />
