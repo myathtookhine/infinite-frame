@@ -63,23 +63,23 @@ const ArtworkListItem = ({ artwork, onEdit, onDelete }) => {
 
   return (
     <>
-      <div className={`pb-2 mb-2 border-b ${borderColor} flex items-center gap-4`}>
+      <div className={`pb-4 mb-4 border-b ${borderColor} flex items-center gap-4`}>
         {/* Artwork Image Thumbnail */}
         <div className="flex-shrink-0 relative">
           <img
             src={mainImage || ImageNotFound}
             alt={artwork.name}
-            className="w-24 h-24 object-cover rounded-md"
+            className="w-20 h-20 object-cover rounded-md"
           />
           {/* Eye Icon Preview Button */}
           {mainImage && (
             <button
               type="button"
               onClick={() => setPreviewOpen(true)}
-              className="absolute top-2 left-2 p-2 rounded transition-all bg-white/80 backdrop-blur-md cursor-pointer"
+              className="absolute top-1 left-1 p-2 rounded-md transition-all bg-black/40 backdrop-blur-lg cursor-pointer"
               title="Preview image"
             >
-              <EyeIcon className="h-4 w-4 text-neutral-900" />
+              <EyeIcon className="h-3 w-3 text-white" />
             </button>
           )}
         </div>
@@ -95,19 +95,19 @@ const ArtworkListItem = ({ artwork, onEdit, onDelete }) => {
           <p className={`text-sm ${subtextColor}`}>
             {formatPrice(artwork.price, artwork.currency)}
           </p>
-          {artwork.width && artwork.height && (
+          {/* {artwork.width && artwork.height && (
             <p className={`text-xs ${subtextColor} mt-1`}>
               {artwork.width} × {artwork.height}
               {artwork.depth && ` × ${artwork.depth}`} {artwork.unit_symbol}
             </p>
-          )}
-          <p className='mt-2'><span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${getStatusColor(artwork.status)}`}>
+          )} */}
+          <p className='mt-1'><span className={`text-[8px] uppercase font-bold px-2 py-1 rounded-full border ${getStatusColor(artwork.status)}`}>
             {artwork.status}
           </span></p>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-0 flex-shrink-0">
           <Button
             variant="secondary"
             size="sm"

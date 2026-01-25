@@ -170,7 +170,7 @@ const ArtworkForm = () => {
       // Backend returns 'attributes' as array of objects with {id, type, name}
       if (artwork.attributes && artwork.attributes.length > 0) {
         const attributeIds = artwork.attributes.map(attr => attr.id);
-        console.log('✅ Loaded attribute IDs in edit mode:', attributeIds);
+        // console.log('✅ Loaded attribute IDs in edit mode:', attributeIds);
         setSelectedAttributes(attributeIds);
       }
     } catch (err) {
@@ -302,9 +302,9 @@ const ArtworkForm = () => {
         attribute_ids: selectedAttributes
       };
 
-      console.log('📤 Submitting artwork data:', artworkData);
-      console.log('🖼️ Additional images state:', additionalImages);
-      console.log('🖼️ Filtered additional images:', artworkData.additional_images);
+      // console.log('📤 Submitting artwork data:', artworkData);
+      // console.log('🖼️ Additional images state:', additionalImages);
+      // console.log('🖼️ Filtered additional images:', artworkData.additional_images);
 
       let artworkId;
       let response;
@@ -376,16 +376,18 @@ const ArtworkForm = () => {
   return (
     <div className="max-w-4xl mx-auto">
       {/* Back Navigation */}
-      <button
+      <Button
+        variant="secondary"
+        size="sm"
         onClick={() => navigate('/artworks')}
-        className={`flex items-center gap-2 mb-6 cursor-pointer ${subtextColor} hover:${textColor} transition-colors`}
+        className="flex items-center gap-2"
       >
         <ArrowLeftIcon className="h-5 w-5" />
         <span className="font-sans font-medium">Go Back</span>
-      </button>
+      </Button>
 
       {/* Page Header */}
-      <div className="mb-6">
+      <div className="mb-6 mt-6">
         <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>
           {isEditMode ? 'Edit Artwork' : 'Add New Artwork'}
         </h1>
@@ -880,7 +882,7 @@ const ArtworkForm = () => {
             </section>
 
             {/* Form Actions */}
-            <div className={`flex gap-4 pt-4 md:pt-4 fixed md:relative bottom-0 left-0 right-0 p-4 md:p-0 ${isDark ? 'bg-[#0a0a0a]' : 'bg-white'} border-t md:border-t-0 ${borderColor} shadow-lg md:shadow-none z-10`}>
+            <div className={`flex gap-4 fixed md:relative bottom-0 left-0 right-0 p-4 md:p-0 ${isDark ? 'bg-[#0a0a0a]' : 'bg-white'} border-t md:border-t-0 ${borderColor} shadow-lg md:shadow-none z-10`}>
               <Button
                 type="button"
                 variant="secondary"
