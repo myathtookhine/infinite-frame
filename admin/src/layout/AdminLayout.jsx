@@ -62,7 +62,7 @@ const AdminLayout = ({ children }) => {
   const sidebarBg = isDark ? "bg-[#141414]" : "bg-white";
   const textColor = isDark ? "text-white" : "text-gray-900";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
-  const contentBg = isDark ? "md:bg-[#141414]" : "md:bg-white";
+  const contentBg = isDark ? "lg:bg-[#141414]" : "lg:bg-white";
   const hoverBg = isDark ? "hover:bg-white/5" : "hover:bg-black/5";
   const iconColor = isDark ? "text-white" : "text-gray-900";
 
@@ -70,7 +70,7 @@ const AdminLayout = ({ children }) => {
     <div className={`min-h-screen ${bgColor}`}>
       {/* Mobile Header - Only visible on mobile */}
       <header
-        className={`md:hidden border-b ${headerBorder} p-4 flex items-center justify-between ${headerBg} sticky top-0 z-20`}
+        className={`lg:hidden border-b ${headerBorder} p-4 flex items-center justify-between ${headerBg} sticky top-0 z-20`}
       >
         <button
           className={`p-2 rounded ${hoverBg}`}
@@ -101,21 +101,21 @@ const AdminLayout = ({ children }) => {
       {/* Backdrop for mobile when sidebar open */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={closeSidebar}
           aria-hidden="true"
         />
       )}
 
-      <div className="flex md:p-4 md:gap-4 min-h-screen">
+      <div className="flex lg:p-4 lg:gap-4 min-h-screen">
         {/* Sidebar */}
         <aside
           className={`fixed inset-y-0 left-0 ${sidebarBg} ${textColor} w-64 p-4 z-50 flex flex-col transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 md:z-auto md:rounded-2xl md:h-[calc(100vh-2rem)] md:sticky md:top-4 ${
+          } lg:translate-x-0 lg:z-auto lg:rounded-2xl lg:h-[calc(100vh-2rem)] lg:sticky lg:top-4 ${
             isDark
-              ? "md:border md:border-[#262626]"
-              : "md:border md:border-gray-300"
+            ? "lg:border lg:border-[#262626]"
+            : "lg:border lg:border-gray-300"
           }`}
           aria-label="Sidebar"
         >
@@ -135,7 +135,7 @@ const AdminLayout = ({ children }) => {
               </div>
             </div>
             <button
-              className={`md:hidden p-1 rounded ${
+              className={`lg:hidden p-1 rounded ${
                 isDark ? "hover:bg-white/10" : "hover:bg-black/5"
               } transition-colors`}
               aria-label="Close menu"
@@ -255,13 +255,13 @@ const AdminLayout = ({ children }) => {
 
         {/* Main Content */}
         <div
-          className={`flex-1 min-w-0 overflow-hidden ${contentBg} md:rounded-2xl md:min-h-[calc(100vh-2rem)] md:my-0 ${
+          className={`flex-1 min-w-0 overflow-hidden ${contentBg} lg:rounded-2xl lg:min-h-[calc(100vh-2rem)] lg:my-0 ${
             isDark
-              ? "md:border md:border-[#262626]"
-              : "md:border md:border-gray-300"
+            ? "lg:border lg:border-[#262626]"
+            : "lg:border lg:border-gray-300"
           }`}
         >
-          <main className="p-4 sm:p-6 md:p-8 w-full max-w-full overflow-x-auto">{children}</main>
+          <main className="p-4 sm:p-6 lg:p-8 w-full max-w-full overflow-x-auto">{children}</main>
         </div>
       </div>
     </div>
