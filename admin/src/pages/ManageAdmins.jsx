@@ -190,24 +190,28 @@ const ManageAdmins = () => {
                           {new Date(admin.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right whitespace-nowrap space-x-2">
-                          <button
-                            onClick={() => toggleStatus(admin.id, admin.status)}
-                            title={admin.status === 'active' ? "Suspend User" : "Activate User"}
-                            className={`p-1 rounded transition-colors ${admin.status === 'active'
-                              ? "text-orange-500 hover:bg-orange-100"
-                              : "text-green-500 hover:bg-green-100"
-                              }`}
-                          >
-                            {admin.status === 'active' ? <NoSymbolIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
-                          </button>
+                          {admin.id !== user?.id && (
+                            <>
+                              <button
+                                onClick={() => toggleStatus(admin.id, admin.status)}
+                                title={admin.status === 'active' ? "Suspend User" : "Activate User"}
+                                className={`p-1 rounded transition-colors ${admin.status === 'active'
+                                  ? "text-orange-500 hover:bg-orange-100"
+                                  : "text-green-500 hover:bg-green-100"
+                                  }`}
+                              >
+                                {admin.status === 'active' ? <NoSymbolIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
+                              </button>
 
-                          <button
-                            onClick={() => handleDelete(admin.id)}
-                            title="Delete User"
-                            className="p-1 text-red-500 hover:bg-red-100 rounded transition-colors"
-                          >
-                            <TrashIcon className="w-5 h-5" />
-                          </button>
+                              <button
+                                onClick={() => handleDelete(admin.id)}
+                                title="Delete User"
+                                className="p-1 text-red-500 hover:bg-red-100 rounded transition-colors"
+                              >
+                                <TrashIcon className="w-5 h-5" />
+                              </button>
+                            </>
+                          )}
                         </td>
                       </tr>
                     ))
