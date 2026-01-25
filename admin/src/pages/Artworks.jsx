@@ -19,10 +19,14 @@ const Artworks = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   // const [selectedAttributeType, setSelectedAttributeType] = useState('');
+  const [selectedArtist, setSelectedArtist] = useState('');
+  const [artists, setArtists] = useState([]);
   const [artworks, setArtworks] = useState([]);
   const [categories, setCategories] = useState([]);
   // const [attributeTypes, setAttributeTypes] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const isSuperAdmin = user?.role === 'super_admin';
 
   const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
@@ -32,11 +36,33 @@ const Artworks = () => {
   // Fetch artworks and categories on mount
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedArtist]);
+
+  // Reset category filter when artist filter changes to prevent stale hidden filters
+  useEffect(() => {
+    setSelectedCategory('');
+  }, [selectedArtist]);
+
+  // Fetch artists list for Super Admin
+  useEffect(() => {
+    if (isSuperAdmin) {
+      const fetchArtists = async () => {
+        try {
+          const response = await axios.get(`${ENDPOINTS.ATTRIBUTES}/users`, {
+            headers: { 'x-admin-id': user.id }
+          });
+          setArtists(response.data);
+        } catch (err) {
+          console.error("Failed to fetch artists", err);
+        }
+      };
+      fetchArtists();
+    }
+  }, [isSuperAdmin, user.id]);
 
   const fetchData = async () => {
-    const worksKey = `artworks_${user.id}`;
-    const catsKey = `categories_list_${user.id}`;
+    const worksKey = `artworks_${user.id}_${selectedArtist || 'all'}`;
+    const catsKey = `categories_list_${user.id}_${selectedArtist || 'all'}`;
 
     const cachedWorks = getCachedData(worksKey);
     const cachedCats = getCachedData(catsKey);
@@ -51,12 +77,18 @@ const Artworks = () => {
     }
 
     try {
+      const targetId = selectedArtist || (isSuperAdmin ? 'all' : undefined);
+
+      // Construct URLs directly to ensure params are passed correctly
+      const artworksUrl = `${ENDPOINTS.ARTWORKS}${targetId ? `?target_user_id=${targetId}` : ''}`;
+      const categoriesUrl = `${ENDPOINTS.CATEGORIES}${targetId ? `?target_user_id=${targetId}` : ''}`;
+
       // Fetch artworks and categories in parallel
       const [artworksRes, categoriesRes] = await Promise.all([
-        axios.get(ENDPOINTS.ARTWORKS, {
+        axios.get(artworksUrl, {
           headers: { 'x-admin-id': user.id }
         }),
-        axios.get(ENDPOINTS.CATEGORIES, {
+        axios.get(categoriesUrl, {
           headers: { 'x-admin-id': user.id }
         })
         // Removed attribute types fetching
@@ -85,13 +117,17 @@ const Artworks = () => {
   // Filter artworks (client-side for search, server-side for category would be better)
   const filteredArtworks = artworks.filter(artwork => {
     const matchesSearch = artwork.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !selectedCategory || artwork.category_id === selectedCategory;
+    // Ignore category filter for Super Admin (since dropdown is hidden)
+    const matchesCategory = isSuperAdmin || !selectedCategory || artwork.category_id === selectedCategory;
+
+    // Strict client-side filter for Artist to ensure correctness
+    const matchesArtist = !isSuperAdmin || !selectedArtist || artwork.admin_id === selectedArtist;
 
     // Removed attribute type filtering
     // const matchesAttributeType = !selectedAttributeType ||
     //   (artwork.attributes && artwork.attributes.some(attr => attr.type === selectedAttributeType));
 
-    return matchesSearch && matchesCategory;
+    return matchesSearch && matchesCategory && matchesArtist;
   });
 
   const handleEdit = (id) => {
@@ -136,14 +172,16 @@ const Artworks = () => {
           </p>
         </div>
 
-        {/* Add Artwork Button */}
-        <Button
-          onClick={handleAddArtwork}
-          className="w-full md:w-auto flex items-center justify-center gap-2"
-        >
-          <PlusIcon className="h-4 w-4" />
-          <span className="whitespace-nowrap">Add Artwork</span>
-        </Button>
+        {/* Add Artwork Button - Hidden for Super Admin */}
+        {!isSuperAdmin && (
+          <Button
+            onClick={handleAddArtwork}
+            className="w-full md:w-auto flex items-center justify-center gap-2"
+          >
+            <PlusIcon className="h-4 w-4" />
+            <span className="whitespace-nowrap">Add Artwork</span>
+          </Button>
+        )}
       </div>
 
       {/* Search and Filter Bar */}
@@ -160,18 +198,33 @@ const Artworks = () => {
           />
         </div>
 
-        {/* Category Filter */}
-        <Select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          disabled={loading}
-          placeholder="All Categories"
-          options={categories.map(category => ({
-            value: category.id,
-            label: category.name
-          }))}
-          className="w-full md:w-64"
-        />
+        {/* Category Filter - Hidden for Super Admin */}
+        {!isSuperAdmin ? (
+          <Select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            disabled={loading}
+            placeholder="All Categories"
+            options={categories.map(category => ({
+              value: category.id,
+              label: category.name
+            }))}
+            className="w-full md:w-64"
+          />
+        ) : (
+          /* Artist Filter for Super Admin */
+          <Select
+            value={selectedArtist}
+            onChange={(e) => setSelectedArtist(e.target.value)}
+            disabled={loading}
+            placeholder="-- All Artists --"
+            options={artists.map(artist => ({
+              value: artist.id,
+              label: `${artist.username} (${artist.email})`
+            }))}
+            className="w-full md:w-64"
+          />
+        )}
       </div>
 
       {/* Artworks List */}
@@ -186,7 +239,7 @@ const Artworks = () => {
             <p className={subtextColor}>
                 {searchQuery || selectedCategory
                 ? 'No artworks match your search criteria.'
-                : 'No artworks found. Create one to get started.'}
+                  : 'No artworks found. Please create one to get started!'}
             </p>
           </div>
         ) : (
