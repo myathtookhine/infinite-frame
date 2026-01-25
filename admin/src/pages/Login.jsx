@@ -124,10 +124,10 @@ const Login = () => {
               {/* Username Field */}
               <Input
                 id="username"
-                label="Username"
+                label="Username or Email"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username"
+                placeholder="Enter username or email"
                 autoComplete="username"
                 icon={UserIcon}
               />

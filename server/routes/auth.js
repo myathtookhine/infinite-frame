@@ -237,7 +237,7 @@ router.post('/login', loginLimiter, validateLogin, async (req, res) => {
     }
 
     const userResult = await pool.query(
-      'SELECT * FROM admins WHERE username = $1', 
+      'SELECT * FROM admins WHERE username = $1 OR email = $1', 
       [username]
     );
 
