@@ -77,12 +77,12 @@ const Login = () => {
           <div className="relative z-10 h-full flex flex-col">
             {/* Top-left branding */}
             <div className="text-left py-6 md:py-0">
-              <h1 className="font-sans text-4xl sm:text-5xl md:text-7xl mb-0 leading-tight">
+              <h1 className="font-sans text-6xl sm:text-6xl md:text-7xl mb-0 leading-tight">
                 <span className="glitch" data-text="Infinite">
                   Infinite
                 </span>
               </h1>
-              <h1 className="font-sans text-4xl sm:text-5xl md:text-7xl mb-4 leading-tight">
+              <h1 className="font-sans text-6xl sm:text-6xl md:text-7xl mb-4 leading-tight">
                 <span className="glitch glitch--delay" data-text="Frame">
                   Frame
                 </span>
