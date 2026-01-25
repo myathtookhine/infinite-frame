@@ -5,7 +5,7 @@
 @layer base {
   :root {
     --color-primary: #000000;
-    --color-secondary: #ffffff;
+    --color-secondary: #f3f4f6;
   }
 
   * {
@@ -13,7 +13,9 @@
   }
 
   body {
-    background-color: #ffffff;
+    background-color: #f3f4f6;
+      /* gray-100 */
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
     color: #000000;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Segoe UI', 'Helvetica Neue', sans-serif;
   }
@@ -150,4 +152,16 @@ input[type="date"].dark-date {
 
 input[type="date"].light-date {
   color-scheme: light;
+}
+
+/* Modal Zoom In Animation */
+@keyframes modalZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

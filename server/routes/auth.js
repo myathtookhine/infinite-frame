@@ -28,6 +28,23 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Middleware to check User Role & ID (Matches logic in artworks.js)
+const getUserContext = async (req, res, next) => {
+  const adminId = req.headers['x-admin-id'];
+  if (!adminId) return res.status(401).json({ message: "Unauthorized: No Admin ID" });
+
+  try {
+    const userResult = await pool.query("SELECT id, role FROM admins WHERE id = $1", [adminId]);
+    if (userResult.rows.length === 0) return res.status(401).json({ message: "User not found" });
+    
+    req.user = userResult.rows[0];
+    next();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 // =====================================================
 // HELPER: Send OTP Email
 // =====================================================
@@ -220,7 +237,7 @@ router.post('/login', loginLimiter, validateLogin, async (req, res) => {
     }
 
     const userResult = await pool.query(
-      'SELECT * FROM admins WHERE username = $1', 
+      'SELECT * FROM admins WHERE username = $1 OR email = $1', 
       [username]
     );
 
@@ -305,7 +322,9 @@ router.post('/login', loginLimiter, validateLogin, async (req, res) => {
         description: user.description,
         address: user.address,
         phone_numbers: user.phone_numbers,
-        social_links: user.social_links
+        social_links: user.social_links,
+        banner_image_url: user.banner_image_url,
+        banner_enabled: user.banner_enabled
       } 
     });
   } catch (err) {
@@ -313,6 +332,63 @@ router.post('/login', loginLimiter, validateLogin, async (req, res) => {
     res.status(500).json({ 
       message: "Server error. Please try again later." 
     });
+  }
+});
+
+// =====================================================
+// 3.5 GET ME (with Stats)
+// =====================================================
+// =====================================================
+// 3.5 GET ME (with Stats)
+// =====================================================
+router.get('/me', getUserContext, async (req, res) => {
+
+  try {
+    // 1. Get Basic User Info (Removed page_views column fetch)
+    const userResult = await pool.query(
+      "SELECT id, username, email, role FROM admins WHERE id = $1",
+      [req.user.id]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const user = userResult.rows[0];
+    let artworkCount = 0;
+
+    // 2. Get Artwork Count based on Role
+    if (user.role === 'super_admin') {
+      // Super Admin: Count ALL artworks
+      const countResult = await pool.query("SELECT COUNT(*) FROM artworks");
+      artworkCount = parseInt(countResult.rows[0].count);
+    } else {
+      // Regular Admin: Count OWN artworks
+      const countResult = await pool.query(
+        "SELECT COUNT(*) FROM artworks WHERE admin_id = $1",
+        [user.id]
+      );
+      artworkCount = parseInt(countResult.rows[0].count);
+    }
+
+    // 3. Get Visitor Count from visit_logs (Real-time sync with chart)
+    const visitorResult = await pool.query(
+      "SELECT COUNT(*) FROM visit_logs WHERE admin_id = $1",
+      [user.id]
+    );
+    const visitorCount = parseInt(visitorResult.rows[0].count);
+
+    res.json({
+      user: {
+        ...user,
+        page_views: visitorCount, // Overwrite with log count
+        artwork_count: artworkCount
+      }
+    });
+
+  } catch (err) {
+    console.error('Error fetching user details:', err);
+    res.status(500).json({ message: "Server Error" });
   }
 });
 
@@ -589,7 +665,7 @@ router.post('/update-gallery-info', async (req, res) => {
       UPDATE admins 
       SET ${setClause}
       WHERE id = $${fields.length + 1}
-      RETURNING id, username, email, role, slug, gallery_name, description, address, phone_numbers, social_links
+      RETURNING id, username, email, role, slug, gallery_name, description, address, phone_numbers, social_links, banner_image_url, banner_enabled
     `;
     
     const result = await pool.query(query, values);

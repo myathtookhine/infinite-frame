@@ -31,21 +31,21 @@ router.get('/', async (req, res) => {
     if (req.user.role === 'super_admin') {
       if (targetUserId && targetUserId !== 'all') {
         // Super Admin viewing SPECIFIC admin's categories
-        query = "SELECT * FROM categories WHERE admin_id = $1 ORDER BY name";
+        query = "SELECT * FROM categories WHERE admin_id = $1 ORDER BY sort_order ASC, name ASC";
         params = [targetUserId];
       } else {
         // Super Admin viewing ALL categories (with owner info)
         query = `
-          SELECT c.id, c.name, c.is_active, c.created_at, c.updated_at, 
+          SELECT c.id, c.name, c.is_active, c.created_at, c.updated_at, c.sort_order,
                  adm.email as owner_email, adm.username as owner_name, c.admin_id
           FROM categories c
           JOIN admins adm ON c.admin_id = adm.id
-          ORDER BY c.name
+          ORDER BY c.sort_order ASC, c.name ASC
         `;
       }
     } else {
       // Individual sees ONLY their categories
-      query = "SELECT * FROM categories WHERE admin_id = $1 ORDER BY name";
+      query = "SELECT * FROM categories WHERE admin_id = $1 ORDER BY sort_order ASC, name ASC";
       params = [req.user.id];
     }
 
@@ -59,7 +59,7 @@ router.get('/', async (req, res) => {
 
 // 2. CREATE CATEGORY (Admin & Super Admin)
 router.post('/', async (req, res) => {
-  const { name, admin_id } = req.body;
+  const { name, admin_id, sort_order } = req.body;
 
   if (!name || !name.trim()) {
     return res.status(400).json({ message: "Category name is required." });
@@ -70,8 +70,8 @@ router.post('/', async (req, res) => {
 
   try {
     const newCategory = await pool.query(
-      "INSERT INTO categories (admin_id, name) VALUES ($1, $2) RETURNING *",
-      [targetAdminId, name.trim()]
+      "INSERT INTO categories (admin_id, name, sort_order) VALUES ($1, $2, $3) RETURNING *",
+      [targetAdminId, name.trim(), sort_order || 0]
     );
     res.json(newCategory.rows[0]);
   } catch (err) {
@@ -86,7 +86,7 @@ router.post('/', async (req, res) => {
 // 3. UPDATE CATEGORY (Admin & Super Admin)
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, is_active } = req.body;
+  const { name, is_active, sort_order } = req.body;
 
   try {
     let updateCategory;
@@ -94,14 +94,14 @@ router.put('/:id', async (req, res) => {
     if (req.user.role === 'super_admin') {
       // Super admin can update any category
       updateCategory = await pool.query(
-        "UPDATE categories SET name = COALESCE($1, name), is_active = COALESCE($2, is_active) WHERE id = $3 RETURNING *",
-        [name, is_active, id]
+        "UPDATE categories SET name = COALESCE($1, name), is_active = COALESCE($2, is_active), sort_order = COALESCE($3, sort_order) WHERE id = $4 RETURNING *",
+        [name, is_active, sort_order, id]
       );
     } else {
       // Regular admin can only update their own categories
       updateCategory = await pool.query(
-        "UPDATE categories SET name = COALESCE($1, name), is_active = COALESCE($2, is_active) WHERE id = $3 AND admin_id = $4 RETURNING *",
-        [name, is_active, id, req.user.id]
+        "UPDATE categories SET name = COALESCE($1, name), is_active = COALESCE($2, is_active), sort_order = COALESCE($3, sort_order) WHERE id = $4 AND admin_id = $5 RETURNING *",
+        [name, is_active, sort_order, id, req.user.id]
       );
     }
 

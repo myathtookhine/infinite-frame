@@ -36,7 +36,7 @@ const ArtistSelector = ({ onSelect, selectedId }) => {
   }, []);
 
   const borderColor = isDark ? 'border-[#262626]' : 'border-gray-200';
-  const textColor = isDark ? 'text-white' : 'text-black';
+  const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
   const bg = isDark ? 'bg-[#0a0a0a]' : 'bg-white';
 

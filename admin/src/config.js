@@ -14,11 +14,20 @@ export const ENDPOINTS = {
     UPDATE_PROFILE: `${API_BASE_URL}/update-profile`,
     UPDATE_GALLERY_INFO: `${API_BASE_URL}/update-gallery-info`,
     CHANGE_PASSWORD: `${API_BASE_URL}/change-password`,
+    ME: `${API_BASE_URL}/me`,
   },
+  // Analytis
+  ANALYTICS: `${API_BASE_URL}/analytics`,
   // Attributes
   ATTRIBUTES: `${API_BASE_URL}/attributes`,
+  ATTRIBUTE_TYPES: `${API_BASE_URL}/attributes/types`,
   // Categories
   CATEGORIES: `${API_BASE_URL}/categories`,
+  // Units
+  UNITS: `${API_BASE_URL}/units`,
+  // Artworks
+  ARTWORKS: `${API_BASE_URL}/artworks`,
+  ARTWORK_UPLOAD: `${API_BASE_URL}/artworks/upload-images`,
   // Config (Master Data)
   CONFIG: (table) => `${API_BASE_URL}/config/${table}`,
   CONFIG_DELETE: (table, id) => `${API_BASE_URL}/config/${table}/${id}`,

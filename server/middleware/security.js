@@ -104,12 +104,16 @@ const validateLogin = (req, res, next) => {
 
   if (!username || !password) {
     return res.status(400).json({ 
-      message: "Username and password are required." 
+      message: "Username/Email and password are required." 
     });
   }
 
-  // Sanitize
-  req.body.username = validator.escape(username.trim());
+  // Check if input is email or username
+  if (validator.isEmail(username)) {
+    req.body.username = validator.normalizeEmail(username).toLowerCase();
+  } else {
+    req.body.username = validator.escape(username.trim());
+  }
 
   next();
 };

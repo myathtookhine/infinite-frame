@@ -87,7 +87,7 @@ const ActivityLogs = () => {
     : "px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed";
   const paginationActiveClass = isDark
     ? "px-3 py-1 rounded bg-white text-black font-bold"
-    : "px-3 py-1 rounded bg-black text-white font-bold";
+    : "px-3 py-1 rounded bg-[#151416] text-white font-bold";
 
   return (
     <div className="space-y-6">

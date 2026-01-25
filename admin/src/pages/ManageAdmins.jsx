@@ -9,7 +9,8 @@ import {
   TrashIcon, 
   NoSymbolIcon, 
   CheckCircleIcon,
-  XMarkIcon
+  XMarkIcon,
+  KeyIcon
 } from '@heroicons/react/24/outline';
 import { useTheme } from '../context/ThemeContext';
 
@@ -17,7 +18,9 @@ const ManageAdmins = () => {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
   const [formData, setFormData] = useState({ username: '', email: '', password: '', isSuperAdmin: false });
+  const [resetData, setResetData] = useState({ id: null, password: '' });
   const [errors, setErrors] = useState({});
   
   const { user } = useAuth();
@@ -97,8 +100,26 @@ const ManageAdmins = () => {
     }
   };
 
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!resetData.password || resetData.password.length < 8) {
+      setErrors({ resetPassword: 'Password must be at least 8 characters' });
+      return;
+    }
+
+    try {
+      await axios.put(ENDPOINTS.ADMIN_MANAGEMENT.RESET_PASSWORD(resetData.id), { newPassword: resetData.password }, config);
+      setShowResetModal(false);
+      setResetData({ id: null, password: '' });
+      alert("Password reset successfully!");
+    } catch (err) {
+      setErrors({ resetPassword: err.response?.data?.message || "Failed to reset password" });
+    }
+  };
+
   const resetForm = () => {
     setFormData({ username: '', email: '', password: '', isSuperAdmin: false });
+    setResetData({ id: null, password: '' });
     setErrors({});
   };
 
@@ -190,24 +211,36 @@ const ManageAdmins = () => {
                           {new Date(admin.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right whitespace-nowrap space-x-2">
-                          <button
-                            onClick={() => toggleStatus(admin.id, admin.status)}
-                            title={admin.status === 'active' ? "Suspend User" : "Activate User"}
-                            className={`p-1 rounded transition-colors ${admin.status === 'active'
-                              ? "text-orange-500 hover:bg-orange-100"
-                              : "text-green-500 hover:bg-green-100"
-                              }`}
-                          >
-                            {admin.status === 'active' ? <NoSymbolIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
-                          </button>
+                          {admin.id !== user?.id && (
+                            <>
+                              <button
+                                onClick={() => { setResetData({ id: admin.id, password: '' }); setShowResetModal(true); }}
+                                title="Reset Password"
+                                className="p-1 text-blue-500 hover:bg-blue-100 rounded transition-colors"
+                              >
+                                <KeyIcon className="w-5 h-5" />
+                              </button>
 
-                          <button
-                            onClick={() => handleDelete(admin.id)}
-                            title="Delete User"
-                            className="p-1 text-red-500 hover:bg-red-100 rounded transition-colors"
-                          >
-                            <TrashIcon className="w-5 h-5" />
-                          </button>
+                              <button
+                                onClick={() => toggleStatus(admin.id, admin.status)}
+                                title={admin.status === 'active' ? "Suspend User" : "Activate User"}
+                                className={`p-1 rounded transition-colors ${admin.status === 'active'
+                                  ? "text-orange-500 hover:bg-orange-100"
+                                  : "text-green-500 hover:bg-green-100"
+                                  }`}
+                              >
+                                {admin.status === 'active' ? <NoSymbolIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
+                              </button>
+
+                              <button
+                                onClick={() => handleDelete(admin.id)}
+                                title="Delete User"
+                                className="p-1 text-red-500 hover:bg-red-100 rounded transition-colors"
+                              >
+                                <TrashIcon className="w-5 h-5" />
+                              </button>
+                            </>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -281,6 +314,43 @@ const ManageAdmins = () => {
                 </Button>
                 <Button type="submit" variant="primary">
                   Create Account
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* RESET PASSWORD MODAL */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className={`w-full max-w-md p-6 rounded-lg shadow-xl relative ${modalBg}`}>
+            <button
+              onClick={() => { setShowResetModal(false); resetForm(); }}
+              className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+
+            <h2 className={`text-xl font-bold mb-6 ${textClass}`}>Reset Password</h2>
+
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <Input
+                id="resetPassword"
+                label="New Password"
+                type="password"
+                value={resetData.password}
+                onChange={(e) => setResetData({ ...resetData, password: e.target.value })}
+                placeholder="New Strong Password"
+                error={errors.resetPassword}
+              />
+
+              <div className="flex justify-end gap-3 mt-6">
+                <Button type="button" variant="secondary" onClick={() => { setShowResetModal(false); resetForm(); }}>
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary">
+                  Reset Password
                 </Button>
               </div>
             </form>

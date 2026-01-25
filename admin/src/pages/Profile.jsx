@@ -5,7 +5,6 @@ import { useTheme } from "../context/ThemeContext";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import InputTextarea from "../components/ui/InputTextarea";
-import ContentCard from "../components/ui/ContentCard";
 import {
   UserIcon,
   LockClosedIcon,
@@ -14,9 +13,10 @@ import {
   ClipboardIcon,
 } from "@heroicons/react/24/outline";
 import Toast from "../components/ui/Toast";
+import BannerUpload from "../components/BannerUpload";
 
 const Profile = () => {
-  const { user, changePassword, updateProfile, updateGalleryInfo, logout } = useAuth();
+  const { user, changePassword, updateProfile, updateGalleryInfo, updateUser, logout } = useAuth();
   const [username, setUsername] = useState(user?.username || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -37,6 +37,10 @@ const Profile = () => {
   const [gallerySuccess, setGallerySuccess] = useState("");
   const [toast, setToast] = useState({ isVisible: false, message: "", type: "info" });
 
+  // Banner State
+  const [bannerUrl, setBannerUrl] = useState(user?.banner_image_url || null);
+  const [bannerEnabled, setBannerEnabled] = useState(user?.banner_enabled || false);
+
   const { isDark } = useTheme();
   const navigate = useNavigate();
 
@@ -49,6 +53,7 @@ const Profile = () => {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (user) {
       setUsername(user.username);
       setSlug(user.slug || "");
@@ -57,10 +62,12 @@ const Profile = () => {
       setAddress(decodeHtml(user.address || ""));
       setPhoneNumbers(user.phone_numbers || []);
       setSocialLinks(user.social_links || {});
+      setBannerUrl(user.banner_image_url || null);
+      setBannerEnabled(user.banner_enabled || false);
     }
   }, [user]);
 
-  const textColor = isDark ? "text-white" : "text-black";
+  const textColor = isDark ? "text-white" : "text-[#151416]";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
 
   const handleUsernameUpdate = async (e) => {
@@ -131,10 +138,17 @@ const Profile = () => {
     });
 
     if (result.success) {
-      setGallerySuccess(result.message);
-      setTimeout(() => setGallerySuccess(""), 3000);
+      setToast({
+        isVisible: true,
+        message: result.message,
+        type: "success"
+      });
     } else {
-      setGalleryError(result.error);
+      setToast({
+        isVisible: true,
+        message: result.error,
+        type: "danger"
+      });
     }
   };
 
@@ -181,6 +195,18 @@ const Profile = () => {
     });
   };
 
+  const handleBannerUpdate = (bannerData) => {
+    // Update local state
+    setBannerUrl(bannerData.banner_image_url);
+    setBannerEnabled(bannerData.banner_enabled);
+
+    // Update user context and localStorage
+    updateUser({
+      banner_image_url: bannerData.banner_image_url,
+      banner_enabled: bannerData.banner_enabled
+    });
+  };
+
   return (
     <main className="max-w-7xl mx-auto">
       <div className="mb-6">
@@ -191,7 +217,8 @@ const Profile = () => {
       </div>
 
       {/* Username Update Form */}
-      <ContentCard title="Update Username">
+      <section className={`py-8 border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
+        <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Update Username</h2>
         <form onSubmit={handleUsernameUpdate} className="space-y-4">
           {/* Username Error/Success Messages */}
           {usernameError && (
@@ -206,25 +233,42 @@ const Profile = () => {
             </div>
           )}
 
-          <Input
-            id="username"
-            label="Username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter new username"
-            autoComplete="username"
-            icon={UserIcon}
-          />
-
-          <Button type="submit" variant="primary" size="md" block>
-            Update Username
-          </Button>
+          <div className="flex gap-2">
+            <Input
+              containerClassName="flex-1"
+              id="username"
+              label="Username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter new username"
+              autoComplete="username"
+              icon={UserIcon}
+            />
+            <div className="flex flex-col justify-end mb-1">
+              <Button type="submit" variant="primary" size="md">
+                Update
+              </Button>
+            </div>
+          </div>
         </form>
-      </ContentCard>
+      </section>
+
+      {/* Gallery Banner Upload */}
+      <section className={`py-8 border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
+        <h2 className={`text-xl font-sans font-bold ${textColor} mb-1`}>Gallery Banner</h2>
+        <p className={`text-sm font-sans ${subtextColor} mb-4`}>Upload a banner image for your public gallery (1200x630px minimum)</p>
+        <BannerUpload
+          userId={user?.id}
+          initialBannerUrl={bannerUrl}
+          initialEnabled={bannerEnabled}
+          onUpdate={handleBannerUpdate}
+        />
+      </section>
 
       {/* Gallery Information Form */}
-      <ContentCard title="Gallery Information">
+      <section className={`py-8 border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
+        <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Gallery Information</h2>
         <form onSubmit={handleGalleryInfoUpdate} className="space-y-4">
 
           <Input
@@ -280,7 +324,8 @@ const Profile = () => {
             placeholder="Describe your gallery..."
             maxLength={2000}
             rows={4}
-            height="200px"
+            minHeight="250px"
+            height="350px"
           />
           <p className={`text-xs mt-1 ${subtextColor}`}>
             {description.length}/2000 characters
@@ -371,26 +416,16 @@ const Profile = () => {
             </Button>
           </div>
 
-          {/* Gallery update messages */}
-          {galleryError && (
-            <div className={`border-2 px-4 py-3 text-sm font-sans rounded font-medium ${isDark ? 'bg-red-900/20 border-red-800 text-red-400' : 'bg-red-50 border-red-600 text-red-700'}`}>
-              {galleryError}
-            </div>
-          )}
 
-          {gallerySuccess && (
-            <div className={`border-2 px-4 py-3 text-sm font-sans rounded font-medium ${isDark ? 'bg-green-900/20 border-green-800 text-green-400' : 'bg-green-50 border-green-600 text-green-700'}`}>
-              {gallerySuccess}
-            </div>
-          )}
           <Button type="submit" variant="primary" size="md" block>
             Update Gallery Info
           </Button>
         </form>
-      </ContentCard>
+      </section>
 
       {/* Change Password Form */}
-      <ContentCard title="Change Password">
+      <section className={`py-8 border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
+        <h2 className={`text-xl font-sans font-bold ${textColor} mb-4`}>Change Password</h2>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           {/* Password Error/Success Messages */}
           {passwordError && (
@@ -445,13 +480,12 @@ const Profile = () => {
             Update Password
           </Button>
         </form>
-      </ContentCard>
+      </section>
 
       {/* Sign Out Section */}
-      <ContentCard
-        title="Sign Out"
-        subtitle="Sign out from your admin account"
-      >
+      <section className="py-8">
+        <h2 className={`text-xl font-sans font-bold ${textColor} mb-1`}>Sign Out</h2>
+        <p className={`text-sm font-sans ${subtextColor} mb-4`}>Sign out from your admin account</p>
         <Button
           onClick={handleSignOut}
           variant="secondary"
@@ -461,7 +495,7 @@ const Profile = () => {
           <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
           Sign Out Now
         </Button>
-      </ContentCard>
+      </section>
 
       {/* Toast Notification */}
       <Toast

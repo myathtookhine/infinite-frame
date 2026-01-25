@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useAdminCache } from '../context/AdminCacheContext';
 import axios from 'axios';
 import { ENDPOINTS } from '../config';
 import ArtistSelector from '../components/ArtistSelector';
@@ -18,12 +19,14 @@ import Button from '../components/ui/Button';
 const Categories = () => {
   const { isDark } = useTheme();
   const { user } = useAuth();
+  const { getCachedData, setCachedData } = useAdminCache();
   const [selectedArtist, setSelectedArtist] = useState('');
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryName, setCategoryName] = useState('');
+  const [sortOrder, setSortOrder] = useState(0);
   const [error, setError] = useState('');
   
   // Super Admin: Can Edit but Not Delete
@@ -31,13 +34,22 @@ const Categories = () => {
   const isSuperAdmin = user?.role === 'super_admin';
   const isReadOnly = false; // Allow super admin to edit
 
-  const textColor = isDark ? 'text-white' : 'text-black';
+  const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
   const borderColor = isDark ? 'border-[#262626]' : 'border-gray-200';
   const cardBg = isDark ? 'bg-[#141414]' : 'bg-white';
 
   const fetchCategories = async () => {
-    setLoading(true);
+    const cacheKey = `categories_${selectedArtist || (isSuperAdmin ? 'all' : 'owner')}`;
+    const cached = getCachedData(cacheKey);
+
+    if (cached) {
+      setCategories(cached.data);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
     const config = {
       headers: { 'x-admin-id': user.id },
       params: {
@@ -47,16 +59,24 @@ const Categories = () => {
 
     try {
       const response = await axios.get(ENDPOINTS.CATEGORIES, config);
-      setCategories(response.data);
+
+      const currentDataStr = JSON.stringify(cached?.data || []);
+      const newDataStr = JSON.stringify(response.data);
+
+      if (currentDataStr !== newDataStr) {
+        setCategories(response.data);
+        setCachedData(cacheKey, response.data);
+      }
     } catch (err) {
       console.error('Error fetching categories:', err);
-      setCategories([]);
+      if (!cached) setCategories([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchCategories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedArtist]);
@@ -65,6 +85,7 @@ const Categories = () => {
     setError('');
     setEditingCategory(null);
     setCategoryName('');
+    setSortOrder(0);
     setIsModalOpen(true);
   };
 
@@ -72,6 +93,7 @@ const Categories = () => {
     setError('');
     setEditingCategory(category);
     setCategoryName(category.name);
+    setSortOrder(category.sort_order || 0);
     setIsModalOpen(true);
   };
 
@@ -81,17 +103,28 @@ const Categories = () => {
 
     setLoading(true);
     const config = { headers: { 'x-admin-id': user.id } };
+    const payload = {
+      name: categoryName,
+      sort_order: parseInt(sortOrder) || 0
+    };
+
+    const cacheKey = `categories_${selectedArtist || (isSuperAdmin ? 'all' : 'owner')}`;
 
     try {
       if (editingCategory) {
-        const response = await axios.put(`${ENDPOINTS.CATEGORIES}/${editingCategory.id}`, { name: categoryName }, config);
-        setCategories(categories.map(cat => cat.id === editingCategory.id ? response.data : cat));
+        const response = await axios.put(`${ENDPOINTS.CATEGORIES}/${editingCategory.id}`, payload, config);
+        const newCats = categories.map(cat => cat.id === editingCategory.id ? response.data : cat);
+        setCategories(newCats);
+        setCachedData(cacheKey, newCats);
       } else {
-        const response = await axios.post(ENDPOINTS.CATEGORIES, { name: categoryName }, config);
-        setCategories([...categories, response.data]);
+        const response = await axios.post(ENDPOINTS.CATEGORIES, payload, config);
+        const newCats = [...categories, response.data].sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
+        setCategories(newCats);
+        setCachedData(cacheKey, newCats);
       }
       setIsModalOpen(false);
       setCategoryName('');
+      setSortOrder(0);
       setEditingCategory(null);
     } catch (err) {
       console.error('Error saving category:', err);
@@ -106,10 +139,13 @@ const Categories = () => {
 
     setLoading(true);
     const config = { headers: { 'x-admin-id': user.id } };
+    const cacheKey = `categories_${selectedArtist || (isSuperAdmin ? 'all' : 'owner')}`;
 
     try {
       await axios.delete(`${ENDPOINTS.CATEGORIES}/${id}`, config);
-      setCategories(categories.filter(cat => cat.id !== id));
+      const newCats = categories.filter(cat => cat.id !== id);
+      setCategories(newCats);
+      setCachedData(cacheKey, newCats);
     } catch (err) {
       console.error('Error deleting category:', err);
       alert(err.response?.data?.message || 'Failed to delete category');
@@ -121,13 +157,16 @@ const Categories = () => {
   const handleToggleStatus = async (category) => {
     const config = { headers: { 'x-admin-id': user.id } };
     const newStatus = !category.is_active;
+    const cacheKey = `categories_${selectedArtist || (isSuperAdmin ? 'all' : 'owner')}`;
 
     try {
       const response = await axios.put(`${ENDPOINTS.CATEGORIES}/${category.id}`, {
         is_active: newStatus
       }, config);
 
-      setCategories(categories.map(cat => cat.id === category.id ? { ...cat, is_active: response.data.is_active } : cat));
+      const newCats = categories.map(cat => cat.id === category.id ? { ...cat, is_active: response.data.is_active } : cat);
+      setCategories(newCats);
+      setCachedData(cacheKey, newCats);
     } catch (err) {
       console.error("Failed to toggle status", err);
       alert("Failed to update status");
@@ -137,7 +176,7 @@ const Categories = () => {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Page Header with Add Button */}
-      <div className="mb-4 lg:mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+      <div className="mb-4 lg:mb-10 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>Categories</h1>
           <p className={`${subtextColor} font-sans`}>
@@ -188,9 +227,16 @@ const Categories = () => {
             >
               <div className="min-w-0 flex-1 flex items-center gap-3">
                 <ArchiveBoxIcon className={`h-5 w-5 flex-shrink-0 ${textColor}`} />
-                <span className={`text-sm sm:text-base font-sans font-semibold ${textColor} block truncate ${!category.is_active ? 'opacity-50 line-through decoration-2' : ''}`}>
-                  {category.name}
-                </span>
+                <div>
+                  <p>
+                    <span className={`text-sm sm:text-base font-sans font-semibold ${textColor} block truncate ${!category.is_active ? 'opacity-50 line-through decoration-2' : ''}`}>
+                      {category.name}
+                    </span>
+                  </p>
+                  <p><span className={`text-xs ${subtextColor} block mt-0.5`}>
+                    Sorting Order : {category.sort_order}
+                  </span></p>
+                </div>
                 {!category.is_active && <span className="text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">Disabled</span>}
                 {category.owner_name && <span className={`text-xs ${subtextColor}`}>by {category.owner_name}</span>}
               </div>
@@ -254,6 +300,16 @@ const Categories = () => {
                 onChange={(e) => setCategoryName(e.target.value)}
                 placeholder="e.g. Painting, Sculpture, Photography"
               />
+
+              <Input
+                label="Sort Order"
+                type="number"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                placeholder="0"
+                helperText="Lower numbers appear first (e.g. 1, 2, 3)"
+              />
+
               {error && <p className="text-red-500 text-xs">{error}</p>}
               {editingCategory && (
                 <div className="space-y-4 mt-4">
@@ -273,7 +329,7 @@ const Categories = () => {
                         setEditingCategory({ ...editingCategory, is_active: newStatus });
                       }}
                       className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${editingCategory.is_active
-                        ? (isDark ? 'bg-white' : 'bg-black')
+                        ? (isDark ? 'bg-white' : 'bg-[#151416]')
                         : (isDark ? 'bg-[#262626]' : 'bg-gray-200')
                         }`}
                     >

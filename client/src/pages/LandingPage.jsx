@@ -3,6 +3,7 @@ import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageToggle from '../components/LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
+import Logo from '../assets/if.svg';
 
 const LandingPage = () => {
   const observerRef = useRef(null);
@@ -11,7 +12,24 @@ const LandingPage = () => {
   useEffect(() => {
     // Scroll to top when page loads
     window.scrollTo(0, 0);
+
+    // Track Visit (Super Admin Analytics)
+    const trackVisit = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://infinite-frame-server.onrender.com/api';
+        await fetch(`${apiUrl}/public/visit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (err) {
+        console.error('Failed to track visit:', err);
+      }
+    };
+    trackVisit();
   }, []);
+
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver((entries) => {
@@ -35,8 +53,8 @@ const LandingPage = () => {
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-theme border-b border-theme">
         <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24 h-20 flex items-center justify-between">
-          <div className="text-sm font-semibold uppercase tracking-wider">
-            {t('nav.brand')}
+          <div className="h-10 w-auto">
+            <img src={Logo} alt={t('nav.brand')} className="h-full w-auto object-contain" />
           </div>
           <div className="flex items-center gap-4">
             <LanguageToggle />
@@ -149,11 +167,6 @@ const LandingPage = () => {
           <div className="text-sm font-semibold uppercase tracking-wider">
             {t('nav.brand')}
           </div>
-          {/* <div className="flex gap-12 text-sm uppercase tracking-wider opacity-70">
-            <a href="#" className="hover:opacity-100">{t('footer.privacy')}</a>
-            <a href="#" className="hover:opacity-100">{t('footer.terms')}</a>
-            <a href="#" className="hover:opacity-100">{t('footer.contact')}</a>
-          </div> */}
           <p className="text-sm opacity-50">&copy; 2026</p>
         </div>
       </footer>

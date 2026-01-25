@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import axios from 'axios';
+import { ENDPOINTS } from '../config';
 import {
   UsersIcon,
   PhotoIcon,
@@ -13,60 +16,139 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  AreaChart,
-  Area
+  BarChart,
+  Bar
 } from 'recharts';
-
-const mockData = {
-  week: [
-    { name: 'Mon', views: 120 },
-    { name: 'Tue', views: 300 },
-    { name: 'Wed', views: 200 },
-    { name: 'Thu', views: 450 },
-    { name: 'Fri', views: 400 },
-    { name: 'Sat', views: 700 },
-    { name: 'Sun', views: 500 },
-  ],
-  month: [
-    { name: 'Week 1', views: 1200 },
-    { name: 'Week 2', views: 1800 },
-    { name: 'Week 3', views: 1400 },
-    { name: 'Week 4', views: 2200 },
-  ],
-  year: [
-    { name: 'Jan', views: 5000 },
-    { name: 'Feb', views: 6500 },
-    { name: 'Mar', views: 5800 },
-    { name: 'Apr', views: 8000 },
-    { name: 'May', views: 7200 },
-    { name: 'Jun', views: 9000 },
-    { name: 'Jul', views: 8500 },
-    { name: 'Aug', views: 10000 },
-    { name: 'Sep', views: 9200 },
-    { name: 'Oct', views: 11000 },
-    { name: 'Nov', views: 10500 },
-    { name: 'Dec', views: 13000 },
-  ],
-};
 
 const Dashboard = () => {
   const { isDark } = useTheme();
-  const [timeFilter, setTimeFilter] = useState('week');
+  const { user } = useAuth();
+  const [timeFilter, setTimeFilter] = useState('today'); // Default to Today as requested
+  const [statsData, setStatsData] = useState({
+    visitors: 0,
+    artworks: 0
+  });
 
-  const textColor = isDark ? "text-white" : "text-black";
+
+  const [currentDateInfo, setCurrentDateInfo] = useState('');
+
+  // Helper to get skeleton data for smooth UI and Axis visibility
+  const getEmptyChartData = (period) => {
+    if (period === 'today') {
+      return Array.from({ length: 24 }, (_, i) => {
+        const hour = i % 12 === 0 ? 12 : i % 12;
+        const ampm = i < 12 ? 'AM' : 'PM';
+        return { name: `${hour} ${ampm}`, views: 0 };
+      });
+    } else if (period === 'week') {
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      return days.map(d => ({ name: d, views: 0 }));
+    } else if (period === 'month') {
+      return Array.from({ length: 4 }, (_, i) => ({ name: `Week ${i + 1}`, views: 0 }));
+    } else if (period === 'year') {
+      return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        .map(m => ({ name: m, views: 0 }));
+    }
+    return [];
+  };
+
+  const [chartData, setChartData] = useState(getEmptyChartData('today'));
+
+  // Fetch Chart Data
+  useEffect(() => {
+    if (!user?.id) return;
+
+    // Set skeleton immediately on filter change
+    setChartData(getEmptyChartData(timeFilter));
+
+    const fetchChartData = async () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const response = await axios.get(`${ENDPOINTS.ANALYTICS || 'http://localhost:5000/api/analytics'}/activity?period=${timeFilter}&timezone=${encodeURIComponent(userTimezone)}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        // console.log("Analytics API Response:", response.data);
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setChartData(response.data);
+        } else {
+          // Keep skeleton or set empty? API returns 0s for missing slots so it should be full.
+          console.warn("Analytics returned empty/malformed data");
+        }
+      } catch (err) {
+        console.error("Failed to fetch chart data", err);
+      }
+    };
+
+    // Set Date Info
+    const now = new Date();
+    if (timeFilter === 'today') {
+      setCurrentDateInfo(now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
+    } else if (timeFilter === 'week') {
+      setCurrentDateInfo(`Last 7 Days`);
+    } else if (timeFilter === 'month') {
+      setCurrentDateInfo(now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+    } else if (timeFilter === 'year') {
+      setCurrentDateInfo(now.getFullYear().toString());
+    }
+
+    fetchChartData();
+  }, [timeFilter, user]);
+
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user?.id) return;
+      try {
+        const response = await axios.get(ENDPOINTS.AUTH.ME, {
+
+          headers: {
+            'x-admin-id': user.id
+          }
+        });
+        if (response.data.user) {
+          setStatsData({
+            visitors: response.data.user.page_views || 0,
+            artworks: response.data.user.artwork_count || 0
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      }
+    };
+
+    fetchStats();
+  }, [user]);
+
+  const textColor = isDark ? "text-white" : "text-[#151416]";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
   const cardBg = isDark ? "bg-[#141414]" : "bg-white";
   const cardBorder = isDark ? "border-[#262626]" : "border-gray-200";
   const accentColor = isDark ? "#ffffff" : "#000000";
   const gridColor = isDark ? "#262626" : "#f0f0f0";
 
-  const stats = [
-    { label: 'Visitors', value: '4,281', icon: UsersIcon },
-    { label: 'Artworks', value: '156', icon: PhotoIcon },
-    { label: 'Exhibitions', value: '12', icon: CalendarDaysIcon },
-  ];
+  /* Removed static stats array in favor of direct render */
 
   const chartLabelColor = isDark ? "#9CA3AF" : "#4B5563";
+
+  // Calculate ticks for Y-Axis (Increment by 10)
+  const maxViews = Math.max(...chartData.map(d => d.views || 0), 0);
+  const tickStep = 10;
+  // Determine max value for axis (at least 10, and multiple of 10)
+  const yAxisMax = Math.max(Math.ceil(maxViews / tickStep) * tickStep, 10);
+
+  const customTicks = [];
+  // Safety: Only generate strict 10-step ticks if reasonable count (e.g. up to 200)
+  // Otherwise revert to standard auto behavior (or larger steps) to avoid clutter
+  if (yAxisMax <= 200) {
+    for (let i = 0; i <= yAxisMax; i += tickStep) {
+      customTicks.push(i);
+    }
+  }
+  // If > 200, we leave customTicks empty and let Recharts handle it (or could implement dynamic steps)
+
 
   return (
     <main className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
@@ -79,24 +161,47 @@ const Dashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.map((stat, idx) => (
-          <div
-            key={idx}
-            className={`border-2 ${cardBorder} ${cardBg} p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group`}
-          >
+        <div className={`border-2 ${cardBorder} ${cardBg} p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group`}>
             <div className="flex items-center justify-between mb-4">
               <div className={`p-2.5 rounded-xl ${isDark ? 'bg-white/5' : 'bg-black/5'} group-hover:scale-110 transition-transform duration-300`}>
-                <stat.icon className={`h-6 w-6 ${textColor}`} />
+              <UsersIcon className={`h-6 w-6 ${textColor}`} />
               </div>
             </div>
             <div className={`font-sans text-sm ${subtextColor} font-bold uppercase tracking-widest mb-1`}>
-              {stat.label}
-            </div>
-            <div className={`font-sans text-4xl font-black ${textColor}`}>
-              {stat.value}
+            Total Page Visits
+          </div>
+          <div className={`font-sans text-4xl font-black ${textColor}`}>
+            {statsData.visitors}
+          </div>
+        </div>
+
+        <div className={`border-2 ${cardBorder} ${cardBg} p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className={`p-2.5 rounded-xl ${isDark ? 'bg-white/5' : 'bg-black/5'} group-hover:scale-110 transition-transform duration-300`}>
+              <PhotoIcon className={`h-6 w-6 ${textColor}`} />
             </div>
           </div>
-        ))}
+          <div className={`font-sans text-sm ${subtextColor} font-bold uppercase tracking-widest mb-1`}>
+            Total Artworks
+            </div>
+            <div className={`font-sans text-4xl font-black ${textColor}`}>
+            {statsData.artworks}
+            </div>
+        </div>
+
+        <div className={`border-2 ${cardBorder} ${cardBg} p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group opacity-60`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className={`p-2.5 rounded-xl ${isDark ? 'bg-white/5' : 'bg-black/5'} group-hover:scale-110 transition-transform duration-300`}>
+              <CalendarDaysIcon className={`h-6 w-6 ${textColor}`} />
+            </div>
+          </div>
+          <div className={`font-sans text-sm ${subtextColor} font-bold uppercase tracking-widest mb-1`}>
+            Exhibitions
+          </div>
+          <div className={`font-sans text-md font-bold ${textColor}`}>
+            Coming soon feature...
+          </div>
+        </div>
       </div>
 
       {/* Graph Section */}
@@ -104,16 +209,16 @@ const Dashboard = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h3 className={`text-xl font-bold ${textColor}`}>Visitor Activity</h3>
-            <p className={`text-sm ${subtextColor}`}>Total views over selected period</p>
+            <p className={`text-sm ${subtextColor}`}>Total views over selected period • <span className="font-semibold text-theme-accent">{currentDateInfo}</span></p>
           </div>
 
           <div className={`flex p-1 rounded-lg ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
-            {['week', 'month', 'year'].map((filter) => (
+            {['today', 'week', 'month', 'year'].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setTimeFilter(filter)}
                 className={`px-4 py-1.5 rounded-md text-sm font-bold capitalize transition-all duration-200 ${timeFilter === filter
-                  ? (isDark ? 'bg-white text-black' : 'bg-black text-white')
+                  ? (isDark ? 'bg-white text-black' : 'bg-[#151416] text-white')
                   : (isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black')
                   }`}
               >
@@ -123,50 +228,47 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="h-[350px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={mockData[timeFilter]}>
-              <defs>
-                <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={accentColor} stopOpacity={0.1} />
-                  <stop offset="95%" stopColor={accentColor} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
-              <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
-                dy={10}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: isDark ? '#1a1a1a' : '#fff',
-                  border: `2px solid ${isDark ? '#262626' : '#f0f0f0'}`,
-                  borderRadius: '12px',
-                  padding: '10px'
-                }}
-                labelStyle={{ color: isDark ? '#fff' : '#000', fontWeight: 'bold', marginBottom: '4px' }}
-                itemStyle={{ color: isDark ? '#fff' : '#000' }}
-                cursor={{ stroke: gridColor, strokeWidth: 2 }}
-              />
-              <Area
-                type="monotone"
-                dataKey="views"
-                stroke={accentColor}
-                strokeWidth={3}
-                fillOpacity={1}
-                fill="url(#colorViews)"
-                animationDuration={1500}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+        <div className="w-full min-w-0" style={{ height: 350, position: 'relative', marginLeft: -36 }}>
+          {chartData.length > 0 && (
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                <XAxis
+                  dataKey="name"
+                  axisLine={true}
+                  tickLine={true}
+                  tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
+                  dy={10}
+                />
+                <YAxis
+                  axisLine={true}
+                  tickLine={true}
+                  tick={{ fill: chartLabelColor, fontSize: 12, fontWeight: 'bold' }}
+                  ticks={customTicks.length > 0 ? customTicks : undefined}
+                  domain={[0, 'auto']}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: isDark ? '#1a1a1a' : '#fff',
+                    border: `2px solid ${isDark ? '#262626' : '#f0f0f0'}`,
+                    borderRadius: '12px',
+                    padding: '10px'
+                  }}
+                  labelStyle={{ color: isDark ? '#fff' : '#000', fontWeight: 'bold', marginBottom: '4px' }}
+                  itemStyle={{ color: isDark ? '#fff' : '#000' }}
+                  cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
+                />
+                <Bar
+                  dataKey="views"
+                  radius={[4, 4, 0, 0]}
+                  fill={accentColor}
+                  animationDuration={1500}
+                  barSize={30}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
     </main>
