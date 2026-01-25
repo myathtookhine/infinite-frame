@@ -16,6 +16,8 @@ export const ENDPOINTS = {
     CHANGE_PASSWORD: `${API_BASE_URL}/change-password`,
     ME: `${API_BASE_URL}/me`,
   },
+  // Analytis
+  ANALYTICS: `${API_BASE_URL}/analytics`,
   // Attributes
   ATTRIBUTES: `${API_BASE_URL}/attributes`,
   ATTRIBUTE_TYPES: `${API_BASE_URL}/attributes/types`,
