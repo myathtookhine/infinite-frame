@@ -9,7 +9,8 @@ import {
   FolderPlusIcon,
   FolderIcon,
   ArchiveBoxIcon,
-  XMarkIcon
+  XMarkIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline';
 
 import { ENDPOINTS } from '../config';
@@ -150,7 +151,7 @@ const ArtworkAttributes = () => {
         {!isReadOnly && (
           <Button
             onClick={() => setIsNewTypeModalOpen(true)}
-            className="w-full md:w-auto flex items-center justify-center gap-2"
+            className="hidden md:flex w-auto items-center justify-center gap-2"
           >
             <FolderPlusIcon className="h-5 w-5" />
             <span>New Attribute Group</span>
@@ -292,6 +293,17 @@ const ArtworkAttributes = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Mobile FAB Button */}
+      {!isReadOnly && (
+        <button
+          onClick={() => setIsNewTypeModalOpen(true)}
+          className="md:hidden fixed bottom-6 right-6 z-50 flex items-center gap-2 px-6 py-3 rounded-full bg-[#151416] dark:bg-white text-white dark:text-[#151416] shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95"
+        >
+          <PlusIcon className="h-5 w-5" />
+          <span className="text-lg font-semibold">Add New</span>
+        </button>
       )}
     </div>
   );

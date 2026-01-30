@@ -142,7 +142,7 @@ const ArtworkDetail = () => {
     <div className="min-h-screen bg-theme text-theme flex flex-col gallery-view">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-theme border-b border-theme">
-        <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 md:px-16 lg:px-24 h-20 flex items-center justify-between">
             <button 
             onClick={() => gallerySlug ? navigate(`/${gallerySlug}`) : navigate(-1)}
             className="group flex items-center gap-2 text-sm font-bold uppercase cursor-pointer tracking-wider hover:opacity-70 transition-opacity"
@@ -156,8 +156,8 @@ const ArtworkDetail = () => {
         </div>
       </nav>
 
-      <main className="flex-1 pt-32 pb-24 px-8 md:px-16 lg:px-24 max-w-4xl mx-auto w-full">
-        <div className="flex flex-col gap-12">
+      <main className="flex-1 pt-24 md:pt-32 lg:pt-32 pb-24 px-4 md:px-16 lg:px-24 max-w-4xl mx-auto w-full">
+        <div className="flex flex-col gap-8">
 
           {/* Left Column: Images */}
           <div className="space-y-6">
@@ -218,7 +218,7 @@ const ArtworkDetail = () => {
                 {artwork.created_year && (
                   <div>
                     <span className="block opacity-50 text-xs uppercase tracking-wider mb-2">Year of work</span>
-                    <span className="text-lg font-light">
+                    <span className="text-md font-light">
                       {artwork.created_year}
                     </span>
                   </div>
@@ -228,22 +228,22 @@ const ArtworkDetail = () => {
                   <span className="block opacity-50 text-xs uppercase tracking-wider mb-2">Status</span>
                   <div className="flex items-center">
                     {artwork.status === 'available' && (
-                      <span className="inline-flex items-center rounded-full text-[14px] font-bold uppercase tracking-wider text-green-900 dark:text-green-400">
+                      <span className="inline-flex items-center rounded-full text-sm font-bold uppercase tracking-wider text-green-900 dark:text-green-400">
                         Available to collect
                       </span>
                     )}
                     {artwork.status === 'reserved' && (
-                      <span className="inline-flex items-center rounded-full text-[14px] font-bold uppercase tracking-wider text-orange-900 dark:text-orange-400">
+                      <span className="inline-flex items-center rounded-full text-sm font-bold uppercase tracking-wider text-orange-900 dark:text-orange-400">
                         Reserved
                       </span>
                     )}
                     {artwork.status === 'sold' && (
-                      <span className="inline-flex items-center rounded-full text-[14px] font-bold uppercase tracking-wider text-red-900 dark:text-red-400">
+                      <span className="inline-flex items-center rounded-full text-sm font-bold uppercase tracking-wider text-red-900 dark:text-red-400">
                         Sold
                       </span>
                     )}
                     {artwork.status === 'private collection' && (
-                      <span className="inline-flex items-center rounded-full text-[14px] font-bold uppercase tracking-wider text-gray-900 dark:text-gray-400">
+                      <span className="inline-flex items-center rounded-full text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-gray-400">
                         Private Collection
                       </span>
                     )}
@@ -273,7 +273,7 @@ const ArtworkDetail = () => {
                 {artwork.width && artwork.height && (
                   <div>
                     <span className="block opacity-50 text-xs uppercase tracking-wider mb-2">Dimensions</span>
-                    <span className="text-lg font-light">
+                    <span className="text-md font-light">
                       {artwork.width} × {artwork.height} {artwork.depth ? `× ${artwork.depth}` : ''} {artwork.unit_name || 'cm'}
                     </span>
                   </div>
@@ -282,7 +282,7 @@ const ArtworkDetail = () => {
                 {/* Frame Status */}
                 <div>
                   <span className="block opacity-50 text-xs uppercase tracking-wider mb-2">Frame</span>
-                  <span className="text-lg font-light">
+                  <span className="text-md font-light">
                     {artwork.is_framed ? 'Framed' : 'Not Included Frame'}
                   </span>
                 </div>
@@ -360,8 +360,8 @@ const ArtworkDetail = () => {
               {/* Description */}
               {artwork.description && (
                 <div className="prose dark:prose-invert max-w-none">
-                  <h3 className="text-xs font-bold uppercase tracking-wider mb-4 opacity-50">About the work</h3>
-                  <p className="text-lg font-light leading-relaxed opacity-80 whitespace-pre-line">
+                  <h3 className="text-xs uppercase tracking-wider mb-4 opacity-50">About the work</h3>
+                  <p className="text-md leading-relaxed opacity-80 whitespace-pre-line">
                     {decodeHtml(artwork.description)}
                   </p>
                 </div>

@@ -101,7 +101,7 @@ const AdminLayout = ({ children }) => {
       {/* Backdrop for mobile when sidebar open */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-[60] lg:hidden"
           onClick={closeSidebar}
           aria-hidden="true"
         />
@@ -110,7 +110,7 @@ const AdminLayout = ({ children }) => {
       <div className="flex lg:p-4 lg:gap-4 min-h-screen">
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 ${sidebarBg} ${textColor} w-64 p-4 z-50 flex flex-col transform transition-transform duration-300 ease-in-out ${
+          className={`fixed inset-y-0 left-0 ${sidebarBg} ${textColor} w-64 p-4 z-[70] flex flex-col transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } lg:translate-x-0 lg:z-auto lg:rounded-2xl lg:h-[calc(100vh-2rem)] lg:sticky lg:top-4 ${
             isDark

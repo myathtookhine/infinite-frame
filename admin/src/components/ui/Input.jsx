@@ -8,6 +8,7 @@ const Input = forwardRef(
       type = "text",
       label,
       error,
+      helperText,
       className = "",
       containerClassName = "",
       icon: Icon,
@@ -81,6 +82,10 @@ const Input = forwardRef(
 
         {error && (
           <p className="mt-2 text-sm font-sans text-red-600">{error}</p>
+        )}
+
+        {helperText && !error && (
+          <p className={`mt-2 text-sm font-sans ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>{helperText}</p>
         )}
       </div>
     );

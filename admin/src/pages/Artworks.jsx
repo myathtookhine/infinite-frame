@@ -176,7 +176,7 @@ const Artworks = () => {
         {!isSuperAdmin && (
           <Button
             onClick={handleAddArtwork}
-            className="w-full md:w-auto flex items-center justify-center gap-2"
+            className="hidden md:flex w-auto items-center justify-center gap-2"
           >
             <PlusIcon className="h-4 w-4" />
             <span className="whitespace-nowrap">Add Artwork</span>
@@ -228,7 +228,7 @@ const Artworks = () => {
       </div>
 
       {/* Artworks List */}
-      <div>
+      <div className='pb-18 md:pb-0'>
         {loading ? (
           <div className={`rounded-xl border-2 ${borderColor} ${cardBg} p-12 text-center`}>
             <div className={`w-8 h-8 border-2 ${isDark ? 'border-white/20 border-t-white' : 'border-black/10 border-t-black'} rounded-full animate-spin mx-auto mb-4`}></div>
@@ -255,6 +255,17 @@ const Artworks = () => {
           </div>
         )}
       </div>
+
+      {/* Mobile FAB Button */}
+      {!isSuperAdmin && (
+        <button
+          onClick={handleAddArtwork}
+          className="md:hidden fixed bottom-6 right-6 z-50 flex items-center gap-2 px-6 py-3 rounded-full bg-[#151416] dark:bg-white text-white dark:text-[#151416] shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95"
+        >
+          <PlusIcon className="h-5 w-5" />
+          <span className="text-lg font-semibold">Add New</span>
+        </button>
+      )}
     </div>
   );
 };
