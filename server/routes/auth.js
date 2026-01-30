@@ -3,7 +3,9 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const validator = require('validator');
 const pool = require('../db');
+const { getUserContext } = require('../middleware/userContext');
 const {
   loginLimiter,
   registerLimiter,
@@ -27,23 +29,6 @@ const transporter = nodemailer.createTransport({
     pass: process.env.RESEND_API_KEY,
   },
 });
-
-// Middleware to check User Role & ID (Matches logic in artworks.js)
-const getUserContext = async (req, res, next) => {
-  const adminId = req.headers['x-admin-id'];
-  if (!adminId) return res.status(401).json({ message: "Unauthorized: No Admin ID" });
-
-  try {
-    const userResult = await pool.query("SELECT id, role FROM admins WHERE id = $1", [adminId]);
-    if (userResult.rows.length === 0) return res.status(401).json({ message: "User not found" });
-    
-    req.user = userResult.rows[0];
-    next();
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server Error" });
-  }
-};
 
 // =====================================================
 // HELPER: Send OTP Email
@@ -430,7 +415,6 @@ router.post('/update-profile', async (req, res) => {
   }
 
   // ✅ Username validation (same as registration)
-  const validator = require('validator');
   if (!validator.isAlphanumeric(newUsername.replace(/_/g, '')) || 
       newUsername.length < 3 || newUsername.length > 30) {
     return res.status(400).json({ 
@@ -542,7 +526,6 @@ router.post('/update-gallery-info', async (req, res) => {
     });
   }
 
-  const validator = require('validator');
   const updates = {};
   
   // ✅ Validate and sanitize slug (optional)

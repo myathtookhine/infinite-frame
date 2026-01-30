@@ -3,15 +3,9 @@ const router = express.Router();
 const pool = require('../db');
 const multer = require('multer');
 const sharp = require('sharp');
-const { createClient } = require('@supabase/supabase-js');
+const supabase = require('../utils/supabase');
+const { getUserContext } = require('../middleware/userContext');
 
-// Initialize Supabase client for storage
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
-// Configure multer for memory storage
 // Configure multer for memory storage
 const upload = multer({ 
   storage: multer.memoryStorage(),
@@ -28,23 +22,6 @@ const upload = multer({
     }
   }
 });
-
-// Middleware to check User Role & ID
-const getUserContext = async (req, res, next) => {
-  const adminId = req.headers['x-admin-id'];
-  if (!adminId) return res.status(401).json({ message: "Unauthorized: No Admin ID" });
-
-  try {
-    const userResult = await pool.query("SELECT id, role FROM admins WHERE id = $1", [adminId]);
-    if (userResult.rows.length === 0) return res.status(401).json({ message: "User not found" });
-    
-    req.user = userResult.rows[0];
-    next();
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server Error" });
-  }
-};
 
 router.use(getUserContext);
 

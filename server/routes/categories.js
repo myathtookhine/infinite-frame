@@ -1,23 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
-
-// Middleware to check User Role & ID
-const getUserContext = async (req, res, next) => {
-  const adminId = req.headers['x-admin-id'];
-  if (!adminId) return res.status(401).json({ message: "Unauthorized: No Admin ID" });
-
-  try {
-    const userResult = await pool.query("SELECT id, role FROM admins WHERE id = $1", [adminId]);
-    if (userResult.rows.length === 0) return res.status(401).json({ message: "User not found" });
-    
-    req.user = userResult.rows[0];
-    next();
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server Error" });
-  }
-};
+const { getUserContext } = require('../middleware/userContext');
 
 router.use(getUserContext);
 
