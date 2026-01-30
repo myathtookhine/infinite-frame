@@ -210,7 +210,7 @@ const ArtworkAttributes = () => {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pb-20 md:pb-8 lg:pb-8">
           {/* Loading state for content */}
           {loading ? (
             <div className={`rounded-xl border-2 ${borderColor} ${cardBg} p-12 text-center animate-in fade-in duration-300`}>
