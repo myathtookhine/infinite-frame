@@ -205,7 +205,7 @@ const Categories = () => {
       )}
 
       {/* Categories List */}
-      <div className="space-y-3 pb-8 md:pb-8 lg:pb-8">
+      <div className="space-y-3 pb-32 md:pb-8 lg:pb-8">
         {loading && categories.length === 0 ? (
           <div className={`rounded-xl border-2 ${borderColor} ${cardBg} p-12 text-center`}>
             <div className={`w-8 h-8 border-2 ${isDark ? 'border-white/20 border-t-white' : 'border-black/10 border-t-black'} rounded-full animate-spin mx-auto mb-4`}></div>

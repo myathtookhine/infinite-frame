@@ -63,7 +63,7 @@ const ArtworkListItem = ({ artwork, onEdit, onDelete }) => {
 
   return (
     <>
-      <div className={`pb-4 mb-4 border-b ${borderColor} flex items-center gap-4`}>
+      <div className={`p-2 mb-2 bg-card border ${borderColor} flex items-center gap-4 rounded-md`}>
         {/* Artwork Image Thumbnail */}
         <div className="flex-shrink-0 relative">
           <img

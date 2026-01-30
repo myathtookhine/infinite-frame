@@ -3,24 +3,55 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem('adminTheme');
+    // Default to system if no preference or invalid value
+    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+    return 'system';
+  });
 
   useEffect(() => {
-    // Check if user has a saved theme preference
-    const savedTheme = localStorage.getItem('adminTheme') || 'light';
-    setTheme(savedTheme);
-  }, []);
+    const root = window.document.documentElement;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = () => {
+      root.classList.remove('light', 'dark');
+
+      if (theme === 'system') {
+        const systemTheme = mediaQuery.matches ? 'dark' : 'light';
+        root.classList.add(systemTheme);
+      } else {
+        root.classList.add(theme);
+      }
+    };
+
+    applyTheme();
+
+    const handleChange = () => {
+      if (theme === 'system') {
+        applyTheme();
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    localStorage.setItem('adminTheme', theme);
+
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [theme]);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('adminTheme', newTheme);
+    setTheme((prev) => {
+      if (prev === 'light') return 'dark';
+      if (prev === 'dark') return 'system';
+      return 'light';
+    });
   };
 
   const value = {
     theme,
+    setTheme,
     toggleTheme,
-    isDark: theme === 'dark',
+    isDark: theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches),
   };
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
