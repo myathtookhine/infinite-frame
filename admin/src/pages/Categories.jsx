@@ -205,7 +205,7 @@ const Categories = () => {
       )}
 
       {/* Categories List */}
-      <div className="space-y-3">
+      <div className="space-y-3 pb-8 md:pb-8 lg:pb-8">
         {loading && categories.length === 0 ? (
           <div className={`rounded-xl border-2 ${borderColor} ${cardBg} p-12 text-center`}>
             <div className={`w-8 h-8 border-2 ${isDark ? 'border-white/20 border-t-white' : 'border-black/10 border-t-black'} rounded-full animate-spin mx-auto mb-4`}></div>
@@ -236,9 +236,9 @@ const Categories = () => {
                   <p><span className={`text-xs ${subtextColor} block mt-0.5`}>
                     Sorting Order : {category.sort_order}
                   </span></p>
+                  {category.owner_name && <span className={`text-xs ${subtextColor}`}>by {category.owner_name}</span>}
                 </div>
                 {!category.is_active && <span className="text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded">Disabled</span>}
-                {category.owner_name && <span className={`text-xs ${subtextColor}`}>by {category.owner_name}</span>}
               </div>
 
               <div className="flex items-center gap-2 ml-4">
