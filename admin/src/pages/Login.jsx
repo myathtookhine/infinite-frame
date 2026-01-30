@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
-import { UserIcon, LockClosedIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { UserIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -99,21 +99,7 @@ const Login = () => {
           className={`border-2 ${rightPanelBorder} ${rightPanelBg} p-6 sm:p-8 md:p-10 h-full flex items-center rounded-md relative`}
         >
           {/* Theme Toggle Button */}
-          <button
-            onClick={toggleTheme}
-            className={`absolute top-4 right-4 p-2 rounded-md transition-colors cursor-pointer ${
-              isDark
-                ? "hover:bg-white/10 text-white"
-                : "hover:bg-black/5 text-black"
-            }`}
-            aria-label="Toggle theme"
-          >
-            {isDark ? (
-              <SunIcon className="h-6 w-6" />
-            ) : (
-              <MoonIcon className="h-6 w-6" />
-            )}
-          </button>
+
 
           <div className="w-full animate-in fade-in slide-in-from-left-8 duration-700">
             <h2 className={`font-sans text-3xl mb-8 text-left ${headingColor}`}>

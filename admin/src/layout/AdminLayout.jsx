@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from "../context/ThemeContext";
 import {
@@ -14,9 +14,11 @@ import {
   UserGroupIcon,
   ClockIcon,
   ArchiveBoxIcon,
+  PhotoIcon,
   ScaleIcon,
-  PhotoIcon
+  ChevronRightIcon
 } from "@heroicons/react/24/outline";
+import ThemeToggle from "../components/ThemeToggle";
 
 const SidebarLink = ({ to, children, icon: Icon, onClick, isDark }) => {
   return (
@@ -70,10 +72,10 @@ const AdminLayout = ({ children }) => {
     <div className={`min-h-screen ${bgColor}`}>
       {/* Mobile Header - Only visible on mobile */}
       <header
-        className={`lg:hidden border-b ${headerBorder} p-4 flex items-center justify-between ${headerBg} sticky top-0 z-20`}
+        className={`lg:hidden border-b ${headerBorder} p-4 flex items-center justify-start ${headerBg} sticky top-0 z-20`}
       >
         <button
-          className={`p-2 rounded ${hoverBg}`}
+          className={`p-2 rounded me-4 ${hoverBg}`}
           onClick={() => setSidebarOpen(true)}
           aria-label="Open menu"
           aria-expanded={sidebarOpen}
@@ -81,33 +83,22 @@ const AdminLayout = ({ children }) => {
           <Bars3Icon className={`h-6 w-6 ${iconColor}`} />
         </button>
         <div className="flex items-center gap-2">
-          <span className={`font-sans text-lg font-semibold ${textColor}`}>
+          <Link to="/dashboard" className={`font-sans text-lg font-semibold ${textColor} hover:opacity-80 transition-opacity`}>
             {user?.gallery_name || user?.username || 'Gallery Admin'}
-          </span>
+          </Link>
         </div>
-        <button
-          onClick={toggleTheme}
-          className={`p-2 rounded ${hoverBg}`}
-          aria-label="Toggle theme"
-        >
-          {isDark ? (
-            <SunIcon className={`h-5 w-5 ${iconColor}`} />
-          ) : (
-            <MoonIcon className={`h-5 w-5 ${iconColor}`} />
-          )}
-        </button>
       </header>
 
       {/* Backdrop for mobile when sidebar open */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-[60] lg:hidden"
+          className="fixed inset-0 bg-black/80 z-[60] lg:hidden"
           onClick={closeSidebar}
           aria-hidden="true"
         />
       )}
 
-      <div className="flex lg:p-4 lg:gap-4 min-h-screen">
+      <div className="flex lg:p-4 lg:gap-3 min-h-screen">
         {/* Sidebar */}
         <aside
           className={`fixed inset-y-0 left-0 ${sidebarBg} ${textColor} w-64 p-4 z-[70] flex flex-col transform transition-transform duration-300 ease-in-out ${
@@ -115,7 +106,7 @@ const AdminLayout = ({ children }) => {
           } lg:translate-x-0 lg:z-auto lg:rounded-2xl lg:h-[calc(100vh-2rem)] lg:sticky lg:top-4 ${
             isDark
             ? "lg:border lg:border-[#262626]"
-            : "lg:border lg:border-gray-300"
+            : "lg:border lg:border-gray-300"  
           }`}
           aria-label="Sidebar"
         >
@@ -223,33 +214,26 @@ const AdminLayout = ({ children }) => {
 
           {/* Theme Toggle & Profile - Fixed */}
           <div
-            className={`flex-shrink-0 mt-auto pt-4 space-y-2 ${
+            className={`flex-shrink-0 mt-auto pt-2 space-y-2 ${
               isDark ? "border-t border-white/10" : "border-t border-black/10"
             }`}
           >
-            <button
-              onClick={toggleTheme}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer font-sans text-sm transition-colors duration-150 ${
-                isDark
-                  ? "text-gray-400 hover:bg-gray-800 hover:text-white"
-                  : "text-gray-600 hover:bg-gray-200 hover:text-black"
-                }`}
-            >
-              {isDark ? (
-                <SunIcon className="h-5 w-5" />
-              ) : (
-                <MoonIcon className="h-5 w-5" />
-              )}
-              {isDark ? "Light Mode" : "Dark Mode"}
-            </button>
+
             <SidebarLink
               to="/profile"
               icon={UserCircleIcon}
               onClick={closeSidebar}
               isDark={isDark}
             >
-              Profile
+              <div className="flex items-center justify-between flex-1">
+                <span>Profile</span>
+                <ChevronRightIcon className="w-4 h-4" />
+              </div>
             </SidebarLink>
+            <div className="px-2 mt-2 mb-2">
+              <ThemeToggle showLabel={true} />
+            </div>
+
           </div>
         </aside>
 

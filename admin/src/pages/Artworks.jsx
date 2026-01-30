@@ -185,7 +185,7 @@ const Artworks = () => {
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="mb-6 flex flex-col md:flex-row gap-4">
+      <div className="mb-4 flex flex-col md:flex-row gap-4">
         {/* Search Input */}
         <div className="flex-1">
           <Input

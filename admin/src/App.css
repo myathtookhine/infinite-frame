@@ -2,21 +2,30 @@
 @import "tailwindcss";
 
 /* Infinite Frame Admin - Minimalist Zen Theme */
+/* Theme Variables - Synced with Client */
 @layer base {
   :root {
-    --color-primary: #000000;
-    --color-secondary: #f3f4f6;
+    --color-bg: #f7f7f7;
+      /* gray-100 */
+      --color-text: #0a0a0a;
+      --color-text-muted: #6d6d6d;
+      --color-border: #2e2e2e;
+      --color-card-bg: #ffffff;
   }
 
-  * {
-    border-color: #000000;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                .dark {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  --color-bg: #0a0a0a;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  --color-text: #f0f0f0;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  --color-text-muted: #6b6b6b;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  --color-border: #f0f0f0;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  --color-card-bg: #151515;
   }
 
   body {
-    background-color: #f3f4f6;
-      /* gray-100 */
+    background-color: var(--color-bg);
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-    color: #000000;
+    color: var(--color-text);
+      transition: background-color 0.3s ease, color 0.3s ease;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Segoe UI', 'Helvetica Neue', sans-serif;
   }
 
@@ -67,6 +76,41 @@
   }
 }
 
+/* Theme-aware Classes */
+.bg-theme {
+  background-color: var(--color-bg);
+}
+
+.bg-card {
+  background-color: var(--color-card-bg);
+}
+
+.text-theme {
+  color: var(--color-text);
+}
+
+.text-theme-muted {
+  color: var(--color-text-muted);
+}
+
+.border-theme {
+  border-color: var(--color-border);
+}
+
+/* Inverse Colors (for buttons, etc) */
+.bg-theme-inverse {
+  background-color: var(--color-text);
+  color: var(--color-bg);
+}
+
+.border-theme-inverse {
+  border-color: var(--color-text);
+}
+
+/* Smooth Transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
 /* Glitch text effect (improved to match reference) */
 .glitch {
   position: relative;
