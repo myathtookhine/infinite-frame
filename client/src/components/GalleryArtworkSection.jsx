@@ -47,7 +47,7 @@ const GalleryArtworkSection = ({ categories = [], artworks = [], gallerySlug }) 
     default: 4,
     1100: 3,
     700: 2,
-    500: 1
+    500: 2
   };
 
   return (
@@ -57,14 +57,14 @@ const GalleryArtworkSection = ({ categories = [], artworks = [], gallerySlug }) 
       <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight mb-8 text-center">Categories</h2>
 
       <div className="relative">
-        <div className="flex flex-nowrap md:flex-wrap justify-start md:justify-center gap-4 mb-12 overflow-x-auto pb-4 md:pb-0 scrollbar-hide px-0 md:px-0 snap-x">
+        <div className="flex flex-nowrap md:flex-wrap justify-start md:justify-center gap-4 mb-0 lg:mb-8 md:mb-8 overflow-x-auto pb-4 md:pb-0 scrollbar-hide px-0 md:px-0 snap-x">
           {categoriesWithArtworks.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`whitespace-nowrap flex-shrink-0 snap-center px-6 py-4 min-w-[120px] text-center text-sm uppercase tracking-wider transition-all duration-300 border-b-4 cursor-pointer ${activeCategory === cat.id
-                ? 'border-black dark:border-white text-white dark:text-black font-bold bg-black dark:bg-white'
-                : 'border-black dark:border-white text-gray-500 dark:text-gray-400 bg-white dark:bg-white/2 hover:bg-gray-100 dark:hover:bg-white/20'
+              className={`whitespace-nowrap flex-shrink-0 snap-center px-6 py-4 min-w-[120px] text-center text-sm uppercase tracking-wider transition-all duration-300 rounded-full cursor-pointer ${activeCategory === cat.id
+                ? 'border-2 border-theme font-bold bg-theme-inverse text-theme-inverse'
+                : 'border-2 border-theme text-theme bg-neutral-200 dark:bg-white/10 hover:bg-neutral-300 dark:hover:bg-white/20'
                 }`}
             >
               {cat.name}
@@ -107,8 +107,8 @@ const GalleryArtworkSection = ({ categories = [], artworks = [], gallerySlug }) 
                       {activeGroup.items.length > 0 ? (
               <Masonry
                               breakpointCols={masonryBreakpoints}
-                              className="flex -ml-8 w-auto"
-                              columnClassName="pl-8 bg-clip-padding"
+                className="flex -ml-4 md:-ml-8 w-auto"
+                columnClassName="pl-4 md:pl-8 bg-clip-padding"
                           >
                               {activeGroup.items.map((art, index) => (
                                 <ArtworkCard key={art.id} artwork={art} index={index} gallerySlug={gallerySlug} />
@@ -144,10 +144,10 @@ const ArtworkCard = ({ artwork, index, gallerySlug }) => {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="mb-12 group block"
+      className="mb-6 md:mb-12 group block"
     >
       <Link to={`/${gallerySlug}/artwork/${artwork.id}`} className="block">
-        <div className="relative overflow-hidden mb-4">
+        <div className="relative overflow-hidden mb-2 md:mb-4">
           <motion.img
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.4 }}
@@ -160,42 +160,42 @@ const ArtworkCard = ({ artwork, index, gallerySlug }) => {
         </div>
 
         <div className="space-y-1">
-          <div className="flex justify-between items-start gap-4">
-            <h4 className="font-bold text-lg leading-tight group-hover:text-theme/80 transition-colors">
+          <div className="flex justify-between items-start gap-2 md:gap-4">
+            <h4 className="font-bold text-sm md:text-lg leading-tight group-hover:text-theme/80 transition-colors">
               {artwork.title}
             </h4>
           </div>
           
           {artwork.description && (
-            <p className="text-sm opacity-60 line-clamp-2 leading-relaxed">
+            <p className="text-xs md:text-sm opacity-60 line-clamp-2 leading-relaxed hidden md:block">
               {artwork.description}
             </p>
           )}
 
-          <div className="flex justify-between items-end">
-             <div className="text-xs uppercase tracking-wider opacity-50 font-mono">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-1">
+            <div className="text-[10px] md:text-xs uppercase tracking-wider opacity-50 font-mono">
               {Number(artwork.width)} x {Number(artwork.height)} {artwork.unit_name}
             </div>
             
-            <div className="text-right flex flex-col items-end gap-1">
+            <div className="md:text-right flex flex-col items-start md:items-end gap-1">
               {/* Status Badge */}
               {artwork.status === 'available' && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold uppercase tracking-wider text-green-900 dark:text-green-400">
+                <span className="inline-flex items-center rounded-full text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-green-900 dark:text-green-400">
                   Available
                 </span>
               )}
               {artwork.status === 'reserved' && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold uppercase tracking-wider text-orange-900 dark:text-orange-400">
+                <span className="inline-flex items-center rounded-full text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-orange-900 dark:text-orange-400">
                   Reserved
                 </span>
               )}
               {artwork.status === 'sold' && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold uppercase tracking-wider text-red-900 dark:text-red-400">
+                <span className="inline-flex items-center rounded-full text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-red-900 dark:text-red-400">
                   Sold
                 </span>
               )}
               {artwork.status === 'private collection' && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold uppercase tracking-wider text-gray-900 dark:text-gray-400">
+                <span className="inline-flex items-center rounded-full text-[10px] md:text-[12px] font-bold uppercase tracking-wider text-gray-900 dark:text-gray-400">
                   Private Collection
                 </span>
               )}

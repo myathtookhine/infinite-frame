@@ -279,7 +279,7 @@ const GalleryView = () => {
         )}
       </div>
 
-      <div id="gallery-content" className="max-w-6xl mx-auto px-8 md:px-8 lg:px-8 pb-24">
+      <div id="gallery-content" className="max-w-6xl mx-auto px-4 md:px-8 lg:px-8 pb-24">
         {/* Header */}
         <header className={`reveal text-center ${gallery.banner_enabled && gallery.banner_image_url ? 'pt-0' : 'pt-32'} sm:pt-16`}>
           <h1 className="text-3xl md:text-7xl lg:text-8xl font-bold capitalize tracking-tighter leading-tight mb-4 sm:mb-4">
