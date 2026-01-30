@@ -31,6 +31,67 @@
     <link rel="canonical" href="https://admin.infiniteframe.online" />
   </head>
   <body>
+    <!-- App Loading Screen - Brutalist Design -->
+    <div id="app-loader">
+      <div class="loader-content">
+        <img src="/if.svg" alt="IF" class="loader-logo" />
+        <div class="loader-bar">
+          <div class="loader-bar-fill"></div>
+        </div>
+        <div class="loader-text">LOADING</div>
+      </div>
+    </div>
+    <style>
+      #app-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+      #app-loader.fade-out {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .loader-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+      }
+      .loader-logo {
+        width: 80px;
+        height: 80px;
+      }
+      .loader-bar {
+        width: 200px;
+        height: 8px;
+        background: #e0e0e0;
+        border: 3px solid #000000;
+        overflow: hidden;
+      }
+      .loader-bar-fill {
+        height: 100%;
+        width: 30%;
+        background: #000000;
+        animation: loading 1.2s ease-in-out infinite;
+      }
+      .loader-text {
+        font-family: 'Inter', monospace, system-ui, sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.3em;
+        color: #000000;
+      }
+      @keyframes loading {
+        0% { transform: translateX(-100%); }
+        50% { transform: translateX(250%); }
+        100% { transform: translateX(-100%); }
+      }
+    </style>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
