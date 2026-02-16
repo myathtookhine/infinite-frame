@@ -4,6 +4,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Myanmar:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@font-face {
+    font-family: "MasterpieceTawWin";
+    src: local('MasterpieceTawWin'), url('https://cdn.jsdelivr.net/gh/saturngod/myanmar-unicode-fonts@master/docs/masterpiece/MasterpieceTawWin.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: "MyanmarSagar";
+    src: local('MyanmarSagar'), url('https://cdn.jsdelivr.net/gh/saturngod/myanmar-unicode-fonts@master/docs/KhmerType/MyanmarSagar.ttf') format('truetype');
+}
 
 body {
     font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -15,7 +24,9 @@ body {
 /* 1. Body and general text - Noto Sans Myanmar */
 html[lang="my"] body:not(.gallery-view),
 html[lang="my"] *:not(.gallery-view):not(.gallery-view *) {
-    font-family: 'Noto Sans Myanmar', sans-serif;
+    font-family: 'MyanmarSagar', 'Space Grotesk', -apple-system,
+            BlinkMacSystemFont,
+            sans-serif;
     line-height: 1.95;
 }
 
@@ -26,8 +37,9 @@ html[lang="my"] h3,
 html[lang="my"] h4,
 html[lang="my"] h5,
 html[lang="my"] h6 {
-    font-family: 'Noto Serif Myanmar', serif !important;
+    font-family: 'MasterpieceTawWin' !important;
     line-height: 1.95;
+    font-weight: normal;
 }
 
 /* English Language Font */
