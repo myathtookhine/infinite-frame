@@ -4,6 +4,8 @@ import ThemeToggle from '../components/ThemeToggle';
 import LanguageToggle from '../components/LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import Logo from '../assets/if.svg';
+import Lottie from 'lottie-react';
+import animationData from '../assets/ifLogo.json';
 
 const LandingPage = () => {
   const observerRef = useRef(null);
@@ -47,14 +49,24 @@ const LandingPage = () => {
     return () => observerRef.current?.disconnect();
   }, []);
 
+  const lottieRef = useRef();
+
   return (
     <div className="min-h-screen bg-theme text-theme">
 
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-theme border-b border-theme">
         <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24 h-20 flex items-center justify-between">
-          <div className="h-10 w-auto">
-            <img src={Logo} alt={t('nav.brand')} className="h-full w-auto object-contain" />
+          <div
+            className="h-10 w-10 cursor-pointer"
+            onMouseEnter={() => lottieRef.current?.goToAndPlay(0)}
+          >
+            <Lottie
+              lottieRef={lottieRef}
+              animationData={animationData}
+              loop={false}
+              className="h-full w-full"
+            />
           </div>
           <div className="flex items-center gap-4">
             <LanguageToggle />
