@@ -29,15 +29,17 @@ const Subscription = () => {
   const fetchData = async () => {
     try {
       const [paymentRes, historyRes] = await Promise.all([
-        fetch(`${apiUrl}/subscription/payment-info`),
+        fetch(`${apiUrl}/subscription/payment-info`, {
+          headers: { 'x-admin-id': user?.id }
+        }),
         fetch(`${apiUrl}/subscription/my-subscriptions`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { 'x-admin-id': user?.id }
         })
       ]);
       const paymentData = await paymentRes.json();
       const historyData = await historyRes.json();
-      setPaymentInfo(paymentData);
-      setHistory(historyData);
+      setPaymentInfo(Array.isArray(paymentData) ? paymentData : []);
+      setHistory(Array.isArray(historyData) ? historyData : []);
     } catch (err) {
       console.error('Error fetching subscription data:', err);
     } finally {
@@ -61,7 +63,7 @@ const Subscription = () => {
       const response = await fetch(`${apiUrl}/subscription/submit`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'x-admin-id': user?.id
         },
         body: formData
       });

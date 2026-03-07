@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useLanguage } from '../context/LanguageContext';
-import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import { ShieldCheckIcon, CheckCircleIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
+import axios from 'axios';
 
 const SubscriptionManagement = () => {
+  const { user } = useAuth();
   const { t } = useLanguage();
   const { isDark } = useTheme();
   const [subscriptions, setSubscriptions] = useState([]);
@@ -21,11 +21,10 @@ const SubscriptionManagement = () => {
   const fetchSubscriptions = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/subscription/admin/list?status=${filter}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      const response = await axios.get(`${apiUrl}/subscription/admin/list?status=${filter}`, {
+        headers: { 'x-admin-id': user?.id }
       });
-      const data = await response.json();
-      setSubscriptions(data);
+      setSubscriptions(response.data);
     } catch (err) {
       console.error('Error fetching subscriptions:', err);
     } finally {
@@ -47,28 +46,20 @@ const SubscriptionManagement = () => {
 
     setProcessingId(id);
     try {
-      const response = await fetch(`${apiUrl}/subscription/admin/verify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          subscription_id: id,
-          status,
-          notes,
-          expiry_date
-        })
+      await axios.post(`${apiUrl}/subscription/admin/verify`, {
+        subscription_id: id,
+        status,
+        notes,
+        expiry_date
+      }, {
+        headers: { 'x-admin-id': user?.id }
       });
 
-      if (response.ok) {
-        alert('Action completed successfully');
-        fetchSubscriptions();
-      } else {
-        alert('Error processing request');
-      }
+      alert('Action completed successfully');
+      fetchSubscriptions();
     } catch (err) {
       console.error('Error verifying subscription:', err);
+      alert(err.response?.data?.message || 'Error processing request');
     } finally {
       setProcessingId(null);
     }
