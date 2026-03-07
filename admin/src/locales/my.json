@@ -20,6 +20,7 @@
   "subscription": {
     "title": "Subscription အစီအစဉ်များ",
     "current_plan": "လက်ရှိအသုံးပြုနေသော အစီအစဉ်",
+    "subscribed": "လက်ရှိဝယ်ယူထားသည်",
     "status": "အခြေအနေ",
     "expiry": "သက်တမ်းကုန်ဆုံးမည့်နေ့",
     "days_remaining": "ရက် ကျန်ရှိပါသည်",

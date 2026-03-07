@@ -1,3 +1,6 @@
+import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { ShieldCheckIcon, CheckCircleIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
@@ -13,6 +16,10 @@ const SubscriptionManagement = () => {
   const [processingId, setProcessingId] = useState(null);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+  const tableHeaderClass = isDark ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-600";
+  const tableRowClass = isDark ? "border-gray-700 hover:bg-white/5" : "border-gray-200 hover:bg-gray-50";
+  const textClass = isDark ? "text-gray-300" : "text-gray-900";
 
   useEffect(() => {
     fetchSubscriptions();
@@ -78,12 +85,15 @@ const SubscriptionManagement = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 p-1 border rounded-lg bg-theme/5">
+        <div className={`flex items-center gap-1 p-1 border rounded-xl ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
           {['pending', 'active', 'rejected'].map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded transition-all ${filter === s ? 'bg-theme text-white' : 'opacity-50 hover:opacity-100'}`}
+              className={`px-6 py-2 text-[10px] font-black uppercase cursor-pointer tracking-widest rounded-lg transition-all ${filter === s
+                ? 'bg-theme-inverse shadow-lg'
+                : isDark ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-black hover:bg-white'
+                }`}
             >
               {s}
             </button>
@@ -91,45 +101,52 @@ const SubscriptionManagement = () => {
         </div>
       </div>
 
-      <div className={`overflow-hidden border-2 ${isDark ? 'border-[#262626] bg-[#141414]' : 'border-gray-200 bg-white'} rounded-xl`}>
+      <div className={`overflow-hidden border ${isDark ? 'border-gray-700' : 'border-gray-200'} rounded-xl`}>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className={`${isDark ? 'bg-white/5 font-mono' : 'bg-gray-50 font-sans'} border-b ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
+          <table className="w-full text-left text-sm min-w-[800px]">
+            <thead className={`${tableHeaderClass} uppercase font-sans text-xs`}>
               <tr>
-                <th className="px-6 py-4 font-bold uppercase text-[10px]">Admin</th>
-                <th className="px-6 py-4 font-bold uppercase text-[10px]">Plan</th>
-                <th className="px-6 py-4 font-bold uppercase text-[10px]">Billing</th>
-                <th className="px-6 py-4 font-bold uppercase text-[10px]">Amount</th>
-                <th className="px-6 py-4 font-bold uppercase text-[10px]">Receipt</th>
-                <th className="px-6 py-4 font-bold uppercase text-[10px]">Actions</th>
+                <th className="px-6 py-4">Admin</th>
+                <th className="px-6 py-4 text-center">Plan</th>
+                <th className="px-6 py-4 text-center">Billing</th>
+                <th className="px-6 py-4 text-right">Amount</th>
+                <th className="px-6 py-4 text-center">Receipt</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-current/10">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr><td colSpan="6" className="px-6 py-10 text-center">{t('common.loading')}</td></tr>
               ) : subscriptions.map((sub) => (
-                <tr key={sub.id} className={isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}>
+                <tr key={sub.id} className={`${tableRowClass} transition-colors border-b last:border-0 ${isDark ? 'border-white/5' : 'border-gray-100'}`}>
                   <td className="px-6 py-4">
-                    <div className="font-bold">{sub.username}</div>
-                    <div className="text-[10px] opacity-50">{sub.email}</div>
+                    <div className={`font-bold ${textClass}`}>{sub.username}</div>
+                    <div className="text-[10px] opacity-40 uppercase tracking-tight">{sub.email}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className="font-bold uppercase text-theme">{sub.plan_type}</span>
+                  <td className="px-6 py-4 text-center">
+                    <span className="font-black uppercase text-theme text-xs tracking-tighter">{sub.plan_type}</span>
                   </td>
-                  <td className="px-6 py-4 uppercase text-[10px] font-mono">{sub.billing_cycle}</td>
-                  <td className="px-6 py-4 font-mono">{sub.amount.toLocaleString()} MMK</td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-center">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${isDark ? 'bg-white/5 text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
+                      {sub.billing_cycle}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <span className={`font-mono font-bold ${textClass}`}>{sub.amount.toLocaleString()} MMK</span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
                     <a 
                       href={sub.receipt_url} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-blue-500 hover:underline text-[10px] font-bold uppercase"
+                      className="inline-flex items-center gap-1.5 text-theme hover:underline text-[10px] font-black uppercase tracking-widest transition-all"
                     >
                       <EyeIcon className="w-4 h-4" />
-                      View Image
+                      View
                     </a>
                   </td>
                   <td className="px-6 py-4">
+                    <div className="flex justify-end">
                     {sub.status === 'pending' ? (
                       <div className="flex items-center gap-2">
                         <Button
@@ -138,22 +155,27 @@ const SubscriptionManagement = () => {
                           onClick={() => handleVerify(sub.id, 'active')}
                           disabled={processingId === sub.id}
                         >
-                          <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                            <CheckCircleIcon className="w-5 h-5" />
                         </Button>
                         <Button
                           variant="secondary"
                           size="sm"
                           onClick={() => handleVerify(sub.id, 'rejected')}
                           disabled={processingId === sub.id}
+                            className="!p-2 hover:!bg-red-500 hover:!text-white border-none"
                         >
-                          <XCircleIcon className="w-5 h-5 text-red-500" />
+                            <XCircleIcon className="w-5 h-5" />
                         </Button>
                       </div>
                     ) : (
-                      <span className={`text-[10px] font-bold uppercase ${sub.status === 'active' ? 'text-green-500' : 'text-red-500'}`}>
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${sub.status === 'active'
+                            ? 'bg-green-500/10 text-green-500'
+                            : 'bg-red-500/10 text-red-500'
+                            }`}>
                         {sub.status}
                       </span>
                     )}
+                    </div>
                   </td>
                 </tr>
               ))}

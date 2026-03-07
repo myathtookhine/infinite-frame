@@ -149,7 +149,7 @@ router.post('/admin/verify', getUserContext, isSuperAdmin, async (req, res) => {
 
         // Update Subscription record
         const subUpdate = await pool.query(
-            "UPDATE subscriptions SET status = $1, notes = $2, start_date = CASE WHEN $1 = 'active' THEN NOW() ELSE start_date END, expiry_date = $3 WHERE id = $4 RETURNING admin_id, plan_type",
+            "UPDATE subscriptions SET status = $1::text, notes = $2::text, start_date = CASE WHEN $1::text = 'active' THEN NOW() ELSE start_date END, expiry_date = $3::timestamptz WHERE id = $4::uuid RETURNING admin_id, plan_type",
             [status, notes, expiry_date, subscription_id]
         );
 
@@ -172,8 +172,12 @@ router.post('/admin/verify', getUserContext, isSuperAdmin, async (req, res) => {
         res.json({ message: `Subscription ${status} successfully` });
     } catch (err) {
         await pool.query('ROLLBACK');
-        console.error('[VERIFY-SUBSCRIPTION ERROR]', err.message);
-        res.status(500).json({ message: "Server error" });
+        console.error('[VERIFY-SUBSCRIPTION ERROR]', err);
+        res.status(500).json({ 
+            message: "Server error", 
+            error: err.message,
+            detail: err.detail || 'No extra details'
+        });
     }
 });
 

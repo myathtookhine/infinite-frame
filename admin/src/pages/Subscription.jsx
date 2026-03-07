@@ -22,6 +22,11 @@ const Subscription = () => {
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+  const tableHeaderClass = isDark ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-600";
+  const tableRowClass = isDark ? "border-gray-700 hover:bg-white/5" : "border-gray-200 hover:bg-gray-50";
+  const textClass = isDark ? "text-gray-300" : "text-gray-900";
+  const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -87,9 +92,44 @@ const Subscription = () => {
   };
 
   const plans = [
-    { type: 'free', price: 0, color: 'text-gray-500' },
-    { type: 'pro', price: 15000, color: 'text-purple-500' },
-    { type: 'deluxe', price: 45000, color: 'text-pink-500' }
+    {
+      type: 'free',
+      price: 0,
+      color: 'text-gray-500',
+      features: [
+        'Max Artwork Count: 20',
+        'Domain: IF slug domain (e.g. online/slug)',
+        'Layout: Default gallery layout',
+        'Analytics: Basic analytic dashboard',
+        'Support: Standard support (Email, Chat)'
+      ]
+    },
+    {
+      type: 'pro',
+      price: 15000,
+      color: 'text-purple-500',
+      features: [
+        'Max Artwork Count: 100',
+        'Domain: IF slug domain',
+        'Layout: 3 customized gallery layouts (IF)',
+        'Analytics: Basic analytic dashboard',
+        'Support: Priority support (Email, Chat, Phone calls)',
+        'Extra: Access to upcoming features'
+      ]
+    },
+    {
+      type: 'deluxe',
+      price: 45000,
+      color: 'text-pink-500',
+      features: [
+        'Max Artwork Count: Unlimited',
+        'Domain: Custom domain support',
+        'Layout: Fully customized layouts (IF)',
+        'Analytics: Advanced analytics',
+        'Support: Priority support (Email, Chat, Phone calls)',
+        'Extra: Access to upcoming features'
+      ]
+    }
   ];
 
   if (loading) return <div className="p-8 text-center">{t('common.loading')}</div>;
@@ -119,28 +159,45 @@ const Subscription = () => {
         {plans.map((plan) => (
           <div 
             key={plan.type}
-            className={`flex flex-col p-6 border-2 transition-all ${selectedPlan?.type === plan.type ? 'border-theme ring-1 ring-theme' : isDark ? 'border-[#262626] hover:border-gray-700' : 'border-gray-200 hover:border-gray-300'} ${isDark ? 'bg-[#141414]' : 'bg-white'} rounded-xl cursor-not-allowed`}
+            className={`flex flex-col p-6 border-2 transition-all ${selectedPlan?.type === plan.type ? 'border-theme ring-1 ring-theme' : isDark ? 'border-[#262626] hover:border-gray-700' : 'border-gray-200 hover:border-gray-300'} ${isDark ? 'bg-[#141414]' : 'bg-white'} rounded-xl`}
           >
             <h3 className="text-xl font-bold uppercase mb-4">{plan.type}</h3>
-            <div className="flex items-baseline gap-1 mb-6">
+            <div className="flex items-baseline gap-1 mb-6 border-b pb-6 border-dashed border-gray-500/10">
               <span className="text-3xl font-black">{plan.price.toLocaleString()}</span>
-              <span className="text-xs uppercase opacity-50">MMK / {t('subscription.monthly')}</span>
+              <span className="text-xs uppercase opacity-50 font-bold">MMK / {t('subscription.monthly')}</span>
             </div>
-            <div className="mt-auto">
-              <Button
-                block
-                variant={selectedPlan?.type === plan.type ? 'primary' : 'secondary'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (plan.type !== 'free') {
+
+            <div className="flex-1 space-y-3 mb-8">
+              {plan.features.map((feature, idx) => (
+                <div key={idx} className="flex items-start gap-2 group">
+                  <CheckIcon className={`w-4 h-4 ${plan.type === 'deluxe' ? 'text-pink-500' : plan.type === 'pro' ? 'text-purple-500' : 'text-theme'} shrink-0 mt-0.5`} />
+                  <span className="text-xs font-bold opacity-60 group-hover:opacity-100 transition-opacity capitalize tracking-tight">{feature}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-auto pt-6 border-t border-dashed border-gray-500/10">
+              {plan.type === 'free' ? (
+                user?.subscription_plan === 'free' && (
+                  <div className={`py-4 text-center font-black uppercase tracking-widest text-[10px] opacity-40`}>
+                    {t('subscription.subscribed')}
+                  </div>
+                )
+              ) : (
+                <Button
+                  block
+                  variant={selectedPlan?.type === plan.type ? 'primary' : 'secondary'}
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setSelectedPlan(plan);
                     setIsModalOpen(true);
-                  }
-                }}
-                disabled={user?.subscription_plan === plan.type}
-              >
-                {user?.subscription_plan === plan.type ? t('subscription.current') : t('subscription.select_plan')}
-              </Button>
+                    }}
+                    disabled={user?.subscription_plan === plan.type}
+                    className="py-4 font-black uppercase tracking-widest"
+                  >
+                    {user?.subscription_plan === plan.type ? t('subscription.subscribed') : t('subscription.select_plan')}
+                  </Button>
+              )}
             </div>
           </div>
         ))}
@@ -272,46 +329,56 @@ const Subscription = () => {
         </div>
       )}
 
-      {/* Subscription History */}
-      <div className="space-y-6 mt-8">
-        <h2 className="text-xl font-bold uppercase flex items-center gap-2">
-          <ClockIcon className="w-5 h-5 opacity-50" />
-          {t('subscription.history')}
-        </h2>
-        <div className={`overflow-hidden border ${isDark ? 'border-[#262626]' : 'border-gray-200'} rounded-xl`}>
-          <table className="w-full text-left text-sm">
-            <thead className={`${isDark ? 'bg-white/5' : 'bg-gray-50'} border-b ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-              <tr>
-                <th className="px-6 py-4 font-bold uppercase text-[10px]">{t('subscription.title')}</th>
-                <th className="px-6 py-4 font-bold uppercase text-[10px]">{t('subscription.status')}</th>
-                <th className="px-6 py-4 font-bold uppercase text-[10px]">{t('subscription.expiry')}</th>
-                <th className="px-6 py-4 font-bold uppercase text-[10px]">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-current/10">
-              {history.map((item) => (
-                <tr key={item.id} className={isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}>
-                  <td className="px-6 py-4 font-bold uppercase">{item.plan_type}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-[10px] font-bold uppercase rounded ${
-                      item.status === 'active' ? 'bg-green-500/20 text-green-500' : 
-                      item.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' : 
-                      'bg-red-500/20 text-red-500'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 font-mono">{item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : '-'}</td>
-                  <td className="px-6 py-4 opacity-50">{new Date(item.created_at).toLocaleDateString()}</td>
-                </tr>
-              ))}
-              {history.length === 0 && (
+      {/* Subscription History Table */}
+      <div className="mt-12">
+        <h2 className={`text-xl font-bold mb-6 ${textClass}`}>Subscription History</h2>
+        <div className={`overflow-hidden border ${isDark ? 'border-gray-700' : 'border-gray-200'} rounded-xl`}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[600px]">
+              <thead className={`${tableHeaderClass} uppercase font-sans text-xs`}>
                 <tr>
-                  <td colSpan="4" className="px-6 py-10 text-center opacity-50">No subscription history found.</td>
+                  <th className="px-6 py-4">Plan / Billing</th>
+                  <th className="px-6 py-4">Request Date</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Expiry Date</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {history.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className={`px-6 py-10 text-center ${subtextColor}`}>
+                      No subscription history found.
+                    </td>
+                  </tr>
+                ) : (
+                  history.map((item) => (
+                    <tr key={item.id} className={`${tableRowClass} transition-colors border-b last:border-0 ${isDark ? 'border-white/5' : 'border-gray-100'}`}>
+                      <td className="px-6 py-4">
+                        <div className={`font-bold ${textClass} uppercase`}>{item.plan_type}</div>
+                        <div className="text-[10px] opacity-40 uppercase tracking-tight">{item.billing_cycle}</div>
+                      </td>
+                      <td className={`px-6 py-4 ${textClass}`}>
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${item.status === 'active'
+                          ? 'bg-green-500/10 text-green-500'
+                          : item.status === 'pending'
+                            ? 'bg-yellow-500/10 text-yellow-500'
+                            : 'bg-red-500/10 text-red-500'
+                          }`}>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className={`px-6 py-4 text-right font-mono ${textClass}`}>
+                        {item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : '-'}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </main>

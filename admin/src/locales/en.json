@@ -20,6 +20,7 @@
   "subscription": {
     "title": "Subscription Plans",
     "current_plan": "Current Plan",
+    "subscribed": "Subscribed",
     "status": "Status",
     "expiry": "Expiry Date",
     "days_remaining": "days remaining",
