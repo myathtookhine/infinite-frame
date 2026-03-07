@@ -339,14 +339,15 @@ const Subscription = () => {
                 <tr>
                   <th className="px-6 py-4">Plan / Billing</th>
                   <th className="px-6 py-4">Request Date</th>
-                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Price</th>
+                  <th className="px-6 py-4 text-center">Status</th>
                   <th className="px-6 py-4 text-right">Expiry Date</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {history.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className={`px-6 py-10 text-center ${subtextColor}`}>
+                    <td colSpan="5" className={`px-6 py-10 text-center ${subtextColor}`}>
                       No subscription history found.
                     </td>
                   </tr>
@@ -360,7 +361,10 @@ const Subscription = () => {
                       <td className={`px-6 py-4 ${textClass}`}>
                         {new Date(item.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className={`px-6 py-4 text-right font-mono font-bold ${textClass}`}>
+                        {item.amount?.toLocaleString()} MMK
+                      </td>
+                      <td className="px-6 py-4 text-center">
                         <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${item.status === 'active'
                           ? 'bg-green-500/10 text-green-500'
                           : item.status === 'pending'

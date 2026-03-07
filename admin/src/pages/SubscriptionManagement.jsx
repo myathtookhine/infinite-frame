@@ -154,6 +154,7 @@ const SubscriptionManagement = () => {
                           size="sm"
                           onClick={() => handleVerify(sub.id, 'active')}
                           disabled={processingId === sub.id}
+                            className="p-2! hover:bg-green-500! hover:text-white! border-none!"
                         >
                             <CheckCircleIcon className="w-5 h-5" />
                         </Button>
@@ -162,7 +163,7 @@ const SubscriptionManagement = () => {
                           size="sm"
                           onClick={() => handleVerify(sub.id, 'rejected')}
                           disabled={processingId === sub.id}
-                            className="!p-2 hover:!bg-red-500 hover:!text-white border-none"
+                            className="p-2! hover:bg-red-500! hover:text-white! border-none!"
                         >
                             <XCircleIcon className="w-5 h-5" />
                         </Button>

@@ -221,38 +221,40 @@ const Profile = () => {
       </div>
 
       {/* Subscription Status Card */}
-      <section className={`p-6 mb-8 border-2 rounded-2xl ${isDark ? 'border-theme/30 bg-theme/5' : 'border-theme/20 bg-theme/5'}`}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-xl ${isDark ? 'bg-theme/20' : 'bg-theme/10'}`}>
-              <CreditCardIcon className="w-8 h-8 text-theme" />
-            </div>
-            <div>
-              <h2 className={`text-sm font-bold uppercase tracking-wider opacity-50 ${textColor}`}>{t('subscription.current_plan')}</h2>
-              <p className={`text-2xl font-black uppercase tracking-tighter ${textColor}`}>{user?.subscription_plan || 'Free'}</p>
-            </div>
-          </div>
-
-          <div className="flex flex-col md:items-end gap-2">
-            {user?.subscription_expiry ? (
-              <div className="text-left md:text-right">
-                <p className={`text-[10px] font-bold uppercase tracking-widest opacity-50 ${textColor}`}>{t('subscription.expiry')}</p>
-                <p className={`text-lg font-mono font-bold ${textColor}`}>{new Date(user.subscription_expiry).toLocaleDateString()}</p>
+      {user?.role !== 'super_admin' && (
+        <section className={`p-6 mb-8 border-2 rounded-2xl ${isDark ? 'border-theme/30 bg-theme/5' : 'border-theme/20 bg-theme/5'}`}>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-xl ${isDark ? 'bg-theme/20' : 'bg-theme/10'}`}>
+                <CreditCardIcon className="w-8 h-8 text-theme" />
               </div>
-            ) : (
-              <p className={`text-xs font-medium opacity-70 ${textColor}`}>Lifetime access for Free plan</p>
-            )}
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => navigate('/subscription')}
-              className="mt-2"
-            >
-              {t('subscription.upgrade')}
-            </Button>
+              <div>
+                <h2 className={`text-sm font-bold uppercase tracking-wider opacity-50 ${textColor}`}>{t('subscription.current_plan')}</h2>
+                <p className={`text-2xl font-black uppercase tracking-tighter ${textColor}`}>{user?.subscription_plan || 'Free'}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:items-end gap-2">
+              {user?.subscription_expiry ? (
+                <div className="text-left md:text-right">
+                  <p className={`text-[10px] font-bold uppercase tracking-widest opacity-50 ${textColor}`}>{t('subscription.expiry')}</p>
+                  <p className={`text-lg font-mono font-bold ${textColor}`}>{new Date(user.subscription_expiry).toLocaleDateString()}</p>
+                </div>
+              ) : (
+                <p className={`text-xs font-medium opacity-70 ${textColor}`}>Lifetime access for Free plan</p>
+              )}
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => navigate('/subscription')}
+                className="mt-2"
+              >
+                {t('subscription.upgrade')}
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Username Update Form */}
       <section className={`py-8 border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>

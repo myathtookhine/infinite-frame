@@ -198,7 +198,7 @@ const AdminLayout = ({ children }) => {
                 onClick={closeSidebar}
                 isDark={isDark}
               >
-                Subscription Mgmt
+                Manage Subscriptions
               </SidebarLink>
             )}
 
