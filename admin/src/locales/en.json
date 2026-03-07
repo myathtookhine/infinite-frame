@@ -1,0 +1,39 @@
+{
+  "common": {
+    "update": "Update",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "artworks": "Artworks",
+    "categories": "Categories",
+    "subscription": "Subscription",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "subscription": {
+    "title": "Subscription Plans",
+    "current_plan": "Current Plan",
+    "status": "Status",
+    "expiry": "Expiry Date",
+    "days_remaining": "days remaining",
+    "upgrade": "Upgrade Plan",
+    "downgrade": "Downgrade Plan",
+    "renew": "Renew Now",
+    "history": "Subscription History",
+    "pending_verification": "Pending Verification",
+    "upload_receipt": "Upload Payment Receipt",
+    "payment_info": "Payment Information",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "select_plan": "Select a Plan",
+    "submit_request": "Submit Request",
+    "expired_notice": "Your subscription has expired. Please renew to continue using all features.",
+    "warning_notice": "Your subscription will expire in {{days}} days. Renew now to avoid interruption."
+  }
+}

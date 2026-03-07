@@ -116,6 +116,9 @@ router.get('/artworks/:id', async (req, res) => {
       });
     }
 
+    // Increment views (Non-blocking)
+    pool.query("UPDATE artworks SET views = views + 1 WHERE id = $1", [id]).catch(err => console.error("Error incrementing artwork views:", err));
+
     res.json({
       success: true,
       data: result.rows[0]

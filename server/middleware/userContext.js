@@ -9,10 +9,32 @@ const getUserContext = async (req, res, next) => {
   if (!adminId) return res.status(401).json({ message: "Unauthorized: No Admin ID" });
 
   try {
-    const userResult = await pool.query("SELECT id, role FROM admins WHERE id = $1", [adminId]);
+    const userResult = await pool.query(
+      "SELECT id, role, subscription_plan, subscription_expiry FROM admins WHERE id = $1", 
+      [adminId]
+    );
     if (userResult.rows.length === 0) return res.status(401).json({ message: "User not found" });
     
-    req.user = userResult.rows[0];
+    let user = userResult.rows[0];
+
+    // --- Subscription Expiry Logic ---
+    if (user.subscription_plan !== 'free' && user.subscription_expiry) {
+      const now = new Date();
+      const expiry = new Date(user.subscription_expiry);
+      
+      if (now > expiry) {
+        // Auto-downgrade to free
+        await pool.query(
+          "UPDATE admins SET subscription_plan = 'free', subscription_expiry = NULL WHERE id = $1",
+          [adminId]
+        );
+        user.subscription_plan = 'free';
+        user.subscription_expiry = null;
+        console.log(`[Auto-Downgrade] User ${adminId} downgraded to free (expired)`);
+      }
+    }
+
+    req.user = user;
     next();
   } catch (err) {
     console.error(err);

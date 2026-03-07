@@ -181,6 +181,30 @@ router.post('/', async (req, res) => {
     attribute_ids
   } = req.body;
 
+  // --- Plan-based Limits Check ---
+  try {
+    const countResult = await pool.query("SELECT COUNT(*) FROM artworks WHERE admin_id = $1", [req.user.id]);
+    const currentCount = parseInt(countResult.rows[0].count);
+    const plan = req.user.subscription_plan || 'free';
+
+    const limits = {
+      'free': 20,
+      'pro': 100,
+      'deluxe': Infinity
+    };
+
+    if (currentCount >= (limits[plan] || 20)) {
+      return res.status(403).json({ 
+        message: `Artwork limit reached for ${plan} plan (${limits[plan]}). Please upgrade to add more.`,
+        limit_reached: true,
+        current_plan: plan
+      });
+    }
+  } catch (err) {
+    console.error('Error checking artwork limits:', err);
+    return res.status(500).json({ message: "Internal server error during limit check" });
+  }
+
   // Validation
   if (!is_untitled && (!name || !name.trim())) {
     return res.status(400).json({ message: "Artwork name is required unless marked as untitled" });
