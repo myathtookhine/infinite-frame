@@ -11,7 +11,8 @@ import {
   TrashIcon,
   ArrowRightStartOnRectangleIcon,
   ClipboardIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  LanguageIcon
 } from "@heroicons/react/24/outline";
 import { useLanguage } from '../context/LanguageContext';
 import Toast from "../components/ui/Toast";
@@ -19,7 +20,7 @@ import BannerUpload from "../components/BannerUpload";
 
 const Profile = () => {
   const { user, changePassword, updateProfile, updateGalleryInfo, updateUser, logout } = useAuth();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const [username, setUsername] = useState(user?.username || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -458,6 +459,52 @@ const Profile = () => {
             Update Gallery Info
           </Button>
         </form>
+      </section>
+
+      {/* Language Settings */}
+      <section className={`py-8 border-b ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
+        <h2 className={`text-xl font-sans font-bold ${textColor} mb-1`}>{t('common.language')}</h2>
+        <p className={`text-sm font-sans ${subtextColor} mb-6`}>
+          Select your preferred language for the admin dashboard
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+          <button
+            onClick={() => setLanguage('en')}
+            className={`flex items-center justify-between p-4 cursor-pointer rounded-xl border-2 transition-all duration-200 sm:w-64 ${language === 'en'
+              ? (isDark ? 'border-white bg-white/5 shadow-lg shadow-white/10' : 'border-gray-900 bg-gray-900/5 shadow-lg shadow-gray-900/10')
+              : isDark
+                ? 'border-neutral-800 bg-neutral-900/40 opacity-60 hover:opacity-100 hover:border-neutral-700'
+                : 'border-gray-100 bg-gray-50/50 opacity-60 hover:opacity-100 hover:border-gray-200'
+              }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${language === 'en' ? (isDark ? 'bg-white text-black' : 'bg-gray-900 text-white') : (isDark ? 'bg-neutral-800 text-gray-500' : 'bg-gray-200 text-gray-500')}`}>
+                EN
+              </div>
+              <span className={`font-sans font-bold ${language === 'en' ? textColor : subtextColor}`}>English</span>
+            </div>
+            {language === 'en' && <div className={`w-2 h-2 rounded-full ${isDark ? 'bg-white' : 'bg-gray-900'} animate-pulse`} />}
+          </button>
+
+          <button
+            onClick={() => setLanguage('my')}
+            className={`flex items-center justify-between p-4 cursor-pointer rounded-xl border-2 transition-all duration-200 sm:w-64 ${language === 'my'
+              ? (isDark ? 'border-white bg-white/5 shadow-lg shadow-white/10' : 'border-gray-900 bg-gray-900/5 shadow-lg shadow-gray-900/10')
+              : isDark
+                ? 'border-neutral-800 bg-neutral-900/40 opacity-60 hover:opacity-100 hover:border-neutral-700'
+                : 'border-gray-100 bg-gray-50/50 opacity-60 hover:opacity-100 hover:border-gray-200'
+              }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${language === 'my' ? (isDark ? 'bg-white text-black' : 'bg-gray-900 text-white') : (isDark ? 'bg-neutral-800 text-gray-500' : 'bg-gray-200 text-gray-500')}`}>
+                MY
+              </div>
+              <span className={`font-sans font-bold ${language === 'my' ? textColor : subtextColor}`}>မြန်မာဘာသာ</span>
+            </div>
+            {language === 'my' && <div className={`w-2 h-2 rounded-full ${isDark ? 'bg-white' : 'bg-gray-900'} animate-pulse`} />}
+          </button>
+        </div>
       </section>
 
       {/* Change Password Form */}

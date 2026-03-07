@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { ShieldCheckIcon, CheckCircleIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
+import Button from '../components/ui/Button';
 
 const SubscriptionManagement = () => {
   const { t } = useLanguage();
@@ -74,14 +75,14 @@ const SubscriptionManagement = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <main className="max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold uppercase tracking-tight flex items-center gap-3">
+          <h1 className={`text-4xl font-sans font-black tracking-tight ${isDark ? "text-white" : "text-[#151416]"} mb-2 flex items-center gap-3`}>
             <ShieldCheckIcon className="w-10 h-10 text-theme" />
             Subscription Management
           </h1>
-          <p className={`mt-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+          <p className={`font-sans text-sm sm:text-base ${isDark ? "text-gray-400" : "text-gray-600"}`}>
             Review and verify admin subscription requests.
           </p>
         </div>
@@ -99,7 +100,7 @@ const SubscriptionManagement = () => {
         </div>
       </div>
 
-      <div className={`overflow-hidden border ${isDark ? 'border-[#262626]' : 'border-gray-200'} rounded-xl bg-theme`}>
+      <div className={`overflow-hidden border-2 ${isDark ? 'border-[#262626] bg-[#141414]' : 'border-gray-200 bg-white'} rounded-xl`}>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className={`${isDark ? 'bg-white/5 font-mono' : 'bg-gray-50 font-sans'} border-b ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
@@ -140,20 +141,22 @@ const SubscriptionManagement = () => {
                   <td className="px-6 py-4">
                     {sub.status === 'pending' ? (
                       <div className="flex items-center gap-2">
-                        <button 
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           onClick={() => handleVerify(sub.id, 'active')}
                           disabled={processingId === sub.id}
-                          className="p-1.5 bg-green-500/20 text-green-500 rounded hover:bg-green-500/30 transition-colors"
                         >
-                          <CheckCircleIcon className="w-5 h-5" />
-                        </button>
-                        <button 
+                          <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           onClick={() => handleVerify(sub.id, 'rejected')}
                           disabled={processingId === sub.id}
-                          className="p-1.5 bg-red-500/20 text-red-500 rounded hover:bg-red-500/30 transition-colors"
                         >
-                          <XCircleIcon className="w-5 h-5" />
-                        </button>
+                          <XCircleIcon className="w-5 h-5 text-red-500" />
+                        </Button>
                       </div>
                     ) : (
                       <span className={`text-[10px] font-bold uppercase ${sub.status === 'active' ? 'text-green-500' : 'text-red-500'}`}>
@@ -172,7 +175,7 @@ const SubscriptionManagement = () => {
           </table>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

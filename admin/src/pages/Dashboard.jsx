@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS } from '../config';
 import {
@@ -9,6 +10,7 @@ import {
   CalendarDaysIcon
 } from '@heroicons/react/24/outline';
 import SubscriptionModal from '../components/SubscriptionModal';
+import Button from '../components/ui/Button';
 import {
   LineChart,
   Line,
@@ -24,6 +26,7 @@ import {
 const Dashboard = () => {
   const { isDark } = useTheme();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [timeFilter, setTimeFilter] = useState('today'); // Default to Today as requested
   const [statsData, setStatsData] = useState({
     visitors: 0,
@@ -340,12 +343,11 @@ const Dashboard = () => {
               <h3 className={`text-lg font-bold ${textColor}`}>Unlock Advanced Analytics</h3>
               <p className={`text-sm opacity-70 ${textColor}`}>Get insights into popular artworks, visitor trends, and more with the Deluxe plan.</p>
             </div>
-            <button
+            <Button
               onClick={() => navigate('/subscription')}
-              className="px-6 py-2.5 bg-theme text-white text-sm font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap"
             >
               Upgrade to Deluxe
-            </button>
+            </Button>
           </div>
         </section>
       )}
@@ -356,3 +358,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

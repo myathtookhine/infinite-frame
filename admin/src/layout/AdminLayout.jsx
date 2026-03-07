@@ -18,8 +18,7 @@ import {
   ScaleIcon,
   ChevronRightIcon,
   CreditCardIcon,
-  ShieldCheckIcon,
-  LanguageIcon
+  ShieldCheckIcon
 } from "@heroicons/react/24/outline";
 import ThemeToggle from "../components/ThemeToggle";
 import { useLanguage } from '../context/LanguageContext';
@@ -244,24 +243,9 @@ const AdminLayout = ({ children }) => {
                 <ChevronRightIcon className="w-4 h-4" />
               </div>
             </SidebarLink>
-            <button
-              onClick={handleLogout}
-              className={`flex items-center gap-2 px-3 py-2 w-full rounded-md font-sans text-sm mb-1 transition-colors duration-150 ${isDark ? "text-red-400 hover:bg-red-900/20" : "text-red-600 hover:bg-red-50"}`}
-            >
-              <XMarkIcon className="h-5 w-5" />
-              {t('nav.logout')}
-            </button>
 
             <div className="px-2 mt-2 space-y-3">
               <ThemeToggle showLabel={true} />
-
-              <button
-                onClick={toggleLanguage}
-                className={`flex items-center gap-3 w-full px-1 text-sm font-sans font-medium transition-opacity hover:opacity-80 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
-              >
-                <LanguageIcon className="h-5 w-5" />
-                <span>{language === 'my' ? 'English' : 'မြန်မာဘာသာ'}</span>
-              </button>
             </div>
           </div>
         </aside>

@@ -6,7 +6,8 @@
     "delete": "Delete",
     "loading": "Loading...",
     "success": "Success",
-    "error": "Error"
+    "error": "Error",
+    "language": "Language"
   },
   "nav": {
     "dashboard": "Dashboard",

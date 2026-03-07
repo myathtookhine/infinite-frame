@@ -2,6 +2,21 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const { getUserContext } = require('../middleware/userContext');
+const multer = require('multer');
+const sharp = require('sharp');
+const supabase = require('../utils/supabase');
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/webp') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPG, PNG and WebP files are allowed'), false);
+    }
+  }
+});
 
 // Middleware to ensure only super_admin can access certain routes
 const isSuperAdmin = (req, res, next) => {
@@ -28,15 +43,42 @@ router.get('/payment-info', getUserContext, async (req, res) => {
 // =====================================================
 // 2. ADMIN: Submit Subscription Request
 // =====================================================
-router.post('/submit', getUserContext, async (req, res) => {
-    const { plan_type, billing_cycle, amount, receipt_url, notes } = req.body;
+router.post('/submit', getUserContext, upload.single('receipt'), async (req, res) => {
+    const { plan_type, billing_cycle, amount, notes } = req.body;
     const admin_id = req.user.id;
 
-    if (!plan_type || !billing_cycle || !receipt_url) {
-        return res.status(400).json({ message: "Missing required fields" });
+    if (!plan_type || !billing_cycle || !req.file) {
+        return res.status(400).json({ message: "Missing required fields or receipt image" });
     }
 
     try {
+        const imageBuffer = req.file.buffer;
+        
+        const processedImage = await sharp(imageBuffer)
+          .webp({ quality: 85 })
+          .toBuffer();
+
+        const timestamp = Date.now();
+        const fileName = `receipts/receipt-${admin_id}-${timestamp}.webp`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('receipt-images')
+          .upload(fileName, processedImage, {
+            contentType: 'image/webp',
+            upsert: false
+          });
+
+        if (uploadError) {
+            console.error('[RECEIPT UPLOAD ERROR]', uploadError);
+            return res.status(500).json({ message: "Failed to upload receipt image", error: uploadError.message });
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('receipt-images')
+          .getPublicUrl(fileName);
+
+        const receipt_url = publicUrl;
+
         const result = await pool.query(
             "INSERT INTO subscriptions (admin_id, plan_type, billing_cycle, amount, receipt_url, notes, status) VALUES ($1, $2, $3, $4, $5, $6, 'pending') RETURNING *",
             [admin_id, plan_type, billing_cycle, amount, receipt_url, notes]
