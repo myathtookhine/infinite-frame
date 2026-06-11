@@ -243,14 +243,16 @@ const Profile = () => {
               ) : (
                 <p className={`text-xs font-medium opacity-70 ${textColor}`}>Lifetime access for Free plan</p>
               )}
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => navigate('/subscription')}
-                className="mt-2"
-              >
-                {t('subscription.upgrade')}
-              </Button>
+              {user?.subscription_plan !== 'deluxe' && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => navigate('/subscription')}
+                  className="mt-2"
+                >
+                  {t('subscription.upgrade')}
+                </Button>
+              )}
             </div>
           </div>
         </section>
