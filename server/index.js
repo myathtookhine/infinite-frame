@@ -15,6 +15,7 @@ const allowedOrigins = [
   'https://infiniteframe.online',    // Production Client
   'https://www.infiniteframe.online',
   'https://admin.infiniteframe.online', // Production Admin
+  'https://infinite-frame-admin.pages.dev', // Cloudflare Pages Admin
   'https://infinite-frame.vercel.app'   // Vercel Deployments (if any)
 ];
 
