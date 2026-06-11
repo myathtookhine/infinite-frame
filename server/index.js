@@ -24,7 +24,10 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // Check if it's a Cloudflare Pages preview subdomain
+    const isCloudflarePages = /^https:\/\/(.*\.)?infinite-frame-admin\.pages\.dev$/.test(origin);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || isCloudflarePages) {
       callback(null, true);
     } else {
       console.log('Blocked by CORS:', origin);
