@@ -4,6 +4,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { CreditCardIcon, CheckIcon, CloudArrowUpIcon, ClockIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
+import InputTextarea from '../components/ui/InputTextarea';
+import axios from 'axios';
 
 const Subscription = () => {
   const { user } = useAuth();
@@ -19,13 +21,16 @@ const Subscription = () => {
   const [receiptPreview, setReceiptPreview] = useState(null);
   const [notes, setNotes] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-  const tableHeaderClass = isDark ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-600";
-  const tableRowClass = isDark ? "border-gray-700 hover:bg-white/5" : "border-gray-200 hover:bg-gray-50";
-  const textClass = isDark ? "text-gray-300" : "text-gray-900";
+  const textColor = isDark ? 'text-white' : 'text-[#151416]';
   const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
+  const borderColor = isDark ? 'border-[#262626]' : 'border-gray-200';
+  const cardBg = isDark ? 'bg-[#141414]' : 'bg-white';
+  const tableHeaderClass = isDark ? "bg-[#1f1f1f] text-gray-300" : "bg-gray-100 text-gray-600";
+  const tableRowClass = isDark ? "border-[#262626] hover:bg-white/5" : "border-gray-200 hover:bg-gray-50";
 
   useEffect(() => {
     fetchData();
@@ -34,17 +39,15 @@ const Subscription = () => {
   const fetchData = async () => {
     try {
       const [paymentRes, historyRes] = await Promise.all([
-        fetch(`${apiUrl}/subscription/payment-info`, {
+        axios.get(`${apiUrl}/subscription/payment-info`, {
           headers: { 'x-admin-id': user?.id }
         }),
-        fetch(`${apiUrl}/subscription/my-subscriptions`, {
+        axios.get(`${apiUrl}/subscription/my-subscriptions`, {
           headers: { 'x-admin-id': user?.id }
         })
       ]);
-      const paymentData = await paymentRes.json();
-      const historyData = await historyRes.json();
-      setPaymentInfo(Array.isArray(paymentData) ? paymentData : []);
-      setHistory(Array.isArray(historyData) ? historyData : []);
+      setPaymentInfo(Array.isArray(paymentRes.data) ? paymentRes.data : []);
+      setHistory(Array.isArray(historyRes.data) ? historyRes.data : []);
     } catch (err) {
       console.error('Error fetching subscription data:', err);
     } finally {
@@ -65,15 +68,13 @@ const Subscription = () => {
       formData.append('receipt', receiptFile);
       formData.append('notes', notes);
 
-      const response = await fetch(`${apiUrl}/subscription/submit`, {
-        method: 'POST',
+      const response = await axios.post(`${apiUrl}/subscription/submit`, formData, {
         headers: {
           'x-admin-id': user?.id
-        },
-        body: formData
+        }
       });
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         alert(t('common.success'));
         setSelectedPlan(null);
         setReceiptFile(null);
@@ -86,9 +87,54 @@ const Subscription = () => {
       }
     } catch (err) {
       console.error('Error submitting subscription:', err);
+      alert(err.response?.data?.message || t('common.error'));
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      processFile(files[0]);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      processFile(files[0]);
+    }
+    e.target.value = '';
+  };
+
+  const processFile = (file) => {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Invalid file type. Only JPEG, PNG, and WebP images are allowed.');
+      return;
+    }
+    const maxSize = 8 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert('File size exceeds 8MB. Please choose a smaller image.');
+      return;
+    }
+    setReceiptFile(file);
+    setReceiptPreview(URL.createObjectURL(file));
   };
 
   const plans = [
@@ -132,24 +178,31 @@ const Subscription = () => {
     }
   ];
 
-  if (loading) return <div className="p-8 text-center">{t('common.loading')}</div>;
+  if (loading) return (
+    <div className="max-w-7xl mx-auto pb-18 md:pb-0">
+      <div className={`rounded-xl border-2 ${borderColor} ${cardBg} p-12 text-center`}>
+        <div className={`w-8 h-8 border-2 ${isDark ? 'border-white/20 border-t-white' : 'border-black/10 border-t-black'} rounded-full animate-spin mx-auto mb-4`}></div>
+        <p className={subtextColor}>{t('common.loading')}</p>
+      </div>
+    </div>
+  );
 
   return (
     <main className="max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className={`mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 border-dashed ${borderColor}`}>
         <div>
-          <h1 className={`text-4xl font-sans font-black tracking-tight ${isDark ? "text-white" : "text-[#151416]"} mb-2`}>
+          <h1 className={`text-3xl font-black uppercase tracking-tight ${textColor}`}>
             {t('subscription.title')}
           </h1>
-          <p className={`font-sans text-sm sm:text-base ${isDark ? "text-gray-400" : "text-gray-600"}`}>
-            {t('subscription.current_plan')}: <span className="font-bold uppercase text-theme">{user?.subscription_plan || 'Free'}</span>
+          <p className={`text-sm ${subtextColor} font-medium mt-1`}>
+            {t('subscription.current_plan')}: <span className={`font-bold uppercase ${textColor}`}>{user?.subscription_plan || 'Free'}</span>
           </p>
         </div>
         {user?.subscription_expiry && (
-          <div className={`px-4 py-2 border ${isDark ? 'border-theme/20 bg-theme/5' : 'border-gray-200 bg-gray-50'} rounded-lg text-right`}>
-            <p className="text-[10px] uppercase font-bold opacity-50">{t('subscription.expiry')}</p>
-            <p className="font-mono text-sm">{new Date(user.subscription_expiry).toLocaleDateString()}</p>
+          <div className={`px-4 py-2 border-2 ${borderColor} ${cardBg} rounded-xl text-right`}>
+            <p className={`text-[10px] uppercase font-bold tracking-widest ${subtextColor}`}>{t('subscription.expiry')}</p>
+            <p className={`font-mono text-sm font-bold ${textColor}`}>{new Date(user.subscription_expiry).toLocaleDateString()}</p>
           </div>
         )}
       </div>
@@ -159,28 +212,36 @@ const Subscription = () => {
         {plans.map((plan) => (
           <div 
             key={plan.type}
-            className={`flex flex-col p-6 border-2 transition-all ${selectedPlan?.type === plan.type ? 'border-theme ring-1 ring-theme' : isDark ? 'border-[#262626] hover:border-gray-700' : 'border-gray-200 hover:border-gray-300'} ${isDark ? 'bg-[#141414]' : 'bg-white'} rounded-xl`}
+            className={`flex flex-col p-8 border-2 transition-all duration-300 ${
+              selectedPlan?.type === plan.type 
+                ? isDark ? 'border-white ring-4 ring-white/10' : 'border-gray-900 ring-4 ring-gray-900/10' 
+                : `${borderColor} hover:-translate-y-1 ${isDark ? 'hover:border-gray-600' : 'hover:border-gray-400'}`
+            } ${cardBg} rounded-2xl group`}
           >
-            <h3 className="text-xl font-bold uppercase mb-4">{plan.type}</h3>
-            <div className="flex items-baseline gap-1 mb-6 border-b pb-6 border-dashed border-gray-500/10">
-              <span className="text-3xl font-black">{plan.price.toLocaleString()}</span>
-              <span className="text-xs uppercase opacity-50 font-bold">MMK / {t('subscription.monthly')}</span>
+            <h3 className={`text-xl font-black uppercase tracking-tight mb-4 ${plan.color}`}>{plan.type}</h3>
+            <div className={`flex items-baseline gap-1 mb-6 border-b pb-6 border-dashed ${borderColor}`}>
+              <span className={`text-4xl font-black tracking-tight ${textColor}`}>{plan.price.toLocaleString()}</span>
+              <span className={`text-xs uppercase font-bold tracking-widest ${subtextColor}`}>MMK / {t('subscription.monthly')}</span>
             </div>
 
-            <div className="flex-1 space-y-3 mb-8">
+            <div className="flex-1 space-y-4 mb-8">
               {plan.features.map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-2 group">
-                  <CheckIcon className={`w-4 h-4 ${plan.type === 'deluxe' ? 'text-pink-500' : plan.type === 'pro' ? 'text-purple-500' : 'text-theme'} shrink-0 mt-0.5`} />
-                  <span className="text-xs font-bold opacity-60 group-hover:opacity-100 transition-opacity capitalize tracking-tight">{feature}</span>
+                <div key={idx} className="flex items-start gap-3">
+                  <CheckIcon className={`w-5 h-5 ${plan.type === 'deluxe' ? 'text-pink-500' : plan.type === 'pro' ? 'text-purple-500' : 'text-neutral-500'} shrink-0`} />
+                  <span className={`text-sm font-medium ${subtextColor} group-hover:${textColor} transition-colors tracking-tight leading-snug`}>{feature}</span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-auto pt-6 border-t border-dashed border-gray-500/10">
+            <div className={`mt-auto pt-6 border-t border-dashed ${borderColor}`}>
               {plan.type === 'free' ? (
-                user?.subscription_plan === 'free' && (
-                  <div className={`py-4 text-center font-black uppercase tracking-widest text-[10px] opacity-40`}>
+                user?.subscription_plan === 'free' ? (
+                  <div className={`py-4 text-center font-black uppercase tracking-widest text-[10px] ${subtextColor} opacity-60`}>
                     {t('subscription.subscribed')}
+                  </div>
+                ) : (
+                  <div className={`py-4 text-center font-black uppercase tracking-widest text-[10px] ${subtextColor} opacity-60`}>
+                    Included
                   </div>
                 )
               ) : (
@@ -191,12 +252,12 @@ const Subscription = () => {
                     e.stopPropagation();
                     setSelectedPlan(plan);
                     setIsModalOpen(true);
-                    }}
-                    disabled={user?.subscription_plan === plan.type}
-                    className="py-4 font-black uppercase tracking-widest"
-                  >
-                    {user?.subscription_plan === plan.type ? t('subscription.subscribed') : t('subscription.select_plan')}
-                  </Button>
+                  }}
+                  disabled={user?.subscription_plan === plan.type}
+                  className="py-4 font-black uppercase tracking-widest text-xs"
+                >
+                  {user?.subscription_plan === plan.type ? t('subscription.subscribed') : t('subscription.select_plan')}
+                </Button>
               )}
             </div>
           </div>
@@ -205,122 +266,130 @@ const Subscription = () => {
 
       {/* Payment & Request Modal */}
       {isModalOpen && selectedPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className={`relative w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 border-2 rounded-3xl shadow-2xl ${isDark ? 'bg-[#141414] border-theme/30' : 'bg-white border-gray-200'} animate-in zoom-in-95 duration-300`}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onClick={() => setIsModalOpen(false)}></div>
+          <div className={`relative w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 md:p-10 rounded-3xl border ${borderColor} ${cardBg} shadow-2xl animate-in zoom-in-95 duration-200`}>
+            
             {/* Close Button */}
             <button
               onClick={() => setIsModalOpen(false)}
-              className={`absolute top-6 right-6 p-2 rounded-full ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-black/5 text-[#151416]'} transition-colors z-10`}
+              className={`absolute top-6 right-6 p-2 rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}
             >
-              <XMarkIcon className="w-6 h-6" />
+              <XMarkIcon className={`h-6 w-6 ${subtextColor}`} />
             </button>
 
-            <div className="mb-8">
-              <h2 className="text-3xl font-black uppercase tracking-tighter flex items-center gap-3">
-                <CreditCardIcon className="w-8 h-8 text-theme" />
+            <div className={`mb-10 border-b pb-6 border-dashed ${borderColor}`}>
+              <h2 className={`text-3xl font-black uppercase tracking-tight flex items-center gap-3 ${textColor}`}>
+                <CreditCardIcon className={`w-8 h-8 ${selectedPlan.color}`} />
                 Plan: {selectedPlan.type}
               </h2>
-              <p className={`text-sm opacity-50 font-bold uppercase mt-1`}>
-                Total Amount: {selectedPlan.price.toLocaleString()} MMK / {billingCycle}
+              <p className={`text-sm ${subtextColor} font-bold uppercase tracking-widest mt-2`}>
+                Total Amount: <span className={textColor}>{selectedPlan.price.toLocaleString()} MMK</span> / {billingCycle}
               </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               {/* Left: Payment Info */}
               <div className="space-y-6">
-                <h3 className="text-xs font-black uppercase tracking-widest opacity-40 border-b pb-2">
+                <h3 className={`text-xs font-black uppercase tracking-widest ${subtextColor} border-b pb-3 border-dashed ${borderColor}`}>
                   Payment Destination
                 </h3>
                 <div className="space-y-4">
                   {paymentInfo.map((pay) => (
-                    <div key={pay.id} className={`p-5 border-2 ${isDark ? 'border-white/5 bg-white/5' : 'border-gray-100 bg-gray-50'} rounded-2xl group transition-all`}>
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] font-black uppercase text-theme tracking-wider bg-theme/10 px-2 py-0.5 rounded">
+                    <div key={pay.id} className={`p-6 border-2 ${borderColor} ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'} rounded-2xl transition-all group hover:border-gray-400`}>
+                      <div className="flex justify-between items-start mb-4">
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
+                          isDark ? 'bg-white text-black' : 'bg-gray-900 text-white'
+                        }`}>
                           {pay.provider}
                         </span>
                       </div>
-                      <p className="text-xl font-mono font-black tracking-tight mb-1">{pay.account_number}</p>
-                      <p className="text-xs font-bold opacity-60 uppercase">{pay.account_name}</p>
+                      <p className={`text-2xl font-mono font-black tracking-tight mb-2 ${textColor}`}>{pay.account_number}</p>
+                      <p className={`text-sm font-bold uppercase tracking-wide ${subtextColor}`}>{pay.account_name}</p>
                     </div>
                   ))}
                   {paymentInfo.length === 0 && (
-                    <p className="text-sm opacity-50 italic">No payment information available.</p>
+                    <div className={`p-6 border-2 border-dashed ${borderColor} rounded-2xl text-center`}>
+                      <p className={`text-sm ${subtextColor} font-medium`}>No payment information available.</p>
+                    </div>
                   )}
                 </div>
               </div>
 
               {/* Right: Submission Form */}
               <form onSubmit={handleSubmit} className="space-y-6">
-                <h3 className="text-xs font-black uppercase tracking-widest opacity-40 border-b pb-2">
+                <h3 className={`text-xs font-black uppercase tracking-widest ${subtextColor} border-b pb-3 border-dashed ${borderColor}`}>
                   Submit Receipt
                 </h3>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest mb-2 opacity-50">Upload Payment Slip</label>
-                    <div className={`relative border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer group ${isDark ? 'border-white/10 hover:border-theme/40 bg-black/20' : 'border-gray-300 hover:border-theme/40 bg-gray-50'}`}>
+                    <label className={`block text-xs font-bold uppercase tracking-widest mb-3 ${textColor}`}>Upload Payment Slip <span className="text-red-500">*</span></label>
+                    
+                    <div
+                      className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-200 ${
+                        dragActive
+                          ? isDark ? 'border-white bg-white/5 scale-[1.02]' : 'border-black bg-black/5 scale-[1.02]'
+                          : `${borderColor} ${isDark ? 'hover:bg-white/5 hover:border-gray-500' : 'hover:bg-black/5 hover:border-gray-400'}`
+                      }`}
+                      onDragEnter={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDragOver={handleDrag}
+                      onDrop={handleDrop}
+                    >
                       <input 
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
-                        required 
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            setReceiptFile(file);
-                            setReceiptPreview(URL.createObjectURL(file));
-                          }
-                        }}
+                        required={!receiptFile}
+                        onChange={handleFileChange}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       />
                       {receiptPreview ? (
                         <div className="flex flex-col items-center">
-                          <div className="relative group/preview">
-                            <img src={receiptPreview} alt="Receipt preview" className="max-h-40 object-contain rounded-xl shadow-lg mb-3" />
-                            <div className="absolute inset-0 bg-theme/20 opacity-0 group-hover/preview:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
-                              <CloudArrowUpIcon className="w-8 h-8 text-white" />
+                          <div className="relative group/preview w-full">
+                            <img src={receiptPreview} alt="Receipt preview" className="max-h-48 w-auto mx-auto object-contain rounded-xl shadow-lg mb-4" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/preview:opacity-100 transition-opacity rounded-xl flex items-center justify-center backdrop-blur-sm">
+                              <CloudArrowUpIcon className="w-10 h-10 text-white" />
                             </div>
                           </div>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-theme">Change Image</span>
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${textColor}`}>Click or drag to change image</span>
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center py-4">
-                          <div className="p-3 rounded-full bg-theme/10 mb-3 group-hover:scale-110 transition-transform">
-                            <CloudArrowUpIcon className="w-8 h-8 text-theme" />
+                        <div className="flex flex-col items-center py-6">
+                          <div className={`p-4 rounded-full ${isDark ? 'bg-white/5' : 'bg-gray-100'} mb-4`}>
+                            <CloudArrowUpIcon className={`w-10 h-10 ${subtextColor}`} />
                           </div>
-                          <span className="text-xs font-black uppercase tracking-widest">Click or drag to upload</span>
-                          <span className="text-[10px] mt-1 opacity-40">JPG, PNG OR WEBP (MAX 8MB)</span>
+                          <span className={`text-sm font-bold ${textColor} mb-2`}>Drop receipt here or click to upload</span>
+                          <span className={`text-xs font-medium uppercase tracking-widest ${subtextColor}`}>JPG, PNG, WebP • Max 8MB</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest mb-2 opacity-50">Notes (Optional)</label>
-                    <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      rows="3"
-                      placeholder="Enter any additional details..."
-                      className={`w-full p-4 text-sm font-medium border-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-theme/30 transition-all ${isDark ? 'bg-black/40 border-white/5 focus:border-theme/50' : 'bg-gray-50 border-gray-100 focus:border-theme/50'}`}
-                    ></textarea>
-                  </div>
+                  <InputTextarea
+                    label="Notes (Optional)"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Enter any additional details about your payment..."
+                    rows={3}
+                  />
 
-                  <div className="pt-4">
+                  <div className={`flex justify-end gap-3 pt-6 border-t border-dashed ${borderColor}`}>
                     <Button
-                      block
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setIsModalOpen(false)}
+                      className="px-6"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
                       type="submit"
-                      disabled={submitting}
-                      className="py-4 font-black uppercase tracking-widest shadow-xl shadow-theme/20"
+                      disabled={submitting || !receiptFile}
+                      className="px-8"
                     >
                       {submitting ? t('common.loading') : t('subscription.submit_request')}
                     </Button>
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(false)}
-                      className="w-full py-3 mt-2 text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-all"
-                    >
-                      {t('common.cancel')}
-                    </button>
                   </div>
                 </div>
               </form>
@@ -330,21 +399,21 @@ const Subscription = () => {
       )}
 
       {/* Subscription History Table */}
-      <div className="mt-12">
-        <h2 className={`text-xl font-bold mb-6 ${textClass}`}>Subscription History</h2>
-        <div className={`overflow-hidden border ${isDark ? 'border-gray-700' : 'border-gray-200'} rounded-xl`}>
+      <div className="mt-12 pb-18 md:pb-0">
+        <h2 className={`text-xl font-black uppercase tracking-tight mb-6 ${textColor}`}>Subscription History</h2>
+        <div className={`overflow-hidden border-2 ${borderColor} rounded-2xl`}>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm min-w-[600px]">
-              <thead className={`${tableHeaderClass} uppercase font-sans text-xs`}>
+              <thead className={`${tableHeaderClass} uppercase font-black tracking-widest text-[10px]`}>
                 <tr>
-                  <th className="px-6 py-4">Plan / Billing</th>
-                  <th className="px-6 py-4">Request Date</th>
-                  <th className="px-6 py-4 text-right">Price</th>
-                  <th className="px-6 py-4 text-center">Status</th>
-                  <th className="px-6 py-4 text-right">Expiry Date</th>
+                  <th className="px-6 py-5">Plan / Billing</th>
+                  <th className="px-6 py-5">Request Date</th>
+                  <th className="px-6 py-5 text-right">Price</th>
+                  <th className="px-6 py-5 text-center">Status</th>
+                  <th className="px-6 py-5 text-right">Expiry Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className={`divide-y ${isDark ? 'divide-[#262626]' : 'divide-gray-200'}`}>
                 {history.length === 0 ? (
                   <tr>
                     <td colSpan="5" className={`px-6 py-10 text-center ${subtextColor}`}>
@@ -353,28 +422,28 @@ const Subscription = () => {
                   </tr>
                 ) : (
                   history.map((item) => (
-                    <tr key={item.id} className={`${tableRowClass} transition-colors border-b last:border-0 ${isDark ? 'border-white/5' : 'border-gray-100'}`}>
+                    <tr key={item.id} className={`${tableRowClass} transition-colors border-b last:border-0 ${borderColor}`}>
                       <td className="px-6 py-4">
-                        <div className={`font-bold ${textClass} uppercase`}>{item.plan_type}</div>
-                        <div className="text-[10px] opacity-40 uppercase tracking-tight">{item.billing_cycle}</div>
+                        <div className={`font-bold ${textColor} uppercase`}>{item.plan_type}</div>
+                        <div className={`text-[10px] ${subtextColor} uppercase tracking-tight`}>{item.billing_cycle}</div>
                       </td>
-                      <td className={`px-6 py-4 ${textClass}`}>
+                      <td className={`px-6 py-4 ${textColor}`}>
                         {new Date(item.created_at).toLocaleDateString()}
                       </td>
-                      <td className={`px-6 py-4 text-right font-mono font-bold ${textClass}`}>
+                      <td className={`px-6 py-4 text-right font-mono font-bold ${textColor}`}>
                         {item.amount?.toLocaleString()} MMK
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${item.status === 'active'
-                          ? 'bg-green-500/10 text-green-500'
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full ${item.status === 'active'
+                          ? isDark ? 'bg-green-500/10 text-green-400' : 'bg-green-100 text-green-700'
                           : item.status === 'pending'
-                            ? 'bg-yellow-500/10 text-yellow-500'
-                            : 'bg-red-500/10 text-red-500'
+                            ? isDark ? 'bg-yellow-500/10 text-yellow-400' : 'bg-yellow-100 text-yellow-700'
+                            : isDark ? 'bg-red-500/10 text-red-400' : 'bg-red-100 text-red-700'
                           }`}>
                           {item.status}
                         </span>
                       </td>
-                      <td className={`px-6 py-4 text-right font-mono ${textClass}`}>
+                      <td className={`px-6 py-4 text-right font-mono ${textColor}`}>
                         {item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : '-'}
                       </td>
                     </tr>
