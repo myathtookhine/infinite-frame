@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { XMarkIcon, SparklesIcon, ExclamationTriangleIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
+import Button from './ui/Button';
 
 const SubscriptionModal = () => {
   const { user } = useAuth();
@@ -50,65 +51,101 @@ const SubscriptionModal = () => {
 
   if (!isOpen) return null;
 
+  const textColor = isDark ? 'text-white' : 'text-[#151416]';
+  const subtextColor = isDark ? 'text-gray-400' : 'text-gray-500';
+  const borderColor = isDark ? 'border-[#262626]' : 'border-gray-200';
+  const cardBg = isDark ? 'bg-[#141414]' : 'bg-white';
+
   const content = {
     welcome: {
       title: "Welcome to Infinite Frame",
       desc: "You are currently on the Free plan. Showcase up to 20 artworks with our standard layout.",
-      icon: <SparklesIcon className="w-12 h-12 text-yellow-500" />,
       cta: "Explore Plans"
     },
     warning: {
       title: "Subscription Expiring Soon",
-      desc: `Your plan will expire in less than 5 days. Renew now to maintain your gallery features.`,
-      icon: <ClockIcon className="w-12 h-12 text-orange-500" />,
+      desc: "Your plan will expire in less than 5 days. Renew now to maintain your gallery features.",
       cta: "Renew Now"
     },
     expired: {
       title: "Subscription Expired",
       desc: "Your subscription has expired. Some features may be limited until you renew.",
-      icon: <ExclamationTriangleIcon className="w-12 h-12 text-red-500" />,
       cta: "Renew Plan"
     }
   }[modalType];
 
+  const getIcon = () => {
+    switch (modalType) {
+      case 'welcome':
+        return (
+          <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full ${isDark ? 'bg-yellow-500/10' : 'bg-yellow-50'} mb-6 animate-in zoom-in duration-300`}>
+            <SparklesIcon className={`h-10 w-10 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`} />
+          </div>
+        );
+      case 'warning':
+        return (
+          <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full ${isDark ? 'bg-orange-500/10' : 'bg-orange-50'} mb-6 animate-in zoom-in duration-300`}>
+            <ClockIcon className={`h-10 w-10 ${isDark ? 'text-orange-400' : 'text-orange-600'}`} />
+          </div>
+        );
+      case 'expired':
+        return (
+          <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full ${isDark ? 'bg-red-500/10' : 'bg-red-50'} mb-6 animate-in zoom-in duration-300`}>
+            <ExclamationTriangleIcon className={`h-10 w-10 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className={`relative w-full max-w-md p-8 border-2 rounded-3xl shadow-2xl ${isDark ? 'bg-[#141414] border-theme/30' : 'bg-white border-gray-200'} animate-in zoom-in-95 duration-300`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Overlay */}
+      <div 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in" 
+        onClick={() => setIsOpen(false)}
+      ></div>
+
+      {/* Modal Content */}
+      <div className={`relative w-full max-w-md p-8 rounded-3xl border ${borderColor} ${cardBg} shadow-2xl animate-in zoom-in-95 duration-300 text-center`}>
+        {/* Close Button */}
         <button 
           onClick={() => setIsOpen(false)}
-          className={`absolute top-4 right-4 p-2 rounded-full ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'} transition-colors`}
+          className={`absolute top-6 right-6 p-2 rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}
         >
-          <XMarkIcon className="w-6 h-6" />
+          <XMarkIcon className={`w-6 h-6 ${subtextColor}`} />
         </button>
 
-        <div className="flex flex-col items-center text-center space-y-6">
-          <div className={`p-4 rounded-2xl ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
-            {content.icon}
-          </div>
+        <div className="flex flex-col items-center">
+          {getIcon()}
           
-          <div className="space-y-2">
-            <h2 className="text-2xl font-black uppercase tracking-tighter">{content.title}</h2>
-            <p className={`text-sm font-light leading-relaxed max-w-[280px] mx-auto ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-              {content.desc}
-            </p>
-          </div>
+          <h2 className={`text-2xl font-black uppercase tracking-tight mb-3 ${textColor}`}>
+            {content.title}
+          </h2>
+          <p className={`text-sm font-medium leading-relaxed max-w-[280px] mx-auto mb-8 ${subtextColor}`}>
+            {content.desc}
+          </p>
 
-          <div className="w-full pt-4">
-            <button
+          <div className="w-full">
+            <Button
+              block
               onClick={() => {
                 setIsOpen(false);
                 navigate('/subscription');
               }}
-              className="w-full py-4 bg-theme text-white font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-theme/20"
+              className="py-4 font-black uppercase tracking-widest text-xs"
             >
               {content.cta}
-            </button>
-            <button
+            </Button>
+            <Button
+              block
+              variant="secondary"
               onClick={() => setIsOpen(false)}
-              className="w-full py-3 mt-2 text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity"
+              className="py-4 mt-2 font-black uppercase tracking-widest text-xs"
             >
               {t('common.cancel')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
