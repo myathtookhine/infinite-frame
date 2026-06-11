@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
-import { CreditCardIcon, CheckIcon, CloudArrowUpIcon, ClockIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CreditCardIcon, CheckIcon, CloudArrowUpIcon, ClockIcon, XMarkIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import InputTextarea from '../components/ui/InputTextarea';
 import axios from 'axios';
@@ -21,6 +21,7 @@ const Subscription = () => {
   const [receiptPreview, setReceiptPreview] = useState(null);
   const [notes, setNotes] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -75,7 +76,7 @@ const Subscription = () => {
       });
 
       if (response.status === 200 || response.status === 201) {
-        alert(t('common.success'));
+        setIsSuccessModalOpen(true);
         setSelectedPlan(null);
         setReceiptFile(null);
         setReceiptPreview(null);
@@ -123,14 +124,14 @@ const Subscription = () => {
   };
 
   const processFile = (file) => {
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     if (!validTypes.includes(file.type)) {
-      alert('Invalid file type. Only JPEG, PNG, and WebP images are allowed.');
+      alert('Invalid file type. Only JPEG and PNG images are allowed.');
       return;
     }
-    const maxSize = 8 * 1024 * 1024;
+    const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert('File size exceeds 8MB. Please choose a smaller image.');
+      alert('File size is too large. Please upload an image smaller than 2MB to ensure successful processing.');
       return;
     }
     setReceiptFile(file);
@@ -192,7 +193,7 @@ const Subscription = () => {
       {/* Header */}
       <div className={`mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 border-dashed ${borderColor}`}>
         <div>
-          <h1 className={`text-3xl font-black uppercase tracking-tight ${textColor}`}>
+          <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>
             {t('subscription.title')}
           </h1>
           <p className={`text-sm ${subtextColor} font-medium mt-1`}>
@@ -220,8 +221,8 @@ const Subscription = () => {
           >
             <h3 className={`text-xl font-black uppercase tracking-tight mb-4 ${plan.color}`}>{plan.type}</h3>
             <div className={`flex items-baseline gap-1 mb-6 border-b pb-6 border-dashed ${borderColor}`}>
-              <span className={`text-4xl font-black tracking-tight ${textColor}`}>{plan.price.toLocaleString()}</span>
-              <span className={`text-xs uppercase font-bold tracking-widest ${subtextColor}`}>MMK / {t('subscription.monthly')}</span>
+              <span className={`text-3xl font-black tracking-tight ${textColor}`}>{plan.price.toLocaleString()}</span>
+              <span className={`text-xs font-bold tracking-widest ${subtextColor}`}>MMK/{t('subscription.monthly')}</span>
             </div>
 
             <div className="flex-1 space-y-4 mb-8">
@@ -244,21 +245,31 @@ const Subscription = () => {
                     Included
                   </div>
                 )
-              ) : (
-                <Button
-                  block
-                  variant={selectedPlan?.type === plan.type ? 'primary' : 'secondary'}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedPlan(plan);
-                    setIsModalOpen(true);
-                  }}
-                  disabled={user?.subscription_plan === plan.type}
-                  className="py-4 font-black uppercase tracking-widest text-xs"
-                >
-                  {user?.subscription_plan === plan.type ? t('subscription.subscribed') : t('subscription.select_plan')}
-                </Button>
-              )}
+              ) : (() => {
+                const isThisPlanPending = history.some(item => item.plan_type === plan.type && item.status === 'pending');
+                const isAnyPlanPending = history.some(item => item.status === 'pending');
+                const isSubscribed = user?.subscription_plan === plan.type || history.some(item => item.plan_type === plan.type && item.status === 'active');
+
+                return (
+                  <Button
+                    block
+                    variant={selectedPlan?.type === plan.type ? 'primary' : 'secondary'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedPlan(plan);
+                      setIsModalOpen(true);
+                    }}
+                    disabled={isSubscribed || isAnyPlanPending}
+                    className="py-4 font-black uppercase tracking-widest text-xs"
+                  >
+                    {isThisPlanPending
+                      ? 'Pending Payment'
+                      : isSubscribed
+                        ? t('subscription.subscribed')
+                        : t('subscription.select_plan')}
+                  </Button>
+                );
+              })()}
             </div>
           </div>
         ))}
@@ -339,7 +350,7 @@ const Subscription = () => {
                     >
                       <input 
                         type="file"
-                        accept="image/jpeg,image/png,image/webp"
+                        accept="image/jpeg,image/png"
                         required={!receiptFile}
                         onChange={handleFileChange}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -360,7 +371,7 @@ const Subscription = () => {
                             <CloudArrowUpIcon className={`w-10 h-10 ${subtextColor}`} />
                           </div>
                           <span className={`text-sm font-bold ${textColor} mb-2`}>Drop receipt here or click to upload</span>
-                          <span className={`text-xs font-medium uppercase tracking-widest ${subtextColor}`}>JPG, PNG, WebP • Max 8MB</span>
+                            <span className={`text-xs font-medium uppercase tracking-widest ${subtextColor}`}>JPG, PNG • Max 2MB</span>
                         </div>
                       )}
                     </div>
@@ -454,6 +465,31 @@ const Subscription = () => {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {isSuccessModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onClick={() => setIsSuccessModalOpen(false)}></div>
+          <div className={`relative w-full max-w-md overflow-y-auto p-8 rounded-3xl border ${borderColor} ${cardBg} shadow-2xl animate-in zoom-in-95 duration-200 text-center`}>
+            <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full ${isDark ? 'bg-green-500/10' : 'bg-green-100'} mb-6`}>
+              <CheckCircleIcon className={`h-10 w-10 ${isDark ? 'text-green-400' : 'text-green-600'}`} />
+            </div>
+            <h3 className={`text-2xl font-black uppercase tracking-tight mb-4 ${textColor}`}>
+              Success!
+            </h3>
+            <p className={`text-sm font-medium ${subtextColor} mb-8 leading-relaxed`}>
+              Your payment slip was successfully sent! Our admin team will check and approve soon. Thank you for using our platform and stay tune for more features!
+            </p>
+            <Button
+              block
+              onClick={() => setIsSuccessModalOpen(false)}
+              className="py-4 font-black uppercase tracking-widest text-xs"
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
