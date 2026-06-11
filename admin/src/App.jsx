@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from "./context/ThemeContext";
 import { AdminCacheProvider } from './context/AdminCacheContext';
+import { LanguageProvider } from './context/LanguageContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -14,6 +15,8 @@ import Artworks from './pages/Artworks';
 import ArtworkForm from './pages/ArtworkForm';
 import ManageAdmins from './pages/ManageAdmins';
 import ActivityLogs from './pages/ActivityLogs';
+import Subscription from './pages/Subscription';
+import SubscriptionManagement from './pages/SubscriptionManagement';
 import AdminLayout from './layout/AdminLayout';
 import './App.css';
 
@@ -21,8 +24,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AdminCacheProvider>
-          <BrowserRouter>
+        <LanguageProvider>
+          <AdminCacheProvider>
+            <BrowserRouter>
             <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
@@ -136,12 +140,35 @@ function App() {
               }
             />
 
+                <Route
+                  path="/subscription"
+                  element={
+                    <ProtectedRoute>
+                      <AdminLayout>
+                        <Subscription />
+                      </AdminLayout>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/subscription-management"
+                  element={
+                    <ProtectedRoute>
+                      <AdminLayout>
+                        <SubscriptionManagement />
+                      </AdminLayout>
+                    </ProtectedRoute>
+                  }
+                />
+
             {/* Default redirect */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>
         </AdminCacheProvider>
+        </LanguageProvider>
       </AuthProvider>
     </ThemeProvider>
   );

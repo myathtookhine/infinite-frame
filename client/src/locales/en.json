@@ -60,5 +60,55 @@
     "social": {
       "title": "Connect"
     }
+  },
+  "pricing": {
+    "title": "Choose Your Plan",
+    "subtitle": "Select the perfect plan to showcase your art to the world.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save": "Save 20%",
+    "current": "Current Plan",
+    "upgrade": "Upgrade Now",
+    "getStarted": "Get Started",
+    "plans": {
+      "free": {
+        "title": "Free",
+        "price": "0",
+        "description": "Perfect for emerging artists.",
+        "features": [
+          "Max 20 Artworks",
+          "Infinite Frame slug domain",
+          "Default gallery layout",
+          "Basic analytics dashboard",
+          "Standard support (Email/Chat)"
+        ]
+      },
+      "pro": {
+        "title": "Pro",
+        "price": "15,000",
+        "description": "For serious professional artists.",
+        "features": [
+          "Max 100 Artworks",
+          "Infinite Frame slug domain",
+          "3 Customized layouts",
+          "Basic analytics dashboard",
+          "Priority support (Email/Chat/Phone)",
+          "Access to virtual exhibitions"
+        ]
+      },
+      "deluxe": {
+        "title": "Deluxe",
+        "price": "45,000",
+        "description": "The ultimate gallery experience.",
+        "features": [
+          "Unlimited Artworks",
+          "Custom domain support",
+          "Fully customized layouts",
+          "Advanced analytics",
+          "Priority support (Email/Chat/Phone)",
+          "Access to virtual exhibitions"
+        ]
+      }
+    }
   }
 }

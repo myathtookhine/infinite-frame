@@ -55,6 +55,7 @@ app.use('/api/config', require('./routes/config')); // Master Data (Categories, 
 app.use('/api/admin-management', require('./routes/adminManagement')); // Super Admin Utils
 app.use('/api/banner', require('./routes/banner')); // Banner Upload
 app.use('/api/analytics', require('./routes/analytics')); // Analytics Charts
+app.use('/api/subscription', require('./routes/subscription')); // Subscription System
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

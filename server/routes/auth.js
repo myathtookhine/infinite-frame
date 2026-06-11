@@ -309,7 +309,9 @@ router.post('/login', loginLimiter, validateLogin, async (req, res) => {
         phone_numbers: user.phone_numbers,
         social_links: user.social_links,
         banner_image_url: user.banner_image_url,
-        banner_enabled: user.banner_enabled
+        banner_enabled: user.banner_enabled,
+        subscription_plan: user.subscription_plan,
+        subscription_expiry: user.subscription_expiry
       } 
     });
   } catch (err) {
@@ -331,7 +333,7 @@ router.get('/me', getUserContext, async (req, res) => {
   try {
     // 1. Get Basic User Info (Removed page_views column fetch)
     const userResult = await pool.query(
-      "SELECT id, username, email, role FROM admins WHERE id = $1",
+      "SELECT id, username, email, role, subscription_plan, subscription_expiry FROM admins WHERE id = $1",
       [req.user.id]
     );
 

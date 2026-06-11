@@ -1,15 +1,17 @@
 import React, { useEffect, useRef } from 'react';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageToggle from '../components/LanguageToggle';
 import { useLanguage } from '../context/LanguageContext';
 import Logo from '../assets/if.svg';
 import Lottie from 'lottie-react';
+import { useState } from 'react';
 import animationData from '../assets/ifLogo.json';
 
 const LandingPage = () => {
   const observerRef = useRef(null);
   const { t, language } = useLanguage();
+  const [billingCycle, setBillingCycle] = useState('monthly');
 
   useEffect(() => {
     // Scroll to top when page loads
@@ -134,6 +136,100 @@ const LandingPage = () => {
                 <p className="text-lg md:text-xl opacity-70 leading-relaxed font-light">{t(`features.items.${key}.desc`)}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-40 px-8 md:px-16 lg:px-24 border-t border-theme">
+        <div className="max-w-7xl mx-auto">
+          <div className="reveal mb-24 text-center md:text-left">
+            <h2 className={`font-bold uppercase leading-[0.9] tracking-tighter whitespace-pre-line ${language === 'my'
+              ? 'text-4xl md:text-4xl lg:text-5xl'
+              : 'text-6xl md:text-8xl lg:text-9xl'
+              }`}>
+              {t('pricing.title')}
+            </h2>
+            <p className="text-xl md:text-2xl opacity-70 max-w-3xl font-light mt-6">
+              {t('pricing.subtitle')}
+            </p>
+
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center md:justify-start gap-4 mt-12 bg-theme p-1 border-2 border-theme w-fit mx-auto md:mx-0">
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                className={`px-8 py-3 text-sm font-bold uppercase tracking-wider transition-all ${billingCycle === 'monthly' ? 'bg-theme-inverse text-theme-inverse' : 'opacity-50 hover:opacity-100'}`}
+              >
+                {t('pricing.monthly')}
+              </button>
+              <button
+                onClick={() => setBillingCycle('yearly')}
+                className={`flex items-center gap-2 px-8 py-3 text-sm font-bold uppercase tracking-wider transition-all ${billingCycle === 'yearly' ? 'bg-theme-inverse text-theme-inverse' : 'opacity-50 hover:opacity-100'}`}
+              >
+                {t('pricing.yearly')}
+                <span className="text-[10px] bg-theme-inverse text-theme-inverse px-1.5 py-0.5 border border-theme">
+                  {t('pricing.save')}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {['free', 'pro', 'deluxe'].map((planKey) => {
+              const plan = t(`pricing.plans.${planKey}`, { returnObjects: true });
+              // Check if plan is an object (it should be since we use returnObjects: true if supported, 
+              // but our custom t doesn't support returnObjects. I'll handle it manually)
+
+              // Manual retrieval since custom t doesn't support returnObjects:
+              const title = t(`pricing.plans.${planKey}.title`);
+              const basePrice = t(`pricing.plans.${planKey}.price`);
+              const description = t(`pricing.plans.${planKey}.description`);
+
+              // Handle Price calculation
+              let displayPrice = basePrice;
+              if (planKey !== 'free' && billingCycle === 'yearly') {
+                const numericPrice = parseInt(basePrice.replace(/,/g, ''));
+                const yearlyDiscountedMonthly = Math.floor((numericPrice * 12 * 0.8) / 12);
+                displayPrice = yearlyDiscountedMonthly.toLocaleString();
+              }
+
+              return (
+                <div
+                  key={planKey}
+                  className={`reveal flex flex-col p-10 border-2 border-theme ${planKey === 'pro' ? 'bg-theme-inverse text-theme-inverse scale-105 z-10' : 'bg-theme'}`}
+                >
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-bold uppercase tracking-tighter mb-2">{title}</h3>
+                    <p className="text-sm opacity-70 font-light">{description}</p>
+                  </div>
+
+                  <div className="mb-10 flex items-baseline gap-2">
+                    <span className="text-5xl font-black tracking-tighter">{displayPrice}</span>
+                    <span className="text-sm font-bold uppercase opacity-50">MMK / {t('pricing.monthly')}</span>
+                  </div>
+
+                  <ul className="space-y-4 mb-12 flex-1">
+                    {[0, 1, 2, 3, 4, 5].map((i) => {
+                      const feature = t(`pricing.plans.${planKey}.features.${i}`);
+                      if (feature === `pricing.plans.${planKey}.features.${i}`) return null;
+                      return (
+                        <li key={i} className="flex items-start gap-3">
+                          <CheckIcon className={`w-5 h-5 shrink-0 ${planKey === 'pro' ? 'text-theme-inverse' : 'text-theme'}`} />
+                          <span className="text-sm font-medium leading-tight">{feature}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+
+                  <a
+                    href="https://admin.infiniteframe.online/register"
+                    className={`inline-flex items-center justify-center py-4 text-xs font-bold uppercase tracking-widest border-2 transition-all hover-lift ${planKey === 'pro' ? 'bg-theme text-theme border-transparent' : 'bg-theme-inverse text-theme-inverse border-theme'}`}
+                  >
+                    {t('pricing.getStarted')}
+                  </a>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

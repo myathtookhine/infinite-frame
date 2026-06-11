@@ -133,4 +133,26 @@ router.get('/activity', verifyToken, async (req, res) => {
   }
 });
 
+// GET /api/analytics/popular
+router.get('/popular', verifyToken, async (req, res) => {
+  try {
+    const adminId = req.user.id || req.user.sub;
+    if (!adminId) return res.status(400).json({ message: "Invalid User ID" });
+
+    const query = `
+      SELECT id, name, views, main_image, price, currency
+      FROM artworks
+      WHERE admin_id = $1 AND is_active = true
+      ORDER BY views DESC, name ASC
+      LIMIT 5
+    `;
+
+    const result = await pool.query(query, [adminId]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching popular artworks:', err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
 module.exports = router;

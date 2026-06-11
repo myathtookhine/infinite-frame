@@ -1,0 +1,41 @@
+{
+  "common": {
+    "update": "ပြင်ဆင်ရန်",
+    "cancel": "ပယ်ဖျက်ရန်",
+    "save": "သိမ်းဆည်းရန်",
+    "delete": "ဖျက်ရန်",
+    "loading": "ခေတ္တစောင့်ဆိုင်းပါ...",
+    "success": "အောင်မြင်ပါသည်",
+    "error": "အမှားအယွင်းရှိပါသည်",
+    "language": "ဘာသာစကား"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "artworks": "အနုပညာလက်ရာများ",
+    "categories": "ကဏ္ဍများ",
+    "subscription": "Subscription",
+    "profile": "ပရိုဖိုင်",
+    "logout": "ထွက်ရန်"
+  },
+  "subscription": {
+    "title": "Subscription အစီအစဉ်များ",
+    "current_plan": "လက်ရှိအသုံးပြုနေသော အစီအစဉ်",
+    "subscribed": "လက်ရှိဝယ်ယူထားသည်",
+    "status": "အခြေအနေ",
+    "expiry": "သက်တမ်းကုန်ဆုံးမည့်နေ့",
+    "days_remaining": "ရက် ကျန်ရှိပါသည်",
+    "upgrade": "အဆင့်မြှင့်တင်ရန်",
+    "downgrade": "အဆင့်လျှော့ချရန်",
+    "renew": "သက်တမ်းတိုးရန်",
+    "history": "Subscription မှတ်တမ်း",
+    "pending_verification": "စစ်ဆေးဆဲ",
+    "upload_receipt": "ငွေလွှဲဖြတ်ပိုင်း တင်ရန်",
+    "payment_info": "ငွေပေးချေမှု အချက်အလက်များ",
+    "monthly": "လစဉ်",
+    "yearly": "နှစ်စဉ်",
+    "select_plan": "အစီအစဉ်ရွေးချယ်ပါ",
+    "submit_request": "တင်သွင်းရန်",
+    "expired_notice": "သင်၏ subscription သက်တမ်းကုန်ဆုံးသွားပါပြီ။ အားလုံးကို ဆက်လက်အသုံးပြုနိုင်ရန် သက်တမ်းတိုးပေးပါ။",
+    "warning_notice": "သင်၏ subscription သက်တမ်းကုန်ဆုံးရန် {{days}} ရက်သာ လိုပါတော့သည်။ အနှောင့်အယှက်မရှိ အသုံးပြုနိုင်ရန် ယခုပဲ သက်တမ်းတိုးလိုက်ပါ။"
+  }
+}

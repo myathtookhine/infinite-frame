@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS } from '../config';
 import {
@@ -8,6 +9,8 @@ import {
   PhotoIcon,
   CalendarDaysIcon
 } from '@heroicons/react/24/outline';
+import SubscriptionModal from '../components/SubscriptionModal';
+import Button from '../components/ui/Button';
 import {
   LineChart,
   Line,
@@ -23,11 +26,13 @@ import {
 const Dashboard = () => {
   const { isDark } = useTheme();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [timeFilter, setTimeFilter] = useState('today'); // Default to Today as requested
   const [statsData, setStatsData] = useState({
     visitors: 0,
     artworks: 0
   });
+  const [popularArtworks, setPopularArtworks] = useState([]);
 
 
   const [currentDateInfo, setCurrentDateInfo] = useState('');
@@ -120,6 +125,24 @@ const Dashboard = () => {
     };
 
     fetchStats();
+  }, [user]);
+
+  // Fetch Popular Artworks (Deluxe Only)
+  useEffect(() => {
+    if (user?.subscription_plan?.toLowerCase() === 'deluxe') {
+      const fetchPopular = async () => {
+        try {
+          const token = localStorage.getItem('adminToken');
+          const response = await axios.get(`${ENDPOINTS.ANALYTICS || 'http://localhost:5000/api/analytics'}/popular`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          setPopularArtworks(response.data);
+        } catch (err) {
+          console.error("Failed to fetch popular artworks", err);
+        }
+      };
+      fetchPopular();
+    }
   }, [user]);
 
   const textColor = isDark ? "text-white" : "text-[#151416]";
@@ -271,8 +294,68 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+
+      {/* Popular Artworks (Deluxe Only) */}
+      {user?.subscription_plan?.toLowerCase() === 'deluxe' && (
+        <section className={`border-2 ${cardBorder} ${cardBg} p-8 rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-700`}>
+          <div className="mb-6">
+            <h3 className={`text-xl font-bold ${textColor}`}>Popular Artworks</h3>
+            <p className={`text-sm ${subtextColor}`}>Top performing pieces based on gallery views</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            {popularArtworks.map((artwork) => (
+              <div key={artwork.id} className="space-y-3 group">
+                <div className="relative aspect-square overflow-hidden rounded-xl border border-theme/10">
+                  <img
+                    src={artwork.main_image}
+                    alt={artwork.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-white text-xs font-bold uppercase tracking-widest bg-theme/80 px-3 py-1.5 rounded-full">
+                      {artwork.views} Views
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <h4 className={`text-sm font-bold truncate ${textColor}`}>{artwork.name}</h4>
+                  <p className={`text-xs font-mono font-bold text-theme`}>
+                    {artwork.price ? `${artwork.price.toLocaleString()} ${artwork.currency}` : 'Price on request'}
+                  </p>
+                </div>
+              </div>
+            ))}
+            {popularArtworks.length === 0 && (
+              <div className="col-span-full py-12 text-center opacity-50">
+                <p className={`text-sm ${textColor}`}>No data available yet</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Upgrade Banner for Non-Deluxe */}
+      {user?.subscription_plan?.toLowerCase() !== 'deluxe' && (
+        <section className={`relative overflow-hidden p-8 border-2 border-dashed rounded-2xl ${isDark ? 'border-theme/30 bg-theme/5' : 'border-theme/20 bg-theme/5'}`}>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="text-center md:text-left">
+              <h3 className={`text-lg font-bold ${textColor}`}>Unlock Advanced Analytics</h3>
+              <p className={`text-sm opacity-70 ${textColor}`}>Get insights into popular artworks, visitor trends, and more with the Deluxe plan.</p>
+            </div>
+            <Button
+              onClick={() => navigate('/subscription')}
+            >
+              Upgrade to Deluxe
+            </Button>
+          </div>
+        </section>
+      )}
+
+      <SubscriptionModal />
     </main>
   );
 };
 
 export default Dashboard;
+

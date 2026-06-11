@@ -16,9 +16,12 @@ import {
   ArchiveBoxIcon,
   PhotoIcon,
   ScaleIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  CreditCardIcon,
+  ShieldCheckIcon
 } from "@heroicons/react/24/outline";
 import ThemeToggle from "../components/ThemeToggle";
+import { useLanguage } from '../context/LanguageContext';
 
 const SidebarLink = ({ to, children, icon: Icon, onClick, isDark }) => {
   return (
@@ -47,6 +50,7 @@ const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { logout, user } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { t, toggleLanguage, language } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -148,7 +152,7 @@ const AdminLayout = ({ children }) => {
               onClick={closeSidebar}
               isDark={isDark}
             >
-              Dashboard
+              {t('nav.dashboard')}
             </SidebarLink>
 
             <SidebarLink
@@ -157,7 +161,7 @@ const AdminLayout = ({ children }) => {
               onClick={closeSidebar}
               isDark={isDark}
             >
-              Categories
+              {t('nav.categories')}
             </SidebarLink>
 
             <SidebarLink
@@ -175,17 +179,26 @@ const AdminLayout = ({ children }) => {
               onClick={closeSidebar}
               isDark={isDark}
             >
-              Artworks
+              {t('nav.artworks')}
+            </SidebarLink>
+
+            <SidebarLink
+              to="/subscription"
+              icon={CreditCardIcon}
+              onClick={closeSidebar}
+              isDark={isDark}
+            >
+              {t('nav.subscription')}
             </SidebarLink>
 
             {user?.role === 'super_admin' && (
               <SidebarLink
-                to="/units"
-                icon={ScaleIcon}
+                to="/subscription-management"
+                icon={ShieldCheckIcon}
                 onClick={closeSidebar}
                 isDark={isDark}
               >
-                Units
+                Manage Subscriptions
               </SidebarLink>
             )}
 
@@ -226,14 +239,14 @@ const AdminLayout = ({ children }) => {
               isDark={isDark}
             >
               <div className="flex items-center justify-between flex-1">
-                <span>Profile</span>
+                <span>{t('nav.profile')}</span>
                 <ChevronRightIcon className="w-4 h-4" />
               </div>
             </SidebarLink>
-            <div className="px-2 mt-2 mb-2">
+
+            <div className="px-2 mt-2 space-y-3">
               <ThemeToggle showLabel={true} />
             </div>
-
           </div>
         </aside>
 
