@@ -14,6 +14,7 @@
     "artworks": "အနုပညာလက်ရာများ",
     "categories": "ကဏ္ဍများ",
     "subscription": "Subscription",
+    "gallery_settings": "Gallery Settings",
     "profile": "ပရိုဖိုင်",
     "logout": "ထွက်ရန်"
   },
@@ -34,6 +35,7 @@
     "monthly": "လစဉ်",
     "yearly": "နှစ်စဉ်",
     "select_plan": "အစီအစဉ်ရွေးချယ်ပါ",
+    "subscribe_now": "ယခုဝယ်ယူမည်",
     "submit_request": "တင်သွင်းရန်",
     "expired_notice": "သင်၏ subscription သက်တမ်းကုန်ဆုံးသွားပါပြီ။ အားလုံးကို ဆက်လက်အသုံးပြုနိုင်ရန် သက်တမ်းတိုးပေးပါ။",
     "warning_notice": "သင်၏ subscription သက်တမ်းကုန်ဆုံးရန် {{days}} ရက်သာ လိုပါတော့သည်။ အနှောင့်အယှက်မရှိ အသုံးပြုနိုင်ရန် ယခုပဲ သက်တမ်းတိုးလိုက်ပါ။"

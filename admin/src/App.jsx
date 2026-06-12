@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import GallerySettings from './pages/GallerySettings';
 import Categories from './pages/Categories';
 import ArtworkAttributes from './pages/ArtworkAttributes';
 import Units from './pages/Units';
@@ -39,6 +40,16 @@ function App() {
                 <ProtectedRoute>
                   <AdminLayout>
                     <Dashboard />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gallery-settings"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <GallerySettings />
                   </AdminLayout>
                 </ProtectedRoute>
               }

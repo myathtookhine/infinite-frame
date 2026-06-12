@@ -25,7 +25,7 @@ import {
 
 const Dashboard = () => {
   const { isDark } = useTheme();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const [timeFilter, setTimeFilter] = useState('today'); // Default to Today as requested
   const [statsData, setStatsData] = useState({
@@ -36,6 +36,8 @@ const Dashboard = () => {
 
 
   const [currentDateInfo, setCurrentDateInfo] = useState('');
+  const subscriptionPlan = (user?.subscription_plan || 'free').toLowerCase();
+  const isDeluxePlan = subscriptionPlan === 'deluxe';
 
   // Helper to get skeleton data for smooth UI and Axis visibility
   const getEmptyChartData = (period) => {
@@ -114,10 +116,12 @@ const Dashboard = () => {
           }
         });
         if (response.data.user) {
+          const { page_views, artwork_count, subscription_plan, subscription_expiry } = response.data.user;
           setStatsData({
-            visitors: response.data.user.page_views || 0,
-            artworks: response.data.user.artwork_count || 0
+            visitors: page_views || 0,
+            artworks: artwork_count || 0
           });
+          updateUser({ subscription_plan, subscription_expiry });
         }
       } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
@@ -129,7 +133,7 @@ const Dashboard = () => {
 
   // Fetch Popular Artworks (Deluxe Only)
   useEffect(() => {
-    if (user?.subscription_plan?.toLowerCase() === 'deluxe') {
+    if (isDeluxePlan) {
       const fetchPopular = async () => {
         try {
           const token = localStorage.getItem('adminToken');
@@ -143,7 +147,7 @@ const Dashboard = () => {
       };
       fetchPopular();
     }
-  }, [user]);
+  }, [user, isDeluxePlan]);
 
   const textColor = isDark ? "text-white" : "text-[#151416]";
   const subtextColor = isDark ? "text-gray-400" : "text-gray-600";
@@ -296,7 +300,7 @@ const Dashboard = () => {
       </div>
 
       {/* Popular Artworks (Deluxe Only) */}
-      {user?.subscription_plan?.toLowerCase() === 'deluxe' && (
+      {isDeluxePlan && (
         <section className={`border-2 ${cardBorder} ${cardBg} p-8 rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-700`}>
           <div className="mb-6">
             <h3 className={`text-xl font-bold ${textColor}`}>Popular Artworks</h3>
@@ -336,7 +340,7 @@ const Dashboard = () => {
       )}
 
       {/* Upgrade Banner for Non-Deluxe */}
-      {user?.subscription_plan?.toLowerCase() !== 'deluxe' && (
+      {['free', 'pro'].includes(subscriptionPlan) && (
         <section className={`relative overflow-hidden p-8 border-2 border-dashed rounded-2xl ${isDark ? 'border-theme/30 bg-theme/5' : 'border-theme/20 bg-theme/5'}`}>
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-center md:text-left">
