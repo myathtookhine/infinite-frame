@@ -14,6 +14,7 @@
     "artworks": "Artworks",
     "categories": "Categories",
     "subscription": "Subscription",
+    "gallery_settings": "Gallery Settings",
     "profile": "Profile",
     "logout": "Logout"
   },
@@ -33,7 +34,8 @@
     "payment_info": "Payment Information",
     "monthly": "Monthly",
     "yearly": "Yearly",
-    "select_plan": "Select a Plan",
+    "select_plan": "Select Plan",
+    "subscribe_now": "Subscribe Now",
     "submit_request": "Submit Request",
     "expired_notice": "Your subscription has expired. Please renew to continue using all features.",
     "warning_notice": "Your subscription will expire in {{days}} days. Renew now to avoid interruption."

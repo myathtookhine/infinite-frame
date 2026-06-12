@@ -145,19 +145,21 @@ const ManageAdmins = () => {
     }
   };
 
+  const textColor = isDark ? "text-white" : "text-[#151416]";
+  const subtextColor = isDark ? "text-gray-400" : "text-gray-500";
   const tableHeaderClass = isDark ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-600";
   const tableRowClass = isDark ? "border-gray-700 hover:bg-white/5" : "border-gray-200 hover:bg-gray-50";
   const textClass = isDark ? "text-gray-300" : "text-gray-900";
   const modalBg = isDark ? "bg-[#141414] border border-[#262626]" : "bg-white";
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="mb-4 lg:mb-10 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
-          <h1 className={`text-2xl font-sans font-bold ${isDark ? "text-white" : "text-black"}`}>
+          <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>
             Manage Admins
           </h1>
-          <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+          <p className={`${subtextColor} font-sans`}>
             Create and manage individual artist accounts
           </p>
         </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheckIcon, CheckCircleIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import axios from 'axios';
 
@@ -17,6 +17,8 @@ const SubscriptionManagement = () => {
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+  const textColor = isDark ? "text-white" : "text-[#151416]";
+  const subtextColor = isDark ? "text-gray-400" : "text-gray-500";
   const tableHeaderClass = isDark ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-600";
   const tableRowClass = isDark ? "border-gray-700 hover:bg-white/5" : "border-gray-200 hover:bg-gray-50";
   const textClass = isDark ? "text-gray-300" : "text-gray-900";
@@ -74,13 +76,12 @@ const SubscriptionManagement = () => {
 
   return (
     <main className="max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className={`text-4xl font-sans font-black tracking-tight ${isDark ? "text-white" : "text-[#151416]"} mb-2 flex items-center gap-3`}>
-            <ShieldCheckIcon className="w-10 h-10 text-theme" />
+          <h1 className={`text-4xl font-sans font-black tracking-tight ${textColor} mb-2`}>
             Subscription Management
           </h1>
-          <p className={`font-sans text-sm sm:text-base ${isDark ? "text-gray-400" : "text-gray-600"}`}>
+          <p className={`font-sans ${subtextColor}`}>
             Review and verify admin subscription requests.
           </p>
         </div>

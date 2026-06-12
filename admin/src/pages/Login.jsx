@@ -73,7 +73,7 @@ const Login = () => {
 
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
         {/* Left Info Panel */}
-        <div className="border-2 border-gray-900 p-8 h-full relative overflow-hidden bg-gray-950 text-white rounded-md transition-shadow hover:shadow-md">
+        <div className="border-2 border-[#262626] p-8 h-full relative overflow-hidden bg-[#0a0a0a] text-white rounded-md transition-shadow hover:shadow-md">
           <div className="relative z-10 h-full flex flex-col">
             {/* Top-left branding */}
             <div className="text-left py-6 md:py-0">

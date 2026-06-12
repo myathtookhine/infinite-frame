@@ -233,6 +233,15 @@ const AdminLayout = ({ children }) => {
           >
 
             <SidebarLink
+              to="/gallery-settings"
+              icon={Cog6ToothIcon}
+              onClick={closeSidebar}
+              isDark={isDark}
+            >
+              {t('nav.gallery_settings')}
+            </SidebarLink>
+
+            <SidebarLink
               to="/profile"
               icon={UserCircleIcon}
               onClick={closeSidebar}

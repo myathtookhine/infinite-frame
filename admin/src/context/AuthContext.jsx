@@ -12,17 +12,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check if user is already logged in
-    const token = localStorage.getItem('adminToken');
-    const storedUser = localStorage.getItem('adminUser');
-    if (token && storedUser) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
-
   const login = async (username, password) => {
     try {
       // Make API call to the backend login endpoint using axios
@@ -146,12 +135,54 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Helper to update user state directly (for real-time updates without API call)
   const updateUser = (userData) => {
     const updatedUser = { ...user, ...userData };
     localStorage.setItem('adminUser', JSON.stringify(updatedUser));
     setUser(updatedUser);
   };
+
+  const refreshUser = async (userId) => {
+    const id = userId || user?.id;
+    if (!id) return null;
+
+    try {
+      const response = await axios.get(ENDPOINTS.AUTH.ME, {
+        headers: { 'x-admin-id': id }
+      });
+
+      if (response.data.user) {
+        const storedUser = localStorage.getItem('adminUser');
+        const parsedUser = storedUser ? JSON.parse(storedUser) : {};
+        const { page_views, artwork_count, ...profileFields } = response.data.user;
+        const updatedUser = { ...parsedUser, ...profileFields };
+        localStorage.setItem('adminUser', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        return response.data.user;
+      }
+    } catch (err) {
+      console.error('Failed to refresh user:', err);
+    }
+
+    return null;
+  };
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem('adminToken');
+      const storedUser = localStorage.getItem('adminUser');
+
+      if (token && storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setIsAuthenticated(true);
+        setUser(parsedUser);
+        await refreshUser(parsedUser.id);
+      }
+
+      setIsLoading(false);
+    };
+
+    initAuth();
+  }, []);
 
   const value = {
     isAuthenticated,
@@ -165,6 +196,7 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     updateGalleryInfo,
     updateUser,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
