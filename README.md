@@ -21,7 +21,7 @@ The administrative portal serves as the headquarters for artists to manage their
 
 ### 🖼️ Public Gallery (Client)
 The client-facing application is optimized for visual impact and ease of access.
-- **Personalized Slug URLs**: Each registered artist receives a unique, shareable URL based on their identifier (e.g., `domain.com/artist-slug`). This serves as their professional online gallery.
+- **Personalized Slug URLs**: Each registered artist receives a unique, shareable URL based on their identifier (e.g., `infiniteframe.online/artist-slug`). This serves as their professional online gallery.
 - **Responsive Exhibition**: A sleek masonry grid layout that elegantly showcases artworks across all devices (Desktop, Tablet, Mobile).
 - **Categorized Views**: Easy navigation for visitors to filter artworks by specific categories.
 - **Artwork Detail Pages**: Immersive viewing experience with high-resolution images, detailed piece information, and smooth animations.
